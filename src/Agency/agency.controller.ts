@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AgencyService } from './agency.service';
-import { CreateAgencyDto } from './Agency/create-agency.dto';
-import { UpdateAgencyDto } from './dto/update-agency.dto';
+import { CreateAgencyDto } from './create-agency.dto';
 
 @Controller('agency')
 export class AgencyController {
@@ -23,7 +22,7 @@ export class AgencyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAgencyDto: UpdateAgencyDto) {
+  update(@Param('id') id: string, @Body() updateAgencyDto: CreateAgencyDto) {
     return this.agencyService.update(+id, updateAgencyDto);
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateImageDto } from './Images/create-image.dto';
-import { UpdateImageDto } from './dto/update-image.dto';
+import { CreateImageDto } from './create-image.dto';
+
 
 @Injectable()
 export class ImagesService {
@@ -16,7 +16,7 @@ export class ImagesService {
     return `This action returns a #${id} image`;
   }
 
-  update(id: number, updateImageDto: UpdateImageDto) {
+  update(id: number, updateImageDto: CreateImageDto) {
     return `This action updates a #${id} image`;
   }
 

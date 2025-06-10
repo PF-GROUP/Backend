@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { TypeofpropertyService } from './typeofproperty.service';
 import { CreateTypeofpropertyDto } from './create-typeofproperty.dto';
-import { UpdateTypeofpropertyDto } from './dto/update-typeofproperty.dto';
 
 @Controller('typeofproperty')
 export class TypeofpropertyController {
@@ -23,7 +22,7 @@ export class TypeofpropertyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTypeofpropertyDto: UpdateTypeofpropertyDto) {
+  update(@Param('id') id: string, @Body() updateTypeofpropertyDto: CreateTypeofpropertyDto) {
     return this.typeofpropertyService.update(+id, updateTypeofpropertyDto);
   }
 

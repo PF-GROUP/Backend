@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCustomizationDto } from './Customization/create-customization.dto';
-import { UpdateCustomizationDto } from './Customization/update-customization.dto';
+import { CreateCustomizationDto } from './create-customization.dto';
 
 @Injectable()
 export class CustomizationService {
@@ -16,7 +15,7 @@ export class CustomizationService {
     return `This action returns a #${id} customization`;
   }
 
-  update(id: number, updateCustomizationDto: UpdateCustomizationDto) {
+  update(id: number, updateCustomizationDto: CreateCustomizationDto) {
     return `This action updates a #${id} customization`;
   }
 

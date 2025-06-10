@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeofpropertyService } from './typeofproperty.service';
-import { TypeofpropertyController } from './TypeOfProperty/typeofproperty.controller';
+import { TypeofpropertyController } from './typeofproperty.controller';
 
 @Module({
   controllers: [TypeofpropertyController],

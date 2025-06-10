@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTypeofpropertyDto } from './create-typeofproperty.dto';
-import { UpdateTypeofpropertyDto } from './dto/update-typeofproperty.dto';
 
 @Injectable()
 export class TypeofpropertyService {
@@ -16,7 +15,7 @@ export class TypeofpropertyService {
     return `This action returns a #${id} typeofproperty`;
   }
 
-  update(id: number, updateTypeofpropertyDto: UpdateTypeofpropertyDto) {
+  update(id: number, updateTypeofpropertyDto: CreateTypeofpropertyDto) {
     return `This action updates a #${id} typeofproperty`;
   }
 

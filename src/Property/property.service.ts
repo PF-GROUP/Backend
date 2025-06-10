@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePropertyDto } from './create-property.dto';
-import { UpdatePropertyDto } from '../dto/update-property.dto';
 
 @Injectable()
 export class PropertyService {
@@ -16,7 +15,7 @@ export class PropertyService {
     return `This action returns a #${id} property`;
   }
 
-  update(id: number, updatePropertyDto: UpdatePropertyDto) {
+  update(id: number, updatePropertyDto: CreatePropertyDto) {
     return `This action updates a #${id} property`;
   }
 

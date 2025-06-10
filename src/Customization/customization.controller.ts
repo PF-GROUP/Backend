@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CustomizationService } from './customization.service';
-import { CreateCustomizationDto } from './Customization/create-customization.dto';
-import { UpdateCustomizationDto } from './Customization/update-customization.dto';
+import { CreateCustomizationDto } from './create-customization.dto';
 
 @Controller('customization')
 export class CustomizationController {
@@ -23,7 +22,7 @@ export class CustomizationController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCustomizationDto: UpdateCustomizationDto) {
+  update(@Param('id') id: string, @Body() updateCustomizationDto: CreateCustomizationDto) {
     return this.customizationService.update(+id, updateCustomizationDto);
   }
 

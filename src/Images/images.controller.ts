@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import { CreateImageDto } from './Images/create-image.dto';
-import { UpdateImageDto } from './dto/update-image.dto';
+import { CreateImageDto } from './create-image.dto';
 
 @Controller('images')
 export class ImagesController {
@@ -23,7 +22,7 @@ export class ImagesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateImageDto: UpdateImageDto) {
+  update(@Param('id') id: string, @Body() updateImageDto:CreateImageDto) {
     return this.imagesService.update(+id, updateImageDto);
   }
 

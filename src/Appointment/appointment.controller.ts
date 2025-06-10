@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
-import { CreateAppointmentDto } from './Appointment/create-appointment.dto';
-import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { CreateAppointmentDto } from './create-appointment.dto';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -23,7 +22,7 @@ export class AppointmentController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
+  update(@Param('id') id: string, @Body() updateAppointmentDto: CreateAppointmentDto) {
     return this.appointmentService.update(+id, updateAppointmentDto);
   }
 

@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { PropertyService } from './Property/property.service';
-import { CreatePropertyDto } from './dto/create-property.dto';
-import { UpdatePropertyDto } from './dto/update-property.dto';
+import { PropertyService } from './property.service';
+import { CreatePropertyDto } from './create-property.dto';
 
 @Controller('property')
 export class PropertyController {
@@ -23,7 +22,7 @@ export class PropertyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePropertyDto: UpdatePropertyDto) {
+  update(@Param('id') id: string, @Body() updatePropertyDto: CreatePropertyDto) {
     return this.propertyService.update(+id, updatePropertyDto);
   }
 
