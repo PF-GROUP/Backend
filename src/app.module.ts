@@ -6,6 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import typeorm from './Config/typeorm';
 import { ImagesModule } from './Images/images.module';
 import { CustomizationModule } from './Customization/customization.module';
+import { PropertyModule } from './Property/property.module';
+import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
+import { UserModule } from './User/user.module';
 
 @Module({
   imports: [    ConfigModule.forRoot({
@@ -19,6 +22,10 @@ import { CustomizationModule } from './Customization/customization.module';
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
     ImagesModule,
+  PropertyModule,
+  TypeofpropertyModule,
+  UserModule,
+  CustomizationModule
   ],
   controllers: [AppController],
   providers: [AppService],
