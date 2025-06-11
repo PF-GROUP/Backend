@@ -1,52 +1,29 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { AppointmentStatus } from './appointment-status.enum';
+import { Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
+
+@Entity({
+  name:'Appointment'})
 
 export class Appointment {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: string;
 
   @Column()
-  propertyId: string;
+  day: Date;
 
   @Column()
-  propertyType: string; // 'Casa' | 'Departamento' | 'Comercial' | etc.
+  time: string; 
 
   @Column()
-  clientId: string;
+  name: string;
 
   @Column()
-  clientName: string;
+  surname: string;
 
   @Column()
-  clientPhone: string;
+  email: string;
 
-  @Column('date')
-  appointmentDate: Date;
+  @Column()
+  phone: string;
 
-  @Column('time')
-  appointmentTime: string;
 
-  @Column('enum', { enum: AppointmentStatus })
-  status: AppointmentStatus; // 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
-
-  @Column('text')
-  appointmentPurpose: string; // 'Visitar' | 'Inspeccion' | 'Reunion' | etc.
-
-  @Column('text', { nullable: true })
-  notes?: string;
-
-  @Column('text', { nullable: true })
-  preferredLanguage?: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
