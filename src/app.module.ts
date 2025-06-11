@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import typeorm from './Config/typeorm';
 import { PropertyModule } from './Property/property.module';
 import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
+import { UserModule } from './User/user.module';
 
 
 @Module({
@@ -20,9 +21,9 @@ import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
 
-   PropertyModule,
-
-    TypeofpropertyModule
+  PropertyModule,
+  TypeofpropertyModule,
+  UserModule
   ],
 
   controllers: [AppController],
