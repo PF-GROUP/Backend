@@ -1,20 +1,63 @@
-import { PropertyStatus, PropertyType, TransactionType } from "src/Interface/enum";
-import { ImageDTO } from "src/Interface/Image";
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
+import { PropertyStatus } from './property-status.enum';
+import { PropertyType } from './property-type.enum';
+import { Typeofproperty } from '../TypeOfProperty/typeofproperty.entity';
+import { Agency } from '../Agency/agency.entity';
 
 export class CreatePropertyDto {
-      id: number;
-      name: string;
-      type_of_property: PropertyType;
-      status: PropertyStatus;
-      type: TransactionType; // Tipo de transacción (ej. 'rent', 'sell'). Foreign Key al ENUM.
-      address: string;
-      city: string;
-      price: number;
-      m2: number;
-      images: ImageDTO[];
-      bathroom: number;
-      description: string;
-      rooms: number;
-      agencyId: number;
-      date: string;
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsNotEmpty()
+  @IsEnum(PropertyStatus)
+  status: PropertyStatus;
+
+  @IsNotEmpty()
+  @IsEnum(PropertyType)
+  type: PropertyType;
+
+  @IsNotEmpty()
+  @IsString()
+  address: string;
+
+  @IsNotEmpty()
+  @IsString()
+  city: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  m2: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  bathrooms: number;
+
+  @IsNotEmpty()
+  @IsString()
+  description: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  rooms: number;
+
+  @IsOptional()
+  @IsString()
+  id_images?: string[];
+
+  @IsNotEmpty()
+  type_of_property: Typeofproperty;
+
+  @IsNotEmpty()
+  agency: Agency;
 }
