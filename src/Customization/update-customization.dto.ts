@@ -1,7 +1,6 @@
-import { IsOptional, IsString, IsHexColor} from 'class-validator';
+import { IsOptional, IsString, IsHexColor } from 'class-validator';
 
-export class CreateCustomizationDto {
-
+export class UpdateCustomizationDto {
   @IsString({ message: 'logoImage debe ser una cadena de texto.' })
   @IsOptional()
   logoImage?: string;
