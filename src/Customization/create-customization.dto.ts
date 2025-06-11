@@ -31,6 +31,6 @@ export class Customization {
   secondaryColor: string;
 
   //descomentar cuando este creado la relacion en agencia
-  // @OneToOne(() => Agency, agency => agency.Customization)
+  // @OneToOne(() => Agency, agency => agency.customization)
   // agency: Agency;
 }
