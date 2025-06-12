@@ -4,9 +4,11 @@ import { AppService } from './app.service';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import typeorm from './Config/typeorm';
+import { AgencyModule } from './Agency/agency.module';
 
 @Module({
-  imports: [    ConfigModule.forRoot({
+  imports: [
+    ConfigModule.forRoot({
       isGlobal: true,
       load: [typeorm],
     }),
@@ -15,7 +17,9 @@ import typeorm from './Config/typeorm';
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       useFactory: (config: ConfigService) => config.get('typeorm')!,
-    })],
+    }),
+    AgencyModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
