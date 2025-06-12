@@ -1,8 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Property } from 'src/Property/property.entity';
+import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 
 @Entity('Images')
-export class Images {
+export class Images extends SoftDeletableEntity{
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -16,8 +17,8 @@ export class Images {
     description?: string;
 
     @ManyToOne(() => Property, property => property.images, {
-        onDelete: 'CASCADE',
-        nullable: false,
+    nullable: true,
+    onDelete: "SET NULL"
     })
     @JoinColumn({ name: 'property_id' })
     property!: Property;

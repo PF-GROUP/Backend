@@ -1,3 +1,4 @@
+import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 import { Property } from 'src/Property/property.entity';
 import { User } from 'src/User/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'typeorm';
@@ -5,7 +6,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'ty
 @Entity({
   name:'Appointment'})
 
-export class Appointment {
+export class Appointment extends SoftDeletableEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
@@ -27,11 +28,17 @@ export class Appointment {
   @Column()
   phone: string;
 
-  @ManyToOne(()=> User, (user:User)=> user.appointment)
+  @ManyToOne(()=> User, (user:User)=> user.appointment, {
+    nullable: true,
+    onDelete: "SET NULL"
+  })
   @JoinColumn({name:'user_id'})
   user: User
 
-  @ManyToOne(()=> Property, (property:Property)=> property.appointment)
+  @ManyToOne(()=> Property, (property:Property)=> property.appointment, {
+    nullable: true,
+    onDelete: "SET NULL"
+  })
   @JoinColumn({name:'property_id'})
   property: Property
 }

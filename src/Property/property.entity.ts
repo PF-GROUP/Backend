@@ -14,9 +14,10 @@ import { Type } from 'src/Enum/type.enum';
 import { TypeOfProperty } from 'src/TypeOfProperty/typeofproperty.entity';
 import { Images } from 'src/Images/image.entity';
 import { Appointment } from 'src/Appointment/appointment.entity';
+import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 
 @Entity('properties')
-export class Property {
+export class Property extends SoftDeletableEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -59,14 +60,26 @@ export class Property {
   @OneToMany(() => Images, (image) => image.property) 
   images: Images[];
 
-  @ManyToOne(() => TypeOfProperty, (type) => type.property) // Relacion con la tabla de tipo de propiedad
+  @ManyToOne(() => TypeOfProperty, (type) => type.property,
+{
+    nullable: true,
+    onDelete: "SET NULL"
+  }) // Relacion con la tabla de tipo de propiedad
   @JoinColumn({ name: 'type_of_property_id' })
   type_of_property: TypeOfProperty;
 
-  @ManyToOne(() => Agency, (agency) => agency.properties) // Relacion con la tabla de agencia
+  @ManyToOne(() => Agency, (agency) => agency.properties,
+{
+    nullable: true,
+    onDelete: "SET NULL"
+  }) // Relacion con la tabla de agencia
   @JoinColumn({ name: 'agency_id' })
   agency: Agency;
 
-  @OneToMany(()=> Appointment, (appointment: Appointment)=> appointment.property)
+  @OneToMany(()=> Appointment, (appointment: Appointment)=> appointment.property,
+{
+    cascade: true,
+    onDelete: "SET NULL"
+  })
   appointment: Appointment[]
 }

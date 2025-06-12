@@ -1,11 +1,12 @@
 import { Agency } from "src/Agency/agency.entity";
 import { Appointment } from "src/Appointment/appointment.entity";
+import { SoftDeletableEntity } from "src/Helpers/softDelete.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({
     name: "User"
 })
-export class User {
+export class User extends SoftDeletableEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -50,10 +51,16 @@ export class User {
     }) 
     isAdmin: boolean;
 
-    @OneToMany(() => Appointment, (appointment: Appointment) => appointment) 
+    @OneToMany(() => Appointment, (appointment: Appointment) => appointment,{
+    cascade: true,
+    onDelete: "SET NULL"
+  }) 
      appointment: Appointment[];
     
-    @OneToOne(()=> Agency , (agency: Agency) => agency.user)
+    @OneToOne(()=> Agency , (agency: Agency) => agency.user,
+{
+    onDelete: "SET NULL"
+  })
     @JoinColumn({name: 'id_agency'})
     agency: Agency
 }

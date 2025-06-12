@@ -1,8 +1,9 @@
 import { Agency } from "src/Agency/agency.entity";
+import { SoftDeletableEntity } from "src/Helpers/softDelete.entity";
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
 
 @Entity('customizations')
-export class Customization {
+export class Customization extends SoftDeletableEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -30,7 +31,10 @@ export class Customization {
   @Column({nullable: true})
   secondaryColor: string;
 
-  @OneToOne(() => Agency, agency => agency.customization)
+  @OneToOne(() => Agency, agency => agency.customization, {
+    nullable: true,
+    onDelete: "SET NULL"
+  })
   agency: Agency;
-  
+
 }

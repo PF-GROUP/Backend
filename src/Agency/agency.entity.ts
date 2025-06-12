@@ -1,4 +1,5 @@
 import { Customization } from 'src/Customization/customization.entity';
+import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 import { Property } from 'src/Property/property.entity';
 import { User } from 'src/User/user.entity';
 import {
@@ -14,7 +15,7 @@ import {
 @Entity({
   name: 'Agency',
 })
-export class Agency {
+export class Agency extends SoftDeletableEntity{
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -34,16 +35,23 @@ export class Agency {
 
   @ManyToOne(() => Customization, (customization) => customization, {
     nullable: true,
+    onDelete: "SET NULL"
   })
   @JoinColumn({ name: 'id_customization' })
   customization: Customization | null;
   id_customization: number;
 
-  @OneToMany(() => Property, (property) => property.agency)
+  @OneToMany(() => Property, (property) => property.agency,{
+    nullable: true,
+    onDelete: "SET NULL"
+  })
   properties: Property[];
   id_property: number;
 
-  @OneToOne(()=> User, (user: User) => user.agency)
+  @OneToOne(()=> User, (user: User) => user.agency, {
+    nullable: true,
+    onDelete: "SET NULL"
+  })
   @JoinColumn({name: 'id_user'})
   user: User
 
