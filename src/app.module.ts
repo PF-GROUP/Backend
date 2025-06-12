@@ -4,7 +4,14 @@ import { AppService } from './app.service';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import typeorm from './Config/typeorm';
+
 import { AgencyModule } from './Agency/agency.module';
+import { ImagesModule } from './Images/images.module';
+import { CustomizationModule } from './Customization/customization.module';
+import { PropertyModule } from './Property/property.module';
+import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
+import { UserModule } from './User/user.module';
+
 
 @Module({
   imports: [
@@ -19,6 +26,11 @@ import { AgencyModule } from './Agency/agency.module';
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
     AgencyModule,
+    ImagesModule,
+  PropertyModule,
+  TypeofpropertyModule,
+  UserModule,
+  CustomizationModule
   ],
   controllers: [AppController],
   providers: [AppService],
