@@ -15,7 +15,6 @@ export class Images extends SoftDeletableEntity{
 
     @Column({ type: 'text', nullable: true })
     description?: string;
-
     @ManyToOne(() => Property, property => property.images, {
     nullable: true,
     onDelete: "SET NULL"

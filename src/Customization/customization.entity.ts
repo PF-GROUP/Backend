@@ -2,7 +2,7 @@ import { Agency } from "src/Agency/agency.entity";
 import { SoftDeletableEntity } from "src/Helpers/softDelete.entity";
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
 
-@Entity('customizations')
+@Entity('Customizations')
 export class Customization extends SoftDeletableEntity {
   @PrimaryGeneratedColumn()
   id: number;

@@ -16,7 +16,7 @@ import { Images } from 'src/Images/image.entity';
 import { Appointment } from 'src/Appointment/appointment.entity';
 import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 
-@Entity('properties')
+@Entity('Property')
 export class Property extends SoftDeletableEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
