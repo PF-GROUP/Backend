@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Property } from 'src/Property/property.entity';
 
-@Entity('media')
-export class Media {
+@Entity('Images')
+export class Images {
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -15,10 +15,10 @@ export class Media {
     @Column({ type: 'text', nullable: true })
     description?: string;
 
-    @ManyToOne(() => Property, property => property.media, {
-        onDelete: 'CASCADE', // Si la Property se elimina, las Media asociadas también se eliminan
+    @ManyToOne(() => Property, property => property.images, {
+        onDelete: 'CASCADE',
         nullable: false,
     })
-    @JoinColumn({ name: 'propertyId' })
+    @JoinColumn({ name: 'property_id' })
     property!: Property;
 }

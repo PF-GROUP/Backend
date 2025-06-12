@@ -8,11 +8,12 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Typeofproperty } from '../TypeOfProperty/typeofproperty.entity';
-import { PropertyStatus } from './property-status.enum';
-import { Image } from 'src/Images/image.entity';
-import { PropertyType } from './property-type.enum';
 import { Agency } from 'src/Agency/agency.entity';
+import { Status } from 'src/Enum/status.enum';
+import { Type } from 'src/Enum/type.enum';
+import { TypeOfProperty } from 'src/TypeOfProperty/typeofproperty.entity';
+import { Images } from 'src/Images/image.entity';
+import { Appointment } from 'src/Appointment/appointment.entity';
 
 @Entity('properties')
 export class Property {
@@ -22,11 +23,11 @@ export class Property {
   @Column()
   name: string;
 
-  @Column('enum', { enum: PropertyStatus })
-  status: PropertyStatus;
+  @Column('enum', { enum: Status })
+  status: Status;
 
-  @Column('enum', { enum: PropertyType })
-  type: PropertyType;
+  @Column('enum', { enum: Type })
+  type: Type;
 
   @Column()
   address: string;
@@ -55,14 +56,17 @@ export class Property {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => Image, (image) => image.property) // Relacion con la tabla de imagenes con array
-  id_images: Image[];
+  @OneToMany(() => Images, (image) => image.property) 
+  images: Images[];
 
-  @ManyToOne(() => Typeofproperty, (type) => type.properties) // Relacion con la tabla de tipo de propiedad
+  @ManyToOne(() => TypeOfProperty, (type) => type.property) // Relacion con la tabla de tipo de propiedad
   @JoinColumn({ name: 'type_of_property_id' })
-  type_of_property: Typeofproperty;
+  type_of_property: TypeOfProperty;
 
   @ManyToOne(() => Agency, (agency) => agency.properties) // Relacion con la tabla de agencia
   @JoinColumn({ name: 'agency_id' })
   agency: Agency;
+
+  @OneToMany(()=> Appointment, (appointment: Appointment)=> appointment.property)
+  appointment: Appointment[]
 }

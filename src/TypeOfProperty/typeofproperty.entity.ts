@@ -10,7 +10,7 @@ id: number
 @Column({type: "varchar", length:"50"})
 type: string
 
- @OneToMany(()=> Property, (property: Property)=> property.typeofproperty)
+ @OneToMany(()=> Property, (property: Property)=> property.type_of_property)
     property: Property[]
 
 }

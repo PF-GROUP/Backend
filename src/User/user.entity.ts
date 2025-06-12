@@ -1,5 +1,6 @@
+import { Agency } from "src/Agency/agency.entity";
 import { Appointment } from "src/Appointment/appointment.entity";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({
     name: "User"
@@ -49,6 +50,11 @@ export class User {
     }) 
     isAdmin: boolean;
 
-    @OneToMany(() => Appointment, (appointment) => appointment.user) {
-         appointment: Appointment[];
+    @OneToMany(() => Appointment, (appointment: Appointment) => appointment) 
+     appointment: Appointment[];
+    
+    @OneToOne(()=> Agency , (agency: Agency) => agency.user)
+    @JoinColumn({name: 'id_agency'})
+    agency: Agency
 }
+

@@ -5,10 +5,10 @@ import {
   IsEnum,
   IsOptional,
 } from 'class-validator';
-import { PropertyStatus } from './property-status.enum';
-import { PropertyType } from './property-type.enum';
-import { Typeofproperty } from '../TypeOfProperty/typeofproperty.entity';
+
 import { Agency } from '../Agency/agency.entity';
+import { Status } from 'src/Enum/status.enum';
+import { Type } from 'src/Enum/type.enum';
 
 export class CreatePropertyDto {
   @IsNotEmpty()
@@ -16,12 +16,12 @@ export class CreatePropertyDto {
   name: string;
 
   @IsNotEmpty()
-  @IsEnum(PropertyStatus)
-  status: PropertyStatus;
+  @IsEnum(Status)
+  status: Status;
 
   @IsNotEmpty()
-  @IsEnum(PropertyType)
-  type: PropertyType;
+  @IsEnum(Type)
+  type: Type;
 
   @IsNotEmpty()
   @IsString()
@@ -56,7 +56,7 @@ export class CreatePropertyDto {
   id_images?: string[];
 
   @IsNotEmpty()
-  type_of_property: Typeofproperty;
+  type_of_property: string;
 
   @IsNotEmpty()
   agency: Agency;

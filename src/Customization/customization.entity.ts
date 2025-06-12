@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
 import { Agency } from "src/Agency/agency.entity";
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
 
 @Entity('customizations')
 export class Customization {
@@ -30,7 +30,7 @@ export class Customization {
   @Column({nullable: true})
   secondaryColor: string;
 
-  //descomentar cuando este creado la relacion en agencia
-  // @OneToOne(() => Agency, agency => agency.customization)
-  // agency: Agency;
+  @OneToOne(() => Agency, agency => agency.customization)
+  agency: Agency;
+  
 }

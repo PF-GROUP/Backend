@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { TypeofpropertyService } from './typeofproperty.service';
-import { CreateTypeofpropertyDto } from './create-typeofproperty.dto';
+import { CreateTypeOfPropertyDto } from './create-typeofproperty.dto';
 
 @Controller('typeofproperty')
 export class TypeofpropertyController {
   constructor(private readonly typeofpropertyService: TypeofpropertyService) {}
 
   @Post()
-  create(@Body() createTypeofpropertyDto: CreateTypeofpropertyDto) {
+  create(@Body() createTypeofpropertyDto: CreateTypeOfPropertyDto) {
     return this.typeofpropertyService.create(createTypeofpropertyDto);
   }
 
@@ -22,7 +22,7 @@ export class TypeofpropertyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTypeofpropertyDto: CreateTypeofpropertyDto) {
+  update(@Param('id') id: string, @Body() updateTypeofpropertyDto: CreateTypeOfPropertyDto) {
     return this.typeofpropertyService.update(+id, updateTypeofpropertyDto);
   }
 

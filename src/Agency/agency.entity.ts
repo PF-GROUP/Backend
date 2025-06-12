@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -31,7 +32,7 @@ export class Agency {
   })
   description: string;
 
-  @ManyToOne(() => Customization, (customization) => customization.agencies, {
+  @ManyToOne(() => Customization, (customization) => customization, {
     nullable: true,
   })
   @JoinColumn({ name: 'id_customization' })
@@ -42,10 +43,9 @@ export class Agency {
   properties: Property[];
   id_property: number;
 
-  @ManyToOne(() => User, (user) => user.managedAgencies)
-  @JoinColumn({ name: 'id_user' })
-  adminUser: User;
-  id_user: number;
+  @OneToOne(()=> User, (user: User) => user.agency)
+  @JoinColumn({name: 'id_user'})
+  user: User
 
   @Column({
     type: 'bigint',

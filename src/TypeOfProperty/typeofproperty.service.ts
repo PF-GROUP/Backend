@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTypeofpropertyDto } from './create-typeofproperty.dto';
+import { CreateTypeOfPropertyDto } from './create-typeofproperty.dto';
 
 @Injectable()
 export class TypeofpropertyService {
-  create(createTypeofpropertyDto: CreateTypeofpropertyDto) {
+  create(CreateTypeOfPropertyDto: CreateTypeOfPropertyDto) {
     return 'This action adds a new typeofproperty';
   }
 
@@ -15,7 +15,7 @@ export class TypeofpropertyService {
     return `This action returns a #${id} typeofproperty`;
   }
 
-  update(id: number, updateTypeofpropertyDto: CreateTypeofpropertyDto) {
+  update(id: number, updateTypeofpropertyDto: CreateTypeOfPropertyDto) {
     return `This action updates a #${id} typeofproperty`;
   }
 
