@@ -6,8 +6,7 @@ import {
   IsOptional,
 } from 'class-validator';
 
-export class RegisterDto {
-  // User fields
+export class CreateRegisterDto {
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -29,7 +28,6 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
-  // Agency fields
   @IsNotEmpty()
   @IsString()
   agencyName: string;

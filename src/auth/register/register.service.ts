@@ -8,7 +8,7 @@ import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/User/user.entity';
 import { Agency } from 'src/Agency/agency.entity';
-import { RegisterDto } from './dto/create-register.dto';
+import { CreateRegisterDto } from './dto/create-register.dto';
 
 @Injectable()
 export class RegisterService {
@@ -21,7 +21,7 @@ export class RegisterService {
   ) {}
 
   async register(
-    registerDto: RegisterDto,
+    registerDto: CreateRegisterDto,
   ): Promise<{ user: User; agency: Agency }> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
