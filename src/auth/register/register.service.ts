@@ -4,6 +4,9 @@ import { UpdateRegisterDto } from './dto/update-register.dto';
 
 @Injectable()
 export class RegisterService {
+  findUserByEmail(email: string) {
+    throw new Error('Method not implemented.');
+  }
   create(createRegisterDto: CreateRegisterDto) {
     return 'This action adds a new register';
   }
