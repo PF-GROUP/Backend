@@ -11,6 +11,8 @@ import { CustomizationModule } from './Customization/customization.module';
 import { PropertyModule } from './Property/property.module';
 import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
 import { UserModule } from './User/user.module';
+import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -30,7 +32,8 @@ import { UserModule } from './User/user.module';
   PropertyModule,
   TypeofpropertyModule,
   UserModule,
-  CustomizationModule
+  CustomizationModule,
+  AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
