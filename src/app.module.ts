@@ -13,6 +13,7 @@ import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
 import { UserModule } from './User/user.module';
 import { AuthModule } from './auth/auth.module';
 import { RegisterModule } from './auth/register/register.module';
+import { LoginModule } from './auth/login/login.module';
 
 @Module({
   imports: [
@@ -33,7 +34,6 @@ import { RegisterModule } from './auth/register/register.module';
     UserModule,
     CustomizationModule,
     AuthModule,
-    RegisterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

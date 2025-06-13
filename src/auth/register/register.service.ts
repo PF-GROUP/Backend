@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   InternalServerErrorException,
+  Logger, // Import Logger
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -12,6 +13,8 @@ import { CreateRegisterDto } from './dto/create-register.dto';
 
 @Injectable()
 export class RegisterService {
+  private readonly logger = new Logger(RegisterService.name); // Inicializar Logger
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -23,9 +26,11 @@ export class RegisterService {
   async register(
     registerDto: CreateRegisterDto,
   ): Promise<{ user: User; agency: Agency }> {
+    this.logger.log(`Comenzando registro para email: ${registerDto.email}`);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    this.logger.log('Transaccion de base de datos iniciada.');
 
     try {
       const existingUser = await this.userRepository.findOne({
@@ -33,6 +38,9 @@ export class RegisterService {
       });
 
       if (existingUser) {
+        this.logger.warn(
+          `Registro fallo: User con email ${registerDto.email} ya existe.`,
+        );
         throw new ConflictException('Usuario con este email ya existe');
       }
 
@@ -41,6 +49,7 @@ export class RegisterService {
         registerDto.password,
         saltRounds,
       );
+      this.logger.debug('Contrasena hasheada exitosamente.');
 
       const user = this.userRepository.create({
         name: registerDto.name,
@@ -51,8 +60,10 @@ export class RegisterService {
         isAdmin: false,
       });
 
-      // Guardar usuario usando queryRunner
       const savedUser = await queryRunner.manager.save(User, user);
+      this.logger.log(
+        `User creado con ID: ${savedUser.id} y email: ${savedUser.email}`,
+      );
 
       const agency = this.agencyRepository.create({
         name: registerDto.agencyName,
@@ -61,14 +72,19 @@ export class RegisterService {
         user: savedUser,
       });
 
-      // Guardar agencia usando queryRunner
       const savedAgency = await queryRunner.manager.save(Agency, agency);
+      this.logger.log(
+        `Agency creada con ID: ${savedAgency.id} y nombre: ${savedAgency.name}`,
+      );
 
-      // Asociar agencia al usuario
       savedUser.agency = savedAgency;
       await queryRunner.manager.save(User, savedUser);
+      this.logger.debug(`Agency asociada con user ${savedUser.id}.`);
 
       await queryRunner.commitTransaction();
+      this.logger.log(
+        `Registro exitoso para email: ${savedUser.email}. Transaccion completada.`,
+      );
 
       const { password, ...userWithoutPassword } = savedUser;
 
@@ -78,6 +94,10 @@ export class RegisterService {
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      this.logger.error(
+        `Registro fallido para email: ${registerDto.email}. Transaccion revertida. Error: ${error.message}`,
+        error.stack,
+      );
 
       if (error instanceof ConflictException) {
         throw error;
@@ -86,13 +106,21 @@ export class RegisterService {
       throw new InternalServerErrorException('Registro fallido');
     } finally {
       await queryRunner.release();
+      this.logger.log('QueryRunner released.');
     }
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({
+    this.logger.log(`Buscando user con email: ${email}`);
+    const user = await this.userRepository.findOne({
       where: { email },
       relations: ['agency'],
     });
+    if (user) {
+      this.logger.debug(`User encontrado con email: ${email}`);
+    } else {
+      this.logger.debug(`No se encontro user con email: ${email}`);
+    }
+    return user;
   }
 }
