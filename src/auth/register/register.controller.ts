@@ -1,42 +1,32 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { RegisterService } from './register.service';
-import { CreateRegisterDto } from './dto/create-register.dto';
-import { UpdateRegisterDto } from './dto/update-register.dto';
+import { RegisterDto } from './dto/create-register.dto';
 
-@Controller('register')
+@Controller('auth/register')
 export class RegisterController {
   constructor(private readonly registerService: RegisterService) {}
 
   @Post()
-  create(@Body() createRegisterDto: CreateRegisterDto) {
-    return this.registerService.create(createRegisterDto);
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() registerDto: RegisterDto) {
+    try {
+      const result = await this.registerService.register(registerDto);
+      return {
+        success: true,
+        message: 'Usuario y Agencia registrados exitosamente',
+        data: {
+          userId: result.user.id,
+          agencyId: result.agency.id,
+          userEmail: result.user.email,
+          agencyName: result.agency.name,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Registro fallido',
+        data: null,
+      };
+    }
   }
-
-  // @Get()
-  // findAll() {
-  //   return this.registerService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.registerService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateRegisterDto: UpdateRegisterDto) {
-  //   return this.registerService.update(+id, updateRegisterDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.registerService.remove(+id);
-  // }
 }

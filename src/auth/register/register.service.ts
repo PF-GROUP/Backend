@@ -1,83 +1,98 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateRegisterDto } from './dto/create-register.dto';
-import { UpdateRegisterDto } from './dto/update-register.dto';
+import {
+  Injectable,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/User/user.entity';
+import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Register } from './entities/register.entity';
-import { Repository } from 'typeorm';
+import { User } from 'src/User/user.entity';
 import { Agency } from 'src/Agency/agency.entity';
+import { RegisterDto } from './dto/create-register.dto';
 
 @Injectable()
 export class RegisterService {
   constructor(
-    @InjectRepository(Register)
-    private registerRepository: Repository<Register>,
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Agency)
-    private agencyRepository: Repository<Agency>,
+    private readonly agencyRepository: Repository<Agency>,
+    private readonly dataSource: DataSource,
   ) {}
 
-  async create(createRegisterDto: CreateRegisterDto) {
-    const existingUser = await this.userRepository.findOne({
-      where: { email: createRegisterDto.email },
-    });
+  async register(
+    registerDto: RegisterDto,
+  ): Promise<{ user: User; agency: Agency }> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (existingUser) {
-      throw new HttpException('Email ya registrado', HttpStatus.BAD_REQUEST);
+    try {
+      const existingUser = await this.userRepository.findOne({
+        where: { email: registerDto.email },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Usuario con este email ya existe');
+      }
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(
+        registerDto.password,
+        saltRounds,
+      );
+
+      const user = this.userRepository.create({
+        name: registerDto.name,
+        surname: registerDto.surname,
+        phone: registerDto.phone,
+        email: registerDto.email,
+        password: hashedPassword,
+        isAdmin: false,
+      });
+
+      // Guardar usuario usando queryRunner
+      const savedUser = await queryRunner.manager.save(User, user);
+
+      const agency = this.agencyRepository.create({
+        name: registerDto.agencyName,
+        description: registerDto.agencyDescription,
+        document: registerDto.document,
+        user: savedUser,
+      });
+
+      // Guardar agencia usando queryRunner
+      const savedAgency = await queryRunner.manager.save(Agency, agency);
+
+      // Asociar agencia al usuario
+      savedUser.agency = savedAgency;
+      await queryRunner.manager.save(User, savedUser);
+
+      await queryRunner.commitTransaction();
+
+      const { password, ...userWithoutPassword } = savedUser;
+
+      return {
+        user: userWithoutPassword as User,
+        agency: savedAgency,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Registro fallido');
+    } finally {
+      await queryRunner.release();
     }
-
-    const hashedPassword = await bcrypt.hash(createRegisterDto.password, 10);
-
-    const user = this.userRepository.create({
-      name: createRegisterDto.name,
-      surname: createRegisterDto.surname,
-      email: createRegisterDto.email,
-      phone: createRegisterDto.phone,
-      password: hashedPassword,
-      rol: createRegisterDto.rol,
-    });
-
-    const savedUser = await this.userRepository.save(user);
-
-    const agency = this.agencyRepository.create({
-      name: createRegisterDto.agencyName,
-      description: createRegisterDto.agencyDescription,
-      cuit_dni_m: createRegisterDto.cuit_dni_m,
-      agentUser: savedUser,
-    });
-
-    const savedAgency = await this.agencyRepository.save(agency);
-
-    const register = this.registerRepository.create({
-      ...createRegisterDto,
-      password: hashedPassword,
-      user: savedUser,
-      agency: savedAgency,
-    });
-
-    return this.registerRepository.save(register);
   }
 
-  findAll() {
-    return this.registerRepository.find({
-      relations: ['user', 'agency'],
+  async findUserByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { email },
+      relations: ['agency'],
     });
-  }
-
-  findOne(id: number) {
-    return this.registerRepository.findOne({
-      where: { id },
-      relations: ['user', 'agency'],
-    });
-  }
-
-  update(id: number, updateRegisterDto: UpdateRegisterDto) {
-    return `This action updates a #${id} register`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} register`;
   }
 }

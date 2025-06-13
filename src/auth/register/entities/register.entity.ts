@@ -6,8 +6,6 @@ export class Register {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // Propiedades del usuario
-
   @Column()
   name: string;
 
@@ -25,8 +23,6 @@ export class Register {
 
   @Column()
   rol: UserRole;
-
-  // Propiedades de la agencia
 
   @Column()
   agencyName: string;
