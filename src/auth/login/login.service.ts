@@ -30,13 +30,12 @@ export class LoginService {
     if (!passwordMatch) throw new BadRequestException ('Bad credentials');
     const payload = {
       id: findUser.id,
-      email: findUser.id,
+      email: findUser.email,
       isAdmin: findUser.isAdmin,
-    }
+    };
     const token = this.jwtService.sign(payload);
 
-    return
-    
+    return { access_token: token };
   }
   // create(createLoginDto: CreateLoginDto) {
   //   return 'This action adds a new login';
