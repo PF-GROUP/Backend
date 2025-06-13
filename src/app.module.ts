@@ -12,7 +12,6 @@ import { PropertyModule } from './Property/property.module';
 import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
 import { UserModule } from './User/user.module';
 import { AuthModule } from './auth/auth.module';
-import { AuthModule } from './auth/auth.module';
 
 
 @Module({
