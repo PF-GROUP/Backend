@@ -5,7 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "plugins": [{
-      "name": "nestjs/swagger",
+      "name": "@nestjs/swagger/dist/plugin",
       "classValidator": true,
       "introspectComments": true
     }]

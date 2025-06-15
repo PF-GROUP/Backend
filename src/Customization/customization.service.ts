@@ -29,7 +29,7 @@ export class CustomizationService {
 
   async findOneByAgencyId(agencyId: string): Promise<Customization> {
     const agency = await this.agencyRepository.findOne({
-      where: {id: agencyId},
+      where: {id: agencyId as unknown as number},
       relations: ['customization'],
     });
 
@@ -51,7 +51,7 @@ export class CustomizationService {
     agencyId: string,
   ): Promise<Customization> {
     const agency = await this.agencyRepository.findOne({
-      where: { id: agencyId },
+      where: { id: agencyId as unknown as number },
       relations: ['customization'],
     });
 
