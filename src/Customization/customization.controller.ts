@@ -1,33 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param} from '@nestjs/common';
 import { CustomizationService } from './customization.service';
+import { UpdateCustomizationDto } from './update-customization.dto';
 import { CreateCustomizationDto } from './create-customization.dto';
 
-@Controller('customization')
+@Controller('agencies/:agencyId/customization')
 export class CustomizationController {
   constructor(private readonly customizationService: CustomizationService) {}
 
   @Post()
-  create(@Body() createCustomizationDto: CreateCustomizationDto) {
-    return this.customizationService.create(createCustomizationDto);
+  async create(
+    @Param('agencyId') agencyId: string,
+    @Body() createCustomizationDto: CreateCustomizationDto) 
+    {
+    return this.customizationService.create(createCustomizationDto, agencyId);
   }
 
   @Get()
-  findAll() {
-    return this.customizationService.findAll();
+  async findOneByAgencyId(
+    @Param('agencyId') agencyId: string)
+    {
+    return this.customizationService.findOneByAgencyId(agencyId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.customizationService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCustomizationDto: CreateCustomizationDto) {
-    return this.customizationService.update(+id, updateCustomizationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.customizationService.remove(+id);
+  @Patch()
+  async update(
+    @Param('agencyId') agencyId: string,
+    @Body() updateCustomizationDto: UpdateCustomizationDto,) {
+    return this.customizationService.updateByAgencyId(agencyId, updateCustomizationDto);
   }
 }
