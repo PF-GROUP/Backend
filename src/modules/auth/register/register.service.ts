@@ -7,8 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/User/user.entity';
-import { Agency } from 'src/Agency/agency.entity';
+import { User } from 'src/modules/user/user.entity';
+import { Agency } from 'src/modules/agency/agency.entity';
 import { CreateRegisterDto } from './dto/create-register.dto';
 
 @Injectable()

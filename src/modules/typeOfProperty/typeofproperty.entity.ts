@@ -1,5 +1,5 @@
 import { SoftDeletableEntity } from "src/Helpers/softDelete.entity";
-import { Property } from "src/Property/property.entity";
+import { Property } from "src/modules/property/property.entity";
 import { Column, Entity,  OneToMany,  PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name:'TypeOfProperty'})

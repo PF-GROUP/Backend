@@ -1,4 +1,4 @@
-import { Agency } from "src/Agency/agency.entity";
+import { Agency } from "src/modules/agency/agency.entity";
 import { SoftDeletableEntity } from "src/Helpers/softDelete.entity";
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
 

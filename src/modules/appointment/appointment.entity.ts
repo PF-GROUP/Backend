@@ -1,6 +1,6 @@
 import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
-import { Property } from 'src/Property/property.entity';
-import { User } from 'src/User/user.entity';
+import { Property } from 'src/modules/property/property.entity';
+import { User } from 'src/modules/user/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'typeorm';
 
 @Entity({

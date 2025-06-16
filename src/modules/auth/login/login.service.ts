@@ -6,7 +6,7 @@ import {
 import { CreateLoginDto } from './dto/create-login.dto';
 import { RegisterService } from '../register/register.service'; // Importar RegisterService
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/User/user.entity';
+import { User } from 'src/modules/user/user.entity';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()

@@ -4,15 +4,15 @@ import { AppService } from './app.service';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import typeorm from './Config/typeorm';
-import { AgencyModule } from './Agency/agency.module';
-import { ImagesModule } from './Images/images.module';
-import { CustomizationModule } from './Customization/customization.module';
-import { PropertyModule } from './Property/property.module';
-import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
-import { UserModule } from './User/user.module';
-import { StripeModule } from './Stripe/stripe.module';
-import { AuthModule } from './auth/auth.module';
-import { RegisterModule } from './auth/register/register.module';
+import { AgencyModule } from './modules/agency/agency.module';
+import { ImagesModule } from './modules/images/images.module';
+import { CustomizationModule } from './modules/customization/customization.module';
+import { PropertyModule } from './modules/property/property.module';
+import { TypeofpropertyModule } from './modules/typeOfProperty/typeofproperty.module';
+import { UserModule } from './modules/user/user.module';
+import { StripeModule } from './modules/stripe/stripe.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { RegisterModule } from './modules/auth/register/register.module';
 
 
 

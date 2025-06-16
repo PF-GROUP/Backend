@@ -8,12 +8,12 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Agency } from 'src/Agency/agency.entity';
+import { Agency } from 'src/modules/agency/agency.entity';
 import { Status } from 'src/Enum/status.enum';
 import { Type } from 'src/Enum/type.enum';
-import { TypeOfProperty } from 'src/TypeOfProperty/typeofproperty.entity';
-import { Images } from 'src/Images/image.entity';
-import { Appointment } from 'src/Appointment/appointment.entity';
+import { TypeOfProperty } from 'src/modules/typeOfProperty/typeofproperty.entity';
+import { Images } from 'src/modules/images/image.entity';
+import { Appointment } from 'src/modules/appointment/appointment.entity';
 import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 
 @Entity('Property')

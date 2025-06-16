@@ -6,7 +6,7 @@ import {
   IsOptional,
 } from 'class-validator';
 
-import { Agency } from '../Agency/agency.entity';
+import { Agency } from '../agency/agency.entity';
 import { Status } from 'src/Enum/status.enum';
 import { Type } from 'src/Enum/type.enum';
 
