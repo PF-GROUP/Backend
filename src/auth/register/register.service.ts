@@ -13,7 +13,16 @@ import { CreateRegisterDto } from './dto/create-register.dto';
 
 @Injectable()
 export class RegisterService {
+
+  findUserByEmail(email: string) {
+    throw new Error('Method not implemented.');
+  }
+  create(createRegisterDto: CreateRegisterDto) {
+    return 'This action adds a new register';
+  }
+
   private readonly logger = new Logger(RegisterService.name); // Inicializar Logger
+
 
   constructor(
     @InjectRepository(User)
