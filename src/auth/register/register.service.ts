@@ -14,12 +14,7 @@ import { CreateRegisterDto } from './dto/create-register.dto';
 @Injectable()
 export class RegisterService {
 
-  findUserByEmail(email: string) {
-    throw new Error('Method not implemented.');
-  }
-  create(createRegisterDto: CreateRegisterDto) {
-    return 'This action adds a new register';
-  }
+
 
   private readonly logger = new Logger(RegisterService.name); // Inicializar Logger
 
@@ -34,7 +29,8 @@ export class RegisterService {
 
   async register(
     registerDto: CreateRegisterDto,
-  ): Promise<{ user: User; agency: Agency }> {
+  ): Promise<{ user: User /*; agency: Agency */ }> {
+    console.log(registerDto)
     this.logger.log(`Comenzando registro para email: ${registerDto.email}`);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -74,21 +70,21 @@ export class RegisterService {
         `User creado con ID: ${savedUser.id} y email: ${savedUser.email}`,
       );
 
-      const agency = this.agencyRepository.create({
-        name: registerDto.agencyName,
-        description: registerDto.agencyDescription,
-        document: registerDto.document,
-        user: savedUser,
-      });
+      // const agency = this.agencyRepository.create({
+      //   name: registerDto.agencyName,
+      //   description: registerDto.agencyDescription,
+      //   document: registerDto.document,
+      //   user: savedUser,
+      // });
 
-      const savedAgency = await queryRunner.manager.save(Agency, agency);
-      this.logger.log(
-        `Agency creada con ID: ${savedAgency.id} y nombre: ${savedAgency.name}`,
-      );
+      // const savedAgency = await queryRunner.manager.save(Agency, agency);
+      // this.logger.log(
+      //   `Agency creada con ID: ${savedAgency.id} y nombre: ${savedAgency.name}`,
+      // );
 
-      savedUser.agency = savedAgency;
-      await queryRunner.manager.save(User, savedUser);
-      this.logger.debug(`Agency asociada con user ${savedUser.id}.`);
+      // savedUser.agency = savedAgency;
+      // await queryRunner.manager.save(User, savedUser);
+      // this.logger.debug(`Agency asociada con user ${savedUser.id}.`);
 
       await queryRunner.commitTransaction();
       this.logger.log(
@@ -99,18 +95,16 @@ export class RegisterService {
 
       return {
         user: userWithoutPassword as User,
-        agency: savedAgency,
+        // agency: savedAgency,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      if (error instanceof ConflictException) throw error;
       this.logger.error(
         `Registro fallido para email: ${registerDto.email}. Transaccion revertida. Error: ${error.message}`,
         error.stack,
       );
 
-      if (error instanceof ConflictException) {
-        throw error;
-      }
 
       throw new InternalServerErrorException('Registro fallido');
     } finally {

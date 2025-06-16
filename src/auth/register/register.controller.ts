@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, BadRequestException } from '@nestjs/common';
 import { RegisterService } from './register.service';
 import { CreateRegisterDto } from './dto/create-register.dto';
 
@@ -16,17 +16,13 @@ export class RegisterController {
         message: 'Usuario y Agencia registrados exitosamente',
         data: {
           userId: result.user.id,
-          agencyId: result.agency.id,
+          // agencyId: result.agency.id,
           userEmail: result.user.email,
-          agencyName: result.agency.name,
+          // agencyName: result.agency.name,
         },
       };
     } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Registro fallido',
-        data: null,
-      };
+      throw new BadRequestException("Hubo un error al registrarse");
     }
   }
 }

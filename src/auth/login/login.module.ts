@@ -3,9 +3,16 @@ import { Module } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { LoginController } from './login.controller';
 import { RegisterModule } from '../register/register.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [RegisterModule],
+  imports: [
+    JwtModule.register({
+      secret: 'theBestPassword??', // Reemplaza este valor por una variable de entorno en producción
+      signOptions: { expiresIn: '1d' }, // Configura el tiempo de expiración del token
+    }),RegisterModule
+  ],
+
   controllers: [LoginController],
   providers: [LoginService],
 })

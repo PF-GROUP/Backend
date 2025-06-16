@@ -8,7 +8,14 @@ import * as express from 'express';
 async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
-  app.use(cors());
+  const corsOptions = {
+  origin: 'http://191.235.34.31:3001', 
+  credentials: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+};
+
+  app.use(cors(corsOptions));
   app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
   app.use(loggerGlobal)
   const swaggerConfig = new DocumentBuilder()

@@ -59,9 +59,10 @@ export class User extends SoftDeletableEntity {
     
     @OneToOne(()=> Agency , (agency: Agency) => agency.user,
 {
-    onDelete: "SET NULL"
+    onDelete: "SET NULL",
+    nullable: true
   })
     @JoinColumn({name: 'id_agency'})
-    agency: Agency
+    agency?: Agency
 }
 

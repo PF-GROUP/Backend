@@ -4,12 +4,14 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  Logger, // Import Logger
+  Logger,
+  Res, // Import Logger
 } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { CreateLoginDto } from './dto/create-login.dto';
+import { Response } from 'express';
 
-@Controller('login')
+@Controller('auth/login')
 export class LoginController {
   private readonly logger = new Logger(LoginController.name); // Initialize Logger
 
@@ -17,26 +19,28 @@ export class LoginController {
 
   @Post()
   @HttpCode(HttpStatus.OK) // Login devolvera 200 OK
-  async login(@Body() createLoginDto: CreateLoginDto) {
+  async login(@Body() createLoginDto: CreateLoginDto, @Res({passthrough: true}) res: Response) {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`); // log de intento
     try {
-      const result = await this.loginService.login(createLoginDto); //
+      const {token, user}= await this.loginService.login(createLoginDto); //
+      console.log(token, user)
       this.logger.log(`Login exitoso para email: ${createLoginDto.email}`); // log con exito
-      return {
-        success: true,
-        message: 'Login exitoso',
-        data: result,
-      };
+      res.cookie('token', token, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 60 * 60 * 1000),
+      secure: process.env.NODE_ENV === 'production',
+      
+    });
+     res.cookie('user', user, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 60 * 60 * 1000),
+        secure: process.env.NODE_ENV === 'production',
+      })
     } catch (error) {
       this.logger.error(
         `Login fallo para email: ${createLoginDto.email}. Error: ${error.message}`, // Error de log
         error.stack, // error de stack
-      );
-      return {
-        success: false,
-        message: error.message || 'Login fallo',
-        data: null,
-      };
+      )
     }
   }
 }

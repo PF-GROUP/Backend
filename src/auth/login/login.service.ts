@@ -7,14 +7,15 @@ import { CreateLoginDto } from './dto/create-login.dto';
 import { RegisterService } from '../register/register.service'; // Importar RegisterService
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/User/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class LoginService {
   private readonly logger = new Logger(LoginService.name); // Inicializar Logger
 
-  constructor(private readonly registerService: RegisterService) {} // Inyectar RegisterService
+  constructor(private readonly registerService: RegisterService, private jwtService: JwtService) {} // Inyectar RegisterService
 
-  async login(createLoginDto: CreateLoginDto): Promise<{ user: User }> {
+  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: User}> {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`);
     const user = await this.registerService.findUserByEmail(
       createLoginDto.email,
@@ -39,13 +40,13 @@ export class LoginService {
       );
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    this.logger.log(
-      `Contrasena valida para email: ${user.email}. Login exitoso.`,
-    );
-    // Omitir contrasena
-    const { password, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword as User };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
+    const token = await this.jwtService.sign(payload);
+    return {token, user};
   }
 }
 
@@ -78,14 +79,6 @@ export class LoginService {
 //       findUser.password,
 //     );
 
-//     if (!passwordMatch) throw new BadRequestException ('Bad credentials');
-//     const payload = {
-//       id: findUser.id,
-//       email: findUser.email,
-//       isAdmin: findUser.isAdmin,
-//     };
-//     const token = this.jwtService.sign(payload);
-
-//     return { access_token: token };
+//     
 //   }
 // }

@@ -28,15 +28,15 @@ export class CreateRegisterDto {
   @MinLength(6)
   password: string;
 
-  @IsNotEmpty()
-  @IsString()
-  agencyName: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // agencyName: string;
 
-  @IsNotEmpty()
-  @IsString()
-  agencyDescription: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // agencyDescription: string;
 
-  @IsOptional()
-  @IsString()
-  document?: string;
+  // @IsOptional()
+  // @IsString()
+  // document?: string;
 }
