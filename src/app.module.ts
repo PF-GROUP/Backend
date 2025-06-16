@@ -11,6 +11,10 @@ import { CustomizationModule } from './Customization/customization.module';
 import { PropertyModule } from './Property/property.module';
 import { TypeofpropertyModule } from './TypeOfProperty/typeofproperty.module';
 import { UserModule } from './User/user.module';
+import { AuthModule } from './auth/auth.module';
+
+import { RegisterModule } from './auth/register/register.module';
+import { LoginModule } from './auth/login/login.module';
 
 
 @Module({
@@ -27,10 +31,11 @@ import { UserModule } from './User/user.module';
     }),
     AgencyModule,
     ImagesModule,
-  PropertyModule,
-  TypeofpropertyModule,
-  UserModule,
-  CustomizationModule
+    PropertyModule,
+    TypeofpropertyModule,
+    UserModule,
+    CustomizationModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
