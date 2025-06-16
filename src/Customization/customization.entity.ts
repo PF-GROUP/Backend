@@ -4,8 +4,8 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
 
 @Entity('Customizations')
 export class Customization extends SoftDeletableEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({nullable: true})
   logoImage: string;
