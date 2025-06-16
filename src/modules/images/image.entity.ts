@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Property } from 'src/Property/property.entity';
+import { Property } from 'src/modules/property/property.entity';
 import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 
 @Entity('Images')

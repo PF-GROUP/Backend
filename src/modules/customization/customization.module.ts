@@ -3,7 +3,7 @@ import { CustomizationService } from './customization.service';
 import { CustomizationController } from './customization.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Customization } from './customization.entity';
-import { Agency } from 'src/Agency/agency.entity';
+import { Agency } from 'src/modules/agency/agency.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Customization, Agency])

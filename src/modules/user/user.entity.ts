@@ -1,5 +1,5 @@
-import { Agency } from "src/Agency/agency.entity";
-import { Appointment } from "src/Appointment/appointment.entity";
+import { Agency } from "src/modules/agency/agency.entity";
+import { Appointment } from "src/modules/appointment/appointment.entity";
 import { SoftDeletableEntity } from "src/Helpers/softDelete.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 

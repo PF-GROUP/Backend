@@ -4,7 +4,7 @@ import { UpdateCustomizationDto } from './update-customization.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Customization } from './customization.entity';
 import { Repository } from 'typeorm';
-import { Agency } from 'src/Agency/agency.entity';
+import { Agency } from 'src/modules/agency/agency.entity';
 
 @Injectable()
 export class CustomizationService {

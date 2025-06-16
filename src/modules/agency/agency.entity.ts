@@ -1,7 +1,7 @@
-import { Customization } from 'src/Customization/customization.entity';
+import { Customization } from 'src/modules/customization/customization.entity';
 import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
-import { Property } from 'src/Property/property.entity';
-import { User } from 'src/User/user.entity';
+import { Property } from 'src/modules/property/property.entity';
+import { User } from 'src/modules/user/user.entity';
 import {
   Column,
   Entity,
