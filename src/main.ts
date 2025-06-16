@@ -2,9 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import {loggerGlobal} from './middlewares/logger-global/logger-global.middleware'
+import * as cors from 'cors';
+import * as express from 'express';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
 
+  const app = await NestFactory.create(AppModule);
+  app.use(cors());
+  app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
+  app.use(loggerGlobal)
   const swaggerConfig = new DocumentBuilder()
   .setTitle('Kasapp')
   .setVersion('1.0')
