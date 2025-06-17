@@ -1,33 +1,61 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  ValidationPipe,
+  UsePipes,
+  Query,
+} from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './create-property.dto';
+import { UpdatePropertyDto } from './update-property.dto';
+import { Property } from './property.entity';
 
 @Controller('property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
-  create(@Body() createPropertyDto: CreatePropertyDto) {
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async create(
+    @Body() createPropertyDto: CreatePropertyDto,
+  ): Promise<Property> {
     return this.propertyService.create(createPropertyDto);
   }
 
   @Get()
-  findAll() {
-    return this.propertyService.findAll();
+  async findAll(
+    @Query('includeDeleted') includeDeleted: boolean = false,
+  ): Promise<Property[]> {
+    return this.propertyService.findAll(includeDeleted);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.propertyService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+    @Query('includeDeleted') includeDeleted: boolean = false,
+  ): Promise<Property> {
+    return this.propertyService.findOne(id, includeDeleted);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePropertyDto: CreatePropertyDto) {
-    return this.propertyService.update(+id, updatePropertyDto);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async update(
+    @Param('id') id: string,
+    @Body() updatePropertyDto: UpdatePropertyDto,
+  ): Promise<Property> {
+    return this.propertyService.update(id, updatePropertyDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.propertyService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.propertyService.remove(+id);
+  // }
 }
