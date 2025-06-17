@@ -5,6 +5,5 @@ export class CreateTypeOfPropertyDto {
       @IsString({message: 'el tipo debe ser un texto. '})
       @IsNotEmpty({message: 'no debe estar el campo vacio. '})
       @MaxLength(50, {message: 'no debe exceder 50 caracteres. '})
-      @IsIn(Object.values(PropertyTypeName),{message: 'el tipo de propiedad no es valido. '})
       type: PropertyTypeName;
 }
