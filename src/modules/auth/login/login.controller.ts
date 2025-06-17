@@ -5,7 +5,8 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
-  Res, // Import Logger
+  Res,
+  InternalServerErrorException, // Import Logger
 } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { CreateLoginDto } from './dto/create-login.dto';
@@ -26,21 +27,17 @@ export class LoginController {
       console.log(token, user)
       this.logger.log(`Login exitoso para email: ${createLoginDto.email}`); // log con exito
       res.cookie('token', token, {
-      httpOnly: true,
+        httpOnly: false,
+        sameSite: 'lax',
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
       
     });
-     res.cookie('user', user, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 60 * 60 * 1000),
-        secure: process.env.NODE_ENV === 'production',
-      })
     } catch (error) {
       this.logger.error(
         `Login fallo para email: ${createLoginDto.email}. Error: ${error.message}`, // Error de log
-        error.stack, // error de stack
       )
+      return new InternalServerErrorException('Error al iniciar sesión');
     }
   }
 }
