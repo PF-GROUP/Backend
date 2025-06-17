@@ -9,7 +9,7 @@ import {
   InternalServerErrorException, // Import Logger
 } from '@nestjs/common';
 import { LoginService } from './login.service';
-import { CreateLoginDto } from './dto/create-login.dto';
+import { CreateLoginDto, GoogleLoginDto } from './dto/create-login.dto';
 import { Response } from 'express';
 
 @Controller('auth/login')
@@ -23,8 +23,7 @@ export class LoginController {
   async login(@Body() createLoginDto: CreateLoginDto, @Res({passthrough: true}) res: Response) {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`); // log de intento
     try {
-      const {token, user}= await this.loginService.login(createLoginDto); //
-      console.log(token, user)
+      const {token}= await this.loginService.login(createLoginDto); //
       this.logger.log(`Login exitoso para email: ${createLoginDto.email}`); // log con exito
       res.cookie('token', token, {
         httpOnly: false,
@@ -35,10 +34,24 @@ export class LoginController {
     });
     } catch (error) {
       this.logger.error(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `Login fallo para email: ${createLoginDto.email}. Error: ${error.message}`, // Error de log
       )
       return new InternalServerErrorException('Error al iniciar sesión');
     }
+  }
+
+
+  @Post('tokenSignin')
+  async tokenSignin(@Body() tokenOfGoogle: GoogleLoginDto, @Res({passthrough: true}) res: Response) {
+    const {token} = await this.loginService.tokenSignin(tokenOfGoogle);
+    res.cookie('token', token, {
+      httpOnly: false,
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 60 * 60 * 1000),
+      secure: process.env.NODE_ENV === 'production',
+    });
+    
   }
 }
 

@@ -26,9 +26,9 @@ export class User extends SoftDeletableEntity {
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: true,
     })
-    phone: string;
+    phone?: string;
 
     @Column({
         type: "varchar",
@@ -41,15 +41,22 @@ export class User extends SoftDeletableEntity {
     @Column({
         type: "varchar",
         length: 100,
-        nullable: false,
+        nullable: true, // No es obligatorio, ya que se pueden logear con Google
     })
-    password: string;
+    password?: string;
 
     @Column({
         type: "boolean",
         default: false,
     }) 
     isAdmin: boolean;
+
+    @Column({
+        type: "varchar",
+        nullable: true
+    })
+    googleId: string;
+
 
     @OneToMany(() => Appointment, (appointment: Appointment) => appointment,{
     cascade: true,

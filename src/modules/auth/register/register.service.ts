@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from 'src/modules/user/user.entity';
 import { Agency } from 'src/modules/agency/agency.entity';
 import { CreateRegisterDto } from './dto/create-register.dto';
+import { TokenPayload } from 'google-auth-library';
 
 @Injectable()
 export class RegisterService {
@@ -125,5 +126,47 @@ export class RegisterService {
       this.logger.debug(`No se encontro user con email: ${email}`);
     }
     return user;
+  }
+  async findOrCreateByGoogleId(payload:TokenPayload): Promise<User> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    const googleId = payload.sub
+    try {
+      const existingUser = await this.userRepository.findOne({
+        where: { googleId },
+      });
+      
+      if (existingUser) {
+        existingUser.email = payload.email!
+        existingUser.name = payload.name!
+        existingUser.surname = payload.family_name!
+        await queryRunner.manager.save(User, existingUser);
+        await queryRunner.commitTransaction();
+        return existingUser
+      }else {
+        const user = this.userRepository.create({
+          name: payload.name,
+          surname: payload.family_name,
+          email: payload.email,
+          googleId,
+          isAdmin: false,
+        });
+        const savedUser = await queryRunner.manager.save(User, user);
+        await queryRunner.commitTransaction();
+        return savedUser
+      }
+    }catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(
+        `Registro fallido para email: ${payload.email}. Transaccion revertida. Error: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException('Registro fallido');
+    } finally {
+      await queryRunner.release();
+      this.logger.log('QueryRunner released.');
+    }
+    
   }
 }
