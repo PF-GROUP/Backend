@@ -13,6 +13,7 @@ import { UserModule } from './modules/user/user.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RegisterModule } from './modules/auth/register/register.module';
+import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
 
 
 
@@ -37,7 +38,8 @@ import { RegisterModule } from './modules/auth/register/register.module';
   StripeModule,
   CustomizationModule,
   AuthModule,
-  RegisterModule
+  RegisterModule,
+  NodeMailerModule
   ],
   controllers: [AppController],
   providers: [AppService],
