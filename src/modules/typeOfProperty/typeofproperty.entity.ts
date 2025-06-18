@@ -5,10 +5,10 @@ import { Column, Entity,  OneToMany,  PrimaryGeneratedColumn } from "typeorm";
 @Entity({name:'TypeOfProperty'})
 export class TypeOfProperty extends SoftDeletableEntity {
 
-@PrimaryGeneratedColumn()
-id: number
+@PrimaryGeneratedColumn('uuid')
+id: string
 
-@Column({type: "varchar", length:"50"})
+@Column({type: "varchar", length:"50", unique: true})
 type: string
 
  @OneToMany(()=> Property, (property: Property)=> property.type_of_property,{

@@ -5,10 +5,9 @@ import { PropertyController } from './property.controller';
 import { Property } from './property.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Property]),
-  ],
+  imports: [TypeOrmModule.forFeature([Property])],
   controllers: [PropertyController],
   providers: [PropertyService],
+  exports: [PropertyService],
 })
 export class PropertyModule {}
