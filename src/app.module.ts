@@ -12,7 +12,6 @@ import { TypeofpropertyModule } from './modules/typeOfProperty/typeofproperty.mo
 import { UserModule } from './modules/user/user.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { RegisterModule } from './modules/auth/register/register.module';
 import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
 
 
@@ -38,7 +37,6 @@ import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
   StripeModule,
   CustomizationModule,
   AuthModule,
-  RegisterModule,
   NodeMailerModule
   ],
   controllers: [AppController],

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req, UseInterceptors } from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { StripeWebhookInterceptor } from 'src/interceptors/rawBody.interceptor';
 
@@ -6,9 +6,9 @@ import { StripeWebhookInterceptor } from 'src/interceptors/rawBody.interceptor';
 export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 
-  @Post('checkout')
-  crearCheckout(@Body() body: { email: string }) {
-    return this.stripeService.crearSesionPago(body.email);
+  @Post('checkout/:id')
+  crearCheckout(@Body() body: { email: string }, @Param('id') id:string) {
+    return this.stripeService.crearSesionPago(body.email, id);
   }
 
 @Post('webhook')

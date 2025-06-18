@@ -8,20 +8,22 @@ export const MOCK_USER: User = {
   phone: '+5491112345678',
   email: 'juan@inmobiliaria.com',
   password: 'hashedpassword123',
+  googleId: null,
   isAdmin: false,
   appointment: [],
-  agency: null as unknown as Agency, // Se completará después
+  agency: null, 
  deletedAt: null,
 }as User;
 
 export const MOCK_AGENCY: Agency = {
-  id: 1,
+  id: "1",
   name: 'Inmobiliaria Ejemplo S.A.',
   description: 'Agencia especializada en propiedades premium',
   customization: null,
   id_customization: 0,
   properties: [],
   id_property: 0,
+  customerId: null,
   user: MOCK_USER, // Relación establecida
   document: '30123456789',
   deletedAt: null,

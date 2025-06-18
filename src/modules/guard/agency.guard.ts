@@ -9,7 +9,7 @@ import { User } from "../user/user.entity";
 export class AgencyGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {} 
     canActivate(context: ExecutionContext): boolean {
-        const request = context.switchToHttp().getRequest<Request>() as any;
+        const request = context.switchToHttp().getRequest<Request>() as Request & { user: User };
         const user: User = request.user;
     
         if(!user) {
@@ -23,8 +23,8 @@ export class AgencyGuard implements CanActivate {
             throw new ForbiddenException('Acceso denegado: Usuario no pertenece a una agencia');
         }
 
-            const agencyId = request.params.agencyId;
-    if (agencyId && user.agency.id !== parseInt(agencyId)) {
+            const agencyId = request.params.id;
+    if (agencyId && user.agency.id !== agencyId) {
       throw new UnauthorizedException('No tienes permisos para esta agencia');
     }
         return true; 

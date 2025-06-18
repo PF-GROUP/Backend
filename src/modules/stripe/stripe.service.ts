@@ -1,20 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { BadRequestException, Injectable, Body, RawBodyRequest } from '@nestjs/common';
+import { BadRequestException, Injectable, Body, RawBodyRequest, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { config as dotenvconfig } from "dotenv"
 dotenvconfig({path: ".env.development"});
 import Stripe from 'stripe';
+import { Agency } from '../agency/agency.entity';
+import { Repository } from 'typeorm';
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
 
-  constructor() {
+  constructor(@InjectRepository(Agency) private readonly agencyRepository: Repository<Agency>) {
     this.stripe = new Stripe(`${process.env.STRIPE_SECRET}`, { apiVersion: '2025-05-28.basil' });
   }
 
-  async crearSesionPago(email: string) {
-    const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
+  async crearSesionPago(email: string, agencyId: string) {
+  const customerId = await this.searchOrCreateCustomer({email, agencyId});
+    
+  const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
   success_url: 'http://localhost:3001/success',
+  customer: customerId,
   customer_email: email,
   payment_method_types: ['card'],
   line_items: [
@@ -28,6 +34,52 @@ export class StripeService {
 });
   return session
   }
+
+
+  async searchOrCreateCustomer(data: {email: string, agencyId: string}) {
+    const {email, agencyId} = data
+    const agency = await this.agencyRepository.findOne({where: {id: agencyId}});
+    if (!agency) {
+      throw new NotFoundException(`Agencia con ID "${agencyId}" no encontrada.`)
+    }
+    if (agency?.customerId){
+      const existsingcustomer = await this.searchCustomer(agency.customerId);
+      return existsingcustomer.id
+    }
+    const customer = await this.searchCustomerByEmail(email);
+    if (customer.data.length > 0) {
+      await this.agencyRepository.update(agencyId, {customerId: customer.data[0].id});
+      return customer.data[0].id;
+    } else {
+      const customer = await this.createCustomer(email);
+      await this.agencyRepository.update(agencyId, {customerId: customer.id});
+      return customer.id;
+    }
+  }
+async createCustomer(email: string) {
+  const customer = await this.stripe.customers.create({
+    email: email,
+  });
+  return customer
+}
+async searchCustomerByEmail(email: string) {
+  try {
+    const customer = await this.stripe.customers.list({
+      email: email,
+    });
+    return customer
+  } catch  {
+    throw new BadRequestException("Hubo un error al buscar el cliente");
+  }
+}
+async searchCustomer(customerId: string) {
+  try {
+      const customer = await this.stripe.customers.retrieve(customerId);
+      return customer
+  } catch  {
+    throw new BadRequestException("Hubo un error al buscar el cliente");
+  }
+}
 
 async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buffer }) {
     const sig = request.headers['stripe-signature'] as string;
@@ -76,7 +128,6 @@ private async handleCheckoutSessionCompleted(session : Stripe.Checkout.Session) 
   }).catch((error) => {
     console.error(error);
   })
-
 }
 private async handleChargeSucceeded(charge: Stripe.Charge) {
   await Promise.resolve(charge).then((charge) => {

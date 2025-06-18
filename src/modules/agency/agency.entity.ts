@@ -17,7 +17,7 @@ import {
 })
 export class Agency extends SoftDeletableEntity{
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
   @Column({
     type: 'varchar',
@@ -60,4 +60,11 @@ export class Agency extends SoftDeletableEntity{
     nullable: true,
   })
   document: string;
+
+  @Column({
+          type: "varchar",
+          nullable: true,
+          default: null
+      })
+      customerId: string | null;
 }
