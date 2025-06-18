@@ -4,6 +4,9 @@ import { CreateAgencyDto } from './create-agency.dto';
 
 @Injectable()
 export class AgencyService {
+  async getAgency(page: number, limit: number) {
+    let agency = await this.agencyRepository.find
+  }
   create(createAgencyDto: CreateAgencyDto) {
     return 'This action adds a new agency';
   }

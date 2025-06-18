@@ -1,4 +1,4 @@
-import {  Module, } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigService, ConfigModule } from '@nestjs/config';
@@ -13,7 +13,9 @@ import { UserModule } from './modules/user/user.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RegisterModule } from './modules/auth/register/register.module';
+import { DatabaseSeederModule } from './database/database-seeder.module';
 import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
+
 
 
 
@@ -30,19 +32,19 @@ import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
+    DatabaseSeederModule,
     AgencyModule,
     ImagesModule,
-  PropertyModule,
-  TypeofpropertyModule,
-  UserModule,
-  StripeModule,
-  CustomizationModule,
-  AuthModule,
-  RegisterModule,
-  NodeMailerModule
+    PropertyModule,
+    TypeofpropertyModule,
+    UserModule,
+    StripeModule,
+    CustomizationModule,
+    AuthModule,
+    RegisterModule,
+    NodeMailerModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-}
+export class AppModule {}

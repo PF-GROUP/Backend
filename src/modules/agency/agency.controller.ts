@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { AgencyService } from './agency.service';
 import { CreateAgencyDto } from './create-agency.dto';
 
@@ -11,9 +11,13 @@ export class AgencyController {
     return this.agencyService.create(createAgencyDto);
   }
 
+  
   @Get()
-  findAll() {
-    return this.agencyService.findAll();
+  findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 5,
+  ) {
+    return this.agencyService.findAll(page, limit);
   }
 
   @Get(':id')

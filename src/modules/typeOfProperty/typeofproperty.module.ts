@@ -10,5 +10,6 @@ import { TypeOfProperty } from './typeofproperty.entity';
   ],
   controllers: [TypeofpropertyController],
   providers: [TypeofpropertyService],
+  exports: [TypeofpropertyService],
 })
 export class TypeofpropertyModule {}
