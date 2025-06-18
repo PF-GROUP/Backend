@@ -14,6 +14,11 @@ import { StripeModule } from './modules/stripe/stripe.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RegisterModule } from './modules/auth/register/register.module';
 import { DatabaseSeederModule } from './database/database-seeder.module';
+import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
+
+
+
+
 
 @Module({
   imports: [
@@ -37,6 +42,7 @@ import { DatabaseSeederModule } from './database/database-seeder.module';
     CustomizationModule,
     AuthModule,
     RegisterModule,
+    NodeMailerModule
   ],
   controllers: [AppController],
   providers: [AppService],

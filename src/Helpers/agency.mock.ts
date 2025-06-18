@@ -1,0 +1,31 @@
+import { User } from '../modules/user/user.entity';
+import { Agency } from '../modules/agency/agency.entity';
+
+export const MOCK_USER: User = {
+  id: 101,
+  name: 'Juan',
+  surname: 'Pérez',
+  phone: '+5491112345678',
+  email: 'juan@inmobiliaria.com',
+  password: 'hashedpassword123',
+  isAdmin: false,
+  appointment: [],
+  agency: null as unknown as Agency, // Se completará después
+ deletedAt: null,
+}as User;
+
+export const MOCK_AGENCY: Agency = {
+  id: 1,
+  name: 'Inmobiliaria Ejemplo S.A.',
+  description: 'Agencia especializada en propiedades premium',
+  customization: null,
+  id_customization: 0,
+  properties: [],
+  id_property: 0,
+  user: MOCK_USER, // Relación establecida
+  document: '30123456789',
+  deletedAt: null,
+};
+
+
+MOCK_USER.agency = MOCK_AGENCY; // Establecer la relación inversa

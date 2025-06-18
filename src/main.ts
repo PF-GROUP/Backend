@@ -3,19 +3,17 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import {loggerGlobal} from './middlewares/logger-global/logger-global.middleware'
-import * as cors from 'cors';
 import * as express from 'express';
 async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
-  const corsOptions = {
-  origin: "*",
-  credentials: true, 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'], 
-};
-
-  app.use(cors(corsOptions));
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://tkdsystem.ddns.net:3001', 'http://tkdsystem.ddns.net:3000', "kasapp.serveminecraft.net:3000", "kasapp.serveminecraft.net:3001"],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true
+  })
   app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
   app.use(loggerGlobal)
   const swaggerConfig = new DocumentBuilder()
