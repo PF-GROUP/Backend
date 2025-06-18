@@ -1,33 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, HttpCode, HttpStatus, BadRequestException } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { CreateImageDto } from './create-image.dto';
+import { UpdateImageDto } from './update-image.dto';
 
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
   @Post()
-  create(@Body() createImageDto: CreateImageDto) {
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createImageDto: CreateImageDto) {
     return this.imagesService.create(createImageDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.imagesService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.imagesService.findOne(+id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.imagesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateImageDto:CreateImageDto) {
-    return this.imagesService.update(+id, updateImageDto);
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateImageDto: UpdateImageDto,
+  ) {
+    if (Object.keys(updateImageDto).length === 0) {
+      throw new BadRequestException('Se requiere al menos un campo para actualizar la imagen.');
+    }
+    return this.imagesService.update(id, updateImageDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.imagesService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.imagesService.remove(id);
   }
 }

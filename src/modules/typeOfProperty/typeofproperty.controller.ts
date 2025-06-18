@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe, NotFoundException, HttpCode, HttpStatus} from '@nestjs/common';
 import { TypeofpropertyService } from './typeofproperty.service';
 import { CreateTypeOfPropertyDto } from './create-typeofproperty.dto';
 
@@ -7,27 +7,25 @@ export class TypeofpropertyController {
   constructor(private readonly typeofpropertyService: TypeofpropertyService) {}
 
   @Post()
-  create(@Body() createTypeofpropertyDto: CreateTypeOfPropertyDto) {
-    return this.typeofpropertyService.create(createTypeofpropertyDto);
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createTypeofpropertyDto: CreateTypeOfPropertyDto) {
+    return await this.typeofpropertyService.create(createTypeofpropertyDto);
   }
 
   @Get()
-  findAll() {
-    return this.typeofpropertyService.findAll();
+  async findAll() {
+    return await this.typeofpropertyService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.typeofpropertyService.findOne(+id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.typeofpropertyService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTypeofpropertyDto: CreateTypeOfPropertyDto) {
-    return this.typeofpropertyService.update(+id, updateTypeofpropertyDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.typeofpropertyService.remove(+id);
-  }
+  async update(
+    @Param('id', ParseUUIDPipe) id: string, 
+    @Body() updateTypeofpropertyDto: CreateTypeOfPropertyDto) {
+    return await this.typeofpropertyService.update(id, updateTypeofpropertyDto);
+    }
 }

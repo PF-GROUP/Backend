@@ -1,10 +1,10 @@
-import { IsOptional, IsString, IsNumber, IsUrl } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class UpdateImageDto {
   @IsString({ message: 'El campo "file" debe ser una cadena de texto.' })
   @IsUrl({}, { message: 'El campo "file" debe ser una URL válida.' })
   @IsOptional()
-  file?: string; 
+  file?: string;
 
   @IsString({ message: 'El campo "title" debe ser una cadena de texto.' })
   @IsOptional()
@@ -14,8 +14,7 @@ export class UpdateImageDto {
   @IsOptional()
   description?: string;
 
-
   @IsNumber({}, { message: 'El "propertyId" debe ser un número.' })
   @IsOptional()
-  propertyId?: number;
+  propertyId?: string;
 }
