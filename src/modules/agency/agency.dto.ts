@@ -2,6 +2,7 @@ import { CustomizationDTO } from "src/Interface/Customization";
 import { PropertyDTO } from "src/Interface/Property";
 import { UserDTO } from "src/Interface/User";
 import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
+import { PartialType } from "@nestjs/mapped-types";
 
 export class CreateAgencyDto {
 
@@ -28,4 +29,9 @@ export class CreateAgencyDto {
   @IsString()
   cuit_dni_m: string; 
 
+}
+
+
+export class UpdateAgencyDto extends PartialType(CreateAgencyDto){
+  customerId?: string;
 }

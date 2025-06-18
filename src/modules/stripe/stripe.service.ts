@@ -1,17 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { BadRequestException, Injectable, Body, RawBodyRequest, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { config as dotenvconfig } from "dotenv"
 dotenvconfig({path: ".env.development"});
 import Stripe from 'stripe';
-import { Agency } from '../agency/agency.entity';
-import { Repository } from 'typeorm';
+import { AgencyService } from '../agency/agency.service';
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
 
-  constructor(@InjectRepository(Agency) private readonly agencyRepository: Repository<Agency>) {
+  constructor(private readonly agencyService: AgencyService) {
     this.stripe = new Stripe(`${process.env.STRIPE_SECRET}`, { apiVersion: '2025-05-28.basil' });
   }
 
@@ -38,7 +36,7 @@ export class StripeService {
 
   async searchOrCreateCustomer(data: {email: string, agencyId: string}) {
     const {email, agencyId} = data
-    const agency = await this.agencyRepository.findOne({where: {id: agencyId}});
+    const agency = await this.agencyService.findOne(agencyId);
     if (!agency) {
       throw new NotFoundException(`Agencia con ID "${agencyId}" no encontrada.`)
     }
@@ -48,11 +46,11 @@ export class StripeService {
     }
     const customer = await this.searchCustomerByEmail(email);
     if (customer.data.length > 0) {
-      await this.agencyRepository.update(agencyId, {customerId: customer.data[0].id});
+      await this.agencyService.update(agencyId, {customerId: customer.data[0].id});
       return customer.data[0].id;
     } else {
       const customer = await this.createCustomer(email);
-      await this.agencyRepository.update(agencyId, {customerId: customer.id});
+      await this.agencyService.update(agencyId, {customerId: customer.id});
       return customer.id;
     }
   }
