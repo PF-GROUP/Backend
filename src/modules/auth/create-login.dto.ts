@@ -14,3 +14,8 @@ export class CreateLoginDto {
   @MinLength(6) // Por ahora minimo de 6 caracteres
   password: string;
 }
+export class GoogleLoginDto {
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+}
