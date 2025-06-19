@@ -66,4 +66,9 @@ export class AgencyService {
     const agency = await this.findOne(id);
     await this.agencyRepository.softRemove(agency);
   }
+
+  async existsAgency(id: string): Promise<boolean> {
+    const agency = await this.findOne(id);
+    return !!agency;
+  }
 }

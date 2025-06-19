@@ -5,7 +5,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'ty
 
 @Entity({
   name:'Appointment'})
-
 export class Appointment extends SoftDeletableEntity {
   @PrimaryGeneratedColumn()
   id: string;

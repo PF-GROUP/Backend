@@ -12,20 +12,18 @@ export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
 
-    const authHeader = request.headers.authorization;
-
-    if (!authHeader) {
-      throw new UnauthorizedException('No token provided');
+    if (!request.cookies || !request.cookies.token || !request)  {
+      throw new UnauthorizedException('Invalid token format');
     }
-
-    const token = authHeader.split(' ')[1];
+    const token = request.cookies?.token as string
     if (!token) {
       throw new UnauthorizedException('Invalid token format');
     }
 
+
     try {
-      const secret = process.env.JWT_SECRET;
-      const user = this.jwtService.verify<JwtPayload>(token, { secret });
+
+      const user = this.jwtService.verify<JwtPayload>(token)
 
       
       user['roles'] = user.isAdmin ? [Role.Admin] : [Role.User];
@@ -35,7 +33,7 @@ export class AuthGuard implements CanActivate {
       user.iat = new Date(user.iat! * 1000) as unknown as number;
 
       request.user = user; // 
-    } catch (error) {
+    } catch  {
       throw new UnauthorizedException('Invalid token');
     }
 

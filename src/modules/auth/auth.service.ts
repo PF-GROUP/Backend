@@ -4,7 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Agency } from '../agency/agency.entity';
 import { User } from '../user/user.entity';
 import { CreateRegisterDto } from './create-register.dto';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { JwtService } from '@nestjs/jwt';
 import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
@@ -224,6 +224,13 @@ export class AuthService {
   const token = this.jwtService.sign(payload);
   return { token };
 }
+
+
+
+
+
+
+
 
 
 

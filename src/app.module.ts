@@ -12,7 +12,7 @@ import { TypeofpropertyModule } from './modules/typeOfProperty/typeofproperty.mo
 import { UserModule } from './modules/user/user.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { DatabaseSeederModule } from './database/database-seeder.module';
+
 import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
 
 
@@ -31,7 +31,6 @@ import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
-    DatabaseSeederModule,
     AgencyModule,
     ImagesModule,
   PropertyModule,

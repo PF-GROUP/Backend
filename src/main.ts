@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
+import * as cookieParser from 'cookie-parser';
 import {loggerGlobal} from './middlewares/logger-global/logger-global.middleware'
 import * as express from 'express';
 async function bootstrap() {
@@ -22,10 +22,10 @@ async function bootstrap() {
   .setDescription(
   "Esta es la documentacionde nuestra app Kasapp")
   .build();
-
+  app.use(cookieParser());
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
-
+  
 
 
   await app.listen(process.env.PORT ?? 3000);
