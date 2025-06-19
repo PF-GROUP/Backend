@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
-import { CreateUserDto } from './create-user.dto';
+import { createGoogleUserDto, CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 
 @Injectable()
@@ -17,10 +17,31 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
+  async createFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
+    const user = this.userRepository.create(googleUser);
+    return await this.userRepository.save(user);
+  }
+  async updateFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
+    const user = this.userRepository.create(googleUser);
+    return await this.userRepository.save(user);
+  }
+
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
   }
+  
+  async findOneByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+return null   
+}
 
+
+    return user;
+  }
+async findOneByGoogleId(googleId: string): Promise<User | null> {
+  return await this.userRepository.findOne({ where: { googleId } });
+}
   async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
@@ -38,5 +59,15 @@ export class UserService {
   async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
+  }
+  async findOneWithAllRelations(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['agency', 'agency.customization', 'agency.properties'],
+    });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
   }
 }

@@ -1,13 +1,14 @@
 import { ConflictException, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { Agency } from '../agency/agency.entity';
+
 import { User } from '../user/user.entity';
 import { CreateRegisterDto } from './create-register.dto';
 import * as bcrypt from 'bcrypt';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { JwtService } from '@nestjs/jwt';
 import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
+import { UserService } from '../user/user.service';
+import { AgencyService } from '../agency/agency.service';
+import { Role } from 'src/Enum/roles.enum';
 @Injectable()
 export class AuthService {
 
@@ -19,11 +20,8 @@ export class AuthService {
 
 
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Agency)
-    private readonly agencyRepository: Repository<Agency>,
-    private readonly dataSource: DataSource,
+    private readonly userService: UserService,
+    private readonly agencyService: AgencyService,
     private jwtService: JwtService
   ) {
    this.logger = new Logger(AuthService.name)
@@ -35,15 +33,12 @@ export class AuthService {
   ): Promise<{ user: User /*; agency: Agency */ }> {
     console.log(registerDto)
     this.logger.log(`Comenzando registro para email: ${registerDto.email}`);
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
     this.logger.log('Transaccion de base de datos iniciada.');
 
     try {
-      const existingUser = await this.userRepository.findOne({
-        where: { email: registerDto.email },
-      });
+      const existingUser = await this.userService.findOneByEmail(
+        registerDto.email,
+      )
 
       if (existingUser) {
         this.logger.warn(
@@ -59,34 +54,22 @@ export class AuthService {
         saltRounds,
       ) ;
       this.logger.debug('Contrasena hasheada exitosamente.');
+      const user = await this.userService.create({...registerDto,password: hashedPassword, rol: Role.User });
 
-      const user = this.userRepository.create({
-        name: registerDto.name,
-        surname: registerDto.surname,
-        phone: registerDto.phone,
-        email: registerDto.email,
-        password: hashedPassword,
-        isAdmin: false,
-      });
-
-      const savedUser = await queryRunner.manager.save(User, user);
       this.logger.log(
-        `User creado con ID: ${savedUser.id} y email: ${savedUser.email}`,
+        `User creado con ID: ${user.id} y email: ${user.email}`,
       );
-      await queryRunner.commitTransaction();
       this.logger.log(
-        `Registro exitoso para email: ${savedUser.email}. Transaccion completada.`,
+        `Registro exitoso para email: ${user.email}. Transaccion completada.`,
       );
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...userWithoutPassword } = savedUser;
+      const { password, ...userWithoutPassword } = user;
 
       return {
         user: userWithoutPassword as User,
-        // agency: savedAgency,
       };
     } catch (error) {
-      await queryRunner.rollbackTransaction();
       if (error instanceof ConflictException) throw error;
       this.logger.error(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -97,18 +80,12 @@ export class AuthService {
 
 
       throw new InternalServerErrorException('Registro fallido');
-    } finally {
-      await queryRunner.release();
-      this.logger.log('QueryRunner released.');
     }
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
     this.logger.log(`Buscando user con email: ${email}`);
-    const user = await this.userRepository.findOne({
-      where: { email },
-      relations: ['agency'],
-    });
+    const user = await this.userService.findOneByEmail(email);
     if (user) {
       this.logger.debug(`User encontrado con email: ${email}`);
     } else {
@@ -117,36 +94,27 @@ export class AuthService {
     return user;
   }
   async findOrCreateByGoogleId(payload:TokenPayload): Promise<User> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
     const googleId = payload.sub
     try {
-      const existingUser = await this.userRepository.findOne({
-        where: { googleId },
-      });
-      
+      const existingUser = await this.userService.findOneByGoogleId(googleId)
       if (existingUser) {
         existingUser.email = payload.email!
         existingUser.name = payload.name!
         existingUser.surname = payload.family_name!
-        await queryRunner.manager.save(User, existingUser);
-        await queryRunner.commitTransaction();
+
+        await this.userService.update(existingUser.id, existingUser)
         return existingUser
       }else {
-        const user = this.userRepository.create({
-          name: payload.name,
-          surname: payload.family_name,
-          email: payload.email,
+        const user = this.userService.createFromGoogle({
+          name: payload.name!,
+          surname: payload.family_name!,
+          email: payload.email!,
           googleId,
-          isAdmin: false,
-        });
-        const savedUser = await queryRunner.manager.save(User, user);
-        await queryRunner.commitTransaction();
-        return savedUser
+          rol: Role.User,
+        })
+        return user
       }
     }catch (error) {
-      await queryRunner.rollbackTransaction();
       this.logger.error(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `Registro fallido para email: ${payload.email}. Transaccion revertida. Error: ${error.message}`,
@@ -154,10 +122,7 @@ export class AuthService {
         error.stack,
       );
       throw new InternalServerErrorException('Registro fallido');
-    } finally {
-      await queryRunner.release();
-      this.logger.log('QueryRunner released.');
-    }
+    } 
     
   }
 
