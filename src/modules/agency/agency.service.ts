@@ -21,7 +21,6 @@ export class AgencyService {
     agency.description = createAgencyDto.description;
     agency.document = createAgencyDto.cuit_dni_m;
     agency.id_customization = createAgencyDto.customization.id;
-    agency.id_property = createAgencyDto.properties[0]?.id;
     agency.user = user; ;
 
     return await this.agencyRepository.save(agency);
@@ -58,14 +57,20 @@ export class AgencyService {
     return agency 
   }
   async findOneByUserId(userId: number): Promise<Agency> {
+    console.log(userId)
     const agency = await this.agencyRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['customization', 'properties', 'user'],
     });
+    console.log(agency)
     if (!agency) {
       throw new NotFoundException("Agency with ID ${id} not found");
     }
     return agency
+  }
+  async updateCustomerId(agencyId: string, customerId: string): Promise<Agency> {
+    const agency = await this.findOne(agencyId);
+    agency.stripeCustomerId = customerId;
+    return await this.agencyRepository.save(agency);
   }
   async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
     const agency = await this.findOne(id);

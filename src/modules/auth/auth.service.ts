@@ -181,10 +181,12 @@ export class AuthService {
 }
 
  private signJWT(user: User) {
+  console.log(user)
   const payload = {
     id: user.id,
     email: user.email,
     isAdmin: user.isAdmin,
+    agencyId: user.agency?.id
   };
   const token = this.jwtService.sign(payload);
   return { token };

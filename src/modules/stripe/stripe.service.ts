@@ -22,7 +22,6 @@ export class StripeService {
   const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
   success_url: 'http://localhost:3001/success',
   customer: customerId,
-  customer_email: email,
   payment_method_types: ['card'],
   line_items: [
     {
@@ -43,17 +42,18 @@ export class StripeService {
     if (!agency) {
       throw new NotFoundException(`Agencia con ID "${agencyId}" no encontrada.`)
     }
+    console.log("SEXOOOO")
     if (agency?.stripeCustomerId){
-      const existsingcustomer = await this.searchCustomer(agency.stripeCustomerId);
-      return existsingcustomer.id
+      const existingcustomer = await this.searchCustomer(agency.stripeCustomerId);
+      return existingcustomer.id
     }
     const customer = await this.searchCustomerByEmail(email);
     if (customer.data.length > 0) {
-      await this.agencyService.update(agencyId, {customerId: customer.data[0].id});
+      await this.agencyService.updateCustomerId(agencyId,customer.data[0].id);
       return customer.data[0].id;
     } else {
       const customer = await this.createCustomer(email);
-      await this.agencyService.update(agencyId, {customerId: customer.id});
+      await this.agencyService.updateCustomerId(agencyId,customer.id);
       return customer.id;
     }
   }
@@ -65,9 +65,11 @@ async createCustomer(email: string) {
 }
 async searchCustomerByEmail(email: string) {
   try {
+    console.log("TRIOOO")
     const customer = await this.stripe.customers.list({
       email: email,
     });
+    console.log("TE PUSEEE EN 4")
     return customer
   } catch  {
     throw new BadRequestException("Hubo un error al buscar el cliente");
