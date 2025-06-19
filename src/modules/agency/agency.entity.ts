@@ -11,6 +11,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Suscription } from '../stripe/stripe.collections.entity';
 
 @Entity({
   name: 'Agency',
@@ -61,10 +62,13 @@ export class Agency extends SoftDeletableEntity{
   })
   document: string;
 
-  @Column({
-          type: "varchar",
-          nullable: true,
-          default: null
-      })
-      customerId: string | null;
+@Column({ nullable: true, name: 'stripe_customer_id', type: 'varchar' }) // 🆕 Nueva columna
+  stripeCustomerId?: string | null; // Almacena el customerId de Stripe
+
+  @OneToOne(() => Suscription, (suscription) => suscription.agency, {
+    nullable: true,
+    onDelete: "SET NULL"
+  })
+  @JoinColumn({ name: 'id_suscription' })
+  suscription?: Suscription | null;
 }

@@ -1,8 +1,11 @@
-import { BadRequestException, Body, Controller, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Res, UseGuards } from '@nestjs/common';
 import { CreateRegisterDto } from './create-register.dto';
 import { AuthService } from './auth.service';
 import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
 import { Response } from 'express';
+import { AuthGuard } from 'src/guard/auth.guard';
+import {config as dotenvconfig} from "dotenv"
+dotenvconfig({path: ".env.development"});
 
 @Controller('auth')
 export class AuthController {
@@ -11,7 +14,7 @@ export class AuthController {
         this.logger = new Logger(AuthController.name); // Initialize Logger
     }
 
-  @Post("/register")
+  @Post("register")
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: CreateRegisterDto) {
     try {
@@ -34,7 +37,7 @@ export class AuthController {
 
 
 
-  @Post("/login")
+  @Post("login")
   @HttpCode(HttpStatus.OK) // Login devolvera 200 OK
   async login(@Body() createLoginDto: CreateLoginDto, @Res({passthrough: true}) res: Response) {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`); // log de intento
@@ -57,7 +60,7 @@ export class AuthController {
   }
 
 
-  @Post('/login/tokenSignin')
+  @Post('login/tokenSignin')
   async tokenSignin(@Body() tokenOfGoogle: GoogleLoginDto, @Res({passthrough: true}) res: Response) {
     const {token} = await this.authService.tokenSignin(tokenOfGoogle);
     res.cookie('token', token, {
@@ -67,5 +70,12 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
     });
     
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+   me(@Res({passthrough: true}) res: Response & {user: any}) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return res.user
   }
 }
