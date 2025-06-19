@@ -64,3 +64,5 @@ weebhook.js
 
 node_modules
 package-lock.json
+tsconfig.build.tsbuildinfo
+

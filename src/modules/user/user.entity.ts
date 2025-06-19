@@ -53,10 +53,12 @@ export class User extends SoftDeletableEntity {
 
     @Column({
         type: "varchar",
-        nullable: true
+        nullable: true,
+        default: null
     })
-    googleId: string;
+    googleId: string | null;
 
+    
 
     @OneToMany(() => Appointment, (appointment: Appointment) => appointment,{
     cascade: true,
@@ -70,6 +72,6 @@ export class User extends SoftDeletableEntity {
     nullable: true
   })
     @JoinColumn({name: 'id_agency'})
-    agency?: Agency
+    agency?: Agency | null;
 }
 
