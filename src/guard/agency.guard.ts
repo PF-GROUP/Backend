@@ -3,11 +3,11 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, UnauthorizedException } from "@nestjs/common";
 
 import { Request } from "express";
-import { User } from "../user/user.entity";
+import { User } from "../modules/user/user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Agency } from "../agency/agency.entity"; // Assuming you have an Agency entity
-import { UserService } from "../user/user.service";
+import { Agency } from "../modules/agency/agency.entity"; // Assuming you have an Agency entity
+import { UserService } from "../modules/user/user.service";
 
     @Injectable()
     export class AgencyGuard implements CanActivate {
