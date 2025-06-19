@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { DatabaseSeederService } from './database.seeder.service';
-import { TypeOfProperty } from '../modules/typeOfProperty/typeofproperty.entity';
-import { Agency } from '../modules/agency/agency.entity';
-import { Property } from '../modules/property/property.entity';
-import { User } from '../modules/user/user.entity';
-import { Images } from '../modules/images/image.entity';
+;
+import { TypeofpropertyModule } from 'src/modules/typeOfProperty/typeofproperty.module';
+import { AgencyModule } from 'src/modules/agency/agency.module';
+import { PropertyModule } from 'src/modules/property/property.module';
+import { ImagesModule } from 'src/modules/images/images.module';
+import { UserModule } from 'src/modules/user/user.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TypeOfProperty, Agency, Property, User, Images]),
+    UserModule,TypeofpropertyModule,AgencyModule,PropertyModule,ImagesModule
   ],
   providers: [DatabaseSeederService],
   exports: [DatabaseSeederService],

@@ -14,6 +14,7 @@ import { StripeModule } from './modules/stripe/stripe.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
+import { DatabaseSeederModule } from './database/database-seeder.module';
 
 
 
@@ -44,7 +45,8 @@ import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
     StripeModule,
     CustomizationModule,
     AuthModule,
-    NodeMailerModule
+    NodeMailerModule,
+    DatabaseSeederModule
   ],
   controllers: [AppController],
   providers: [AppService],

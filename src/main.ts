@@ -15,7 +15,7 @@ async function bootstrap() {
     credentials: true
   })
   app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
-  app.use(loggerGlobal)
+
   const swaggerConfig = new DocumentBuilder()
   .setTitle('Kasapp')
   .setVersion('1.0')

@@ -46,6 +46,17 @@ export class AgencyService {
     return agency;
   }
 
+  async findOneByCustomerId(customerId: string): Promise<Agency> {
+    const agency = await this.agencyRepository.findOne({
+      where: { stripeCustomerId: customerId },
+      relations: ['customization', 'properties', 'user'],
+    })
+
+    if (!agency) {
+      throw new NotFoundException("Agency with ID ${id} not found");
+    }
+    return agency 
+  }
   async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
     const agency = await this.findOne(id);
     if ( !updateAgencyDto.agentUser ) throw new NotFoundException("User not found");
