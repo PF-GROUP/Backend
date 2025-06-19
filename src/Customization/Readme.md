@@ -25,4 +25,5 @@ La funcionalidad de Customization permite a cada agencia que utiliza la platafor
 * `GET /agencies/:agencyId/customization`: Recupera la configuración de personalización de una agencia.
 * `PATCH /agencies/:agencyId/customization`: Actualiza la configuración de personalización de una agencia.
 
-...
+…
+

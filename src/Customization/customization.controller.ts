@@ -1,36 +1,31 @@
-import { IsOptional, IsString, IsHexColor} from 'class-validator';
+import {Controller, Get, Post, Body, Patch, Param} from '@nestjs/common';
+import { CustomizationService } from './customization.service';
+import { UpdateCustomizationDto } from './update.customization.dto';
+import { CreateCustomizationDTO } from 'src/Interface/Customization';
 
-export class CreateCustomizationDto {
+@Controller('agencies/:agencyId/customization')
+export class CustomizationController {
+  constructor(private readonly customizationService: CustomizationService) {}
 
-  @IsString({ message: 'logoImage debe ser una cadena de texto.' })
-  @IsOptional()
-  logoImage?: string;
+  @Post()
+  async create(
+    @Param('agencyId') agencyId: string,
+    @Body() createCustomizationDto: CreateCustomizationDTO) 
+    {
+    return this.customizationService.create(createCustomizationDto, agencyId);
+  }
 
-  @IsString({ message: 'information debe ser una cadena de texto.' })
-  @IsOptional()
-  information?: string;
+  @Get()
+  async findOneByAgencyId(
+    @Param('agencyId') agencyId: string)
+    {
+    return this.customizationService.findOneByAgencyId(agencyId);
+  }
 
-  @IsHexColor({ message: 'mainColors debe ser un color hexadecimal válido.' })
-  @IsOptional()
-  mainColors?: string;
-
-  @IsHexColor({ message: 'banner debe ser un color hexadecimal válido.' })
-  @IsOptional()
-  banner?: string;
-
-  @IsHexColor({ message: 'navbarColor debe ser un color hexadecimal válido.' })
-  @IsOptional()
-  navbarColor?: string;
-
-  @IsHexColor({ message: 'buttonColor debe ser un color hexadecimal válido.' })
-  @IsOptional()
-  buttonColor?: string;
-
-  @IsHexColor({ message: 'backgroundColor debe ser un color hexadecimal válido.' })
-  @IsOptional()
-  backgroundColor?: string;
-
-  @IsHexColor({ message: 'secondaryColor debe ser un color hexadecimal válido.' })
-  @IsOptional()
-  secondaryColor?: string;
+  @Patch()
+  async update(
+    @Param('agencyId') agencyId: string,
+    @Body() updateCustomizationDto: UpdateCustomizationDto,) {
+    return this.customizationService.updateByAgencyId(agencyId, updateCustomizationDto);
+  }
 }

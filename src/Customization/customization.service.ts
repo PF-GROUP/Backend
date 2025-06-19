@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCustomizationDTO } from 'src/Interface/Customization';
-import { UpdateCustomizationDto } from 'src/modules/customization/update-customization.dto';
+import { UpdateCustomizationDto } from './update.customization.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Customization } from './customization.entity';
 import { Repository } from 'typeorm';
@@ -16,8 +16,8 @@ export class CustomizationService {
     private agencyRepository: Repository<Agency>,
   ){}
 
-  async updateByAgencyId(Id: string, updateCustomizationDto: UpdateCustomizationDto): Promise<Customization> {
-    const customizationUpdate = await this.findOneByAgencyId(Id);
+  async updateByAgencyId(agencyId: string, updateCustomizationDto: UpdateCustomizationDto): Promise<Customization> {
+    const customizationUpdate = await this.findOneByAgencyId(agencyId);
 
     this.customizationRepository.merge(customizationUpdate, updateCustomizationDto)
 
@@ -27,18 +27,18 @@ export class CustomizationService {
 
 
 
-  async findOneByAgencyId(Id: string): Promise<Customization> {
+  async findOneByAgencyId(agencyId: string): Promise<Customization> {
     const agency = await this.agencyRepository.findOne({
-      where: {id: Id},
+      where: {id: agencyId},
       relations: ['customization'],
     });
 
     if (!agency){
-      throw new NotFoundException(`Agencia con ID "${Id}" no encontrada.`)
+      throw new NotFoundException(`Agencia con ID "${agencyId}" no encontrada.`)
     }
 
     if (!agency.customization){
-      throw new NotFoundException(`La agencia con ID "${Id}" no tiene una personalización asociada.`);
+      throw new NotFoundException(`La agencia con ID "${agencyId}" no tiene una personalización asociada.`);
     }
 
     return agency.customization;
@@ -48,15 +48,15 @@ export class CustomizationService {
 
     async create(
     createCustomizationDto: CreateCustomizationDTO,
-    Id: string,
+    agencyId: string,
   ): Promise<Customization> {
     const agency = await this.agencyRepository.findOne({
-      where: { id: Id },
+      where: { id: agencyId },
       relations: ['customization'],
     });
 
     if (!agency) {
-      throw new NotFoundException(`Agencia con ID "${Id}" no encontrada.`);
+      throw new NotFoundException(`Agencia con ID "${agencyId}" no encontrada.`);
     }
 
     if (agency.customization) {
