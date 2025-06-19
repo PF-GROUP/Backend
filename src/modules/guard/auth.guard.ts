@@ -4,12 +4,19 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { JwtPayload } from 'src/Interface/jwtpayload';
 import { Role } from 'src/Enum/roles.enum';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from "../user/user.entity";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
     const authHeader = request.headers.authorization;
@@ -25,16 +32,25 @@ export class AuthGuard implements CanActivate {
 
     try {
       const secret = process.env.JWT_SECRET;
-      const user = this.jwtService.verify<JwtPayload>(token, { secret });
+      const payload = this.jwtService.verify<JwtPayload>(token, { secret });
 
       
-      user['roles'] = user.isAdmin ? [Role.Admin] : [Role.User];
+      const user = await this.userRepository.findOne({
+         where: { id: Number(payload.id) },
+         relations: ['agency'] 
+        });
 
+        if (!user) {
+      throw new UnauthorizedException('User not found');}
       
-      user.exp = new Date(user.exp! * 1000) as unknown as number; 
-      user.iat = new Date(user.iat! * 1000) as unknown as number;
+      const updatedPayload: JwtPayload = {
+        ...payload,
+        agencyId: user.agency?.id, 
+        roles: user.isAdmin ? [Role.Admin] : [Role.User],
+      };
 
-      request.user = user; // 
+      request.user = updatedPayload;
+
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
