@@ -192,27 +192,27 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
 
       // Seeder de imagenes
       const imagesRepo = queryRunner.manager.getRepository(Images);
-      const imagesToCreate = [
+      const imagesToCreate: Partial<Images>[] = [
         {
-          image: 'https://example.com/property1_img1.jpg',
+          file: 'https://example.com/property1_img1.jpg',
           title: 'Sala de estar',
           description: 'Sala de estar amplia',
           property: properties[0],
         },
         {
-          image: 'https://example.com/property1_img2.jpg',
+          file: 'https://example.com/property1_img2.jpg',
           title: 'Apartamento',
           description: 'Cocina moderna con electrodomesticos',
           property: properties[0],
         },
         {
-          image: 'https://example.com/property2_img1.jpg',
+          file: 'https://example.com/property2_img1.jpg',
           title: 'Villa',
           description: 'Vista panoramica de la villa',
           property: properties[1],
         },
         {
-          image: 'https://example.com/property3_img1.jpg',
+          file: 'https://example.com/property3_img1.jpg',
           title: 'Jardin',
           description: 'Jardin con piscina',
           property: properties[2],
