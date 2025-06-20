@@ -9,14 +9,14 @@ import { Role } from "src/Enum/roles.enum";
 export class RolesGuard implements CanActivate {
     constructor(private readonly reflector: Reflector) {}
     canActivate(context:ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {   
-        const request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest<Request & { user: { roles: Role[] } }>();
 
         const roles = this.reflector.getAllAndOverride<Role[]>('roles', [
             context.getHandler(),
             context.getClass()
         ]);
 
-        const user = request.user;
+        const user = request.user as { roles: Role[] };
 
         const hasRole = () => roles.some((role) => user.roles.includes(role));
 

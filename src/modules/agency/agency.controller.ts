@@ -17,7 +17,14 @@ export class AgencyController {
   findAll() {
     return this.agencyService.findAll();
   }
-
+  @Get('getByUser/:id')
+ async getByUser(@Param('id') id: string) {
+    const useId = parseInt(id);
+    console.log(useId)
+    const agency = await this.agencyService.findOneByUserId(useId);
+    console.log(agency)
+    return agency
+    }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.agencyService.findOne(id);
