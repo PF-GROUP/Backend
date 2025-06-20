@@ -15,12 +15,13 @@ export class AgencyService {
 
   async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
 
-    const user = await this.userService.findOne(createAgencyDto.agentUser.id);
+    const user = await this.userService.findOne(createAgencyDto.agentUser);
     const agency = new Agency();
     agency.name = createAgencyDto.name;
     agency.description = createAgencyDto.description;
-    agency.document = createAgencyDto.cuit_dni_m;
-    agency.id_customization = createAgencyDto.customization.id;
+    agency.document = createAgencyDto.document;
+    agency.id_customization = null;
+    agency.slug = createAgencyDto.slug
     agency.user = user; ;
 
     return await this.agencyRepository.save(agency);
@@ -75,12 +76,11 @@ export class AgencyService {
   async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
     const agency = await this.findOne(id);
     if ( !updateAgencyDto.agentUser ) throw new NotFoundException("User not found");
-    const user = await this.userService.findOne(updateAgencyDto.agentUser.id);
+    const user = await this.userService.findOne(updateAgencyDto.agentUser);
     if (updateAgencyDto.name) agency.name = updateAgencyDto.name;
     if (updateAgencyDto.description) agency.description = updateAgencyDto.description;
-    if (updateAgencyDto.cuit_dni_m) agency.document = updateAgencyDto.cuit_dni_m;
-    if (updateAgencyDto.customization) agency.id_customization = updateAgencyDto.customization.id;
-    if (updateAgencyDto.properties) agency.id_property = updateAgencyDto.properties[0]?.id;
+    if (updateAgencyDto.document) agency.document = updateAgencyDto.document;
+
     if (updateAgencyDto.agentUser) {
       agency.user = user;
     }

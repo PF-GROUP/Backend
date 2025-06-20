@@ -157,6 +157,7 @@ private async createOrUpdateSubscription(suscription: Stripe.Subscription & {cur
   } else{
     await this.suscriptionRepository.insert(sucriptionData);
   }
+  await this.agencyService.update(agency.id, {onBoarding: false})
 }
 private async deleteSubscription(suscription: Stripe.Subscription) {
   await this.suscriptionRepository.softDelete({suscriptionId: suscription.id})

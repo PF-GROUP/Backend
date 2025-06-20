@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
 
 import { User } from '../user/user.entity';
-import { CreateRegisterDto } from './create-register.dto';
+import { CreateRegisterDto, createUserAndAgencyDto } from './create-register.dto';
 import * as bcrypt from 'bcrypt';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { JwtService } from '@nestjs/jwt';
@@ -28,6 +28,15 @@ export class AuthService {
    this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
   }
 
+async registerUserAndAgency(data: createUserAndAgencyDto) {
+    const {agencyName, agencyDescription, document, email, name, surname, password, phone, slug} = data
+
+    const user = await this.register({name, surname, phone, email, password})
+    const agency = await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+
+    return {success: true, agencyId: agency.id, userId: user.user.id}
+
+}
   async register(
     registerDto: CreateRegisterDto,
   ): Promise<{ user: User /*; agency: Agency */ }> {

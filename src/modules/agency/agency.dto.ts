@@ -1,6 +1,4 @@
-import { CustomizationDTO } from "src/Interface/Customization";
-import { PropertyDTO } from "src/Interface/Property";
-import { UserDTO } from "src/Interface/User";
+
 import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
 import { PartialType } from "@nestjs/mapped-types";
 
@@ -12,26 +10,29 @@ export class CreateAgencyDto {
   @MaxLength(80)
   name: string;
 
-  @IsNotEmpty()
+  
   @IsString()
-  description: string;
+  description?: string | null;
+
+
+  document: string | null;
 
   @IsNotEmpty()
-  customization: CustomizationDTO;
-
-  @IsNotEmpty()
-  properties: PropertyDTO[]; 
-
-  @IsNotEmpty()
-  agentUser: UserDTO; 
+  agentUser: number; 
 
   @IsNotEmpty()
   @IsString()
-  cuit_dni_m: string; 
-
+  slug: string
 }
 
 
 export class UpdateAgencyDto extends PartialType(CreateAgencyDto){
   customerId?: string;
+
+  customizationId?: number;
+
+  propertiesId?: number;
+
+  onBoarding?: boolean
+
 }

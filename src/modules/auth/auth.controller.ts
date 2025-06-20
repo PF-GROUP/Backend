@@ -1,5 +1,5 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Res, UseGuards } from '@nestjs/common';
-import { CreateRegisterDto } from './create-register.dto';
+import { Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Res, UseGuards } from '@nestjs/common';
+import {  createUserAndAgencyDto } from './create-register.dto';
 import { AuthService } from './auth.service';
 import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
 import { Response } from 'express';
@@ -14,25 +14,11 @@ export class AuthController {
         this.logger = new Logger(AuthController.name); // Initialize Logger
     }
 
-  @Post("register")
+  @Post("createBoth")
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() registerDto: CreateRegisterDto) {
-    try {
-      const result = await this.authService.register(registerDto);
-      return {
-        success: true,
-        message: 'Usuario y Agencia registrados exitosamente',
-        data: {
-          userId: result.user.id,
-          // agencyId: result.agency.id,
-          userEmail: result.user.email,
-          // agencyName: result.agency.name,
-        },
-      };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      throw new BadRequestException("Hubo un error al registrarse");
-    }
+  async register(@Body() registerDto: createUserAndAgencyDto) {
+      return await this.authService.registerUserAndAgency(registerDto);
+
   }
 
 
@@ -50,6 +36,7 @@ export class AuthController {
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
     });
+      
     } catch (error) {
       this.logger.error(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
