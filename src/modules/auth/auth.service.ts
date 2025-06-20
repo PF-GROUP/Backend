@@ -128,7 +128,7 @@ export class AuthService {
 
 
   
-  async login(createLoginDto: CreateLoginDto): Promise<{token: string}> {
+  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: User}> {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`);
     const user = await this.findUserByEmail(
       createLoginDto.email,
@@ -155,8 +155,10 @@ export class AuthService {
       );
       throw new UnauthorizedException('Invalid credentials');
     }
-    const token = this.signJWT(user);
-    return token;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {password ,...userWithoutPassword} = user
+    const payload = this.signJWT(user);
+    return {token: payload.token,user: userWithoutPassword};
   }
   async tokenSignin(token: GoogleLoginDto) {
    const res = await this.verify(token.token)
@@ -176,7 +178,7 @@ export class AuthService {
   const user = await this.findOrCreateByGoogleId(payload)
   const  payloadToSend = this.signJWT(user)
 
-  return payloadToSend
+  return {payloadToSend , user}
   
 }
 
