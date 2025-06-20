@@ -128,7 +128,7 @@ export class AuthService {
 
 
   
-  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: User}> {
+  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: { id: number; name: string; surname: string; email: string; isAdmin: boolean}}> {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`);
     const user = await this.findUserByEmail(
       createLoginDto.email,
@@ -155,10 +155,8 @@ export class AuthService {
       );
       throw new UnauthorizedException('Invalid credentials');
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {password ,...userWithoutPassword} = user
-    const payload = this.signJWT(user);
-    return {token: payload.token,user: userWithoutPassword};
+    const {token, user:userToSend} = this.signJWT(user);
+    return {token,user:userToSend};
   }
   async tokenSignin(token: GoogleLoginDto) {
    const res = await this.verify(token.token)
@@ -176,9 +174,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
   }
   const user = await this.findOrCreateByGoogleId(payload)
-  const  payloadToSend = this.signJWT(user)
+  const  {token: payloadToSend, user:userToSend} = this.signJWT(user)
 
-  return {payloadToSend , user}
+  return {token: payloadToSend , user: userToSend}
   
 }
 
@@ -186,12 +184,14 @@ export class AuthService {
   console.log(user)
   const payload = {
     id: user.id,
+    name: user.name,
+    surname: user.surname,
     email: user.email,
     isAdmin: user.isAdmin,
     agencyId: user.agency?.id
   };
   const token = this.jwtService.sign(payload);
-  return { token };
+  return { token , user: payload };
 }
 
 

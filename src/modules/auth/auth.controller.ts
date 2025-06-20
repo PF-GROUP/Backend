@@ -45,7 +45,7 @@ export class AuthController {
       const {token, user}= await this.authService.login(createLoginDto); //
       this.logger.log(`Login exitoso para email: ${createLoginDto.email}`); // log con exito
       res.cookie('token', token, {
-        httpOnly: false,
+        httpOnly: true,
         sameSite: 'lax',
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
@@ -63,9 +63,9 @@ export class AuthController {
 
   @Post('login/tokenSignin')
   async tokenSignin(@Body() tokenOfGoogle: GoogleLoginDto, @Res({passthrough: true}) res: Response) {
-    const {payloadToSend, user} = await this.authService.tokenSignin(tokenOfGoogle);
-    res.cookie('token', payloadToSend, {
-      httpOnly: false,
+    const {token, user} = await this.authService.tokenSignin(tokenOfGoogle);
+    res.cookie('token', token, {
+      httpOnly: true,
       sameSite: 'lax',
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
