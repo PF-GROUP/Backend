@@ -97,4 +97,18 @@ export class AgencyService {
     const agency = await this.findOne(id);
     return !!agency;
   }
+
+  async updateAgencyNameAndDescription(id: string, updateAgencyDto: { name?: string; description?: string }): Promise<Agency> {
+  const agency = await this.findOne(id);
+  if (!agency) {
+    throw new NotFoundException(`Agencia con id ${id} no encontrada`);
+  }
+  if (updateAgencyDto.name) {
+    agency.name = updateAgencyDto.name;
+  }
+  if (updateAgencyDto.description) {
+    agency.description = updateAgencyDto.description;
+  }
+  return await this.agencyRepository.save(agency);
+}
 }

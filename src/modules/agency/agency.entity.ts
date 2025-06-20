@@ -12,13 +12,14 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Suscription } from '../stripe/stripe.collections.entity';
+import { v4 as uuid } from "uuid"
 
 @Entity({
   name: 'Agency',
 })
 export class Agency extends SoftDeletableEntity{
-  @PrimaryGeneratedColumn()
-  id: string;
+  @PrimaryGeneratedColumn("uuid")
+  id: string = uuid();
 
   @Column({
     type: 'varchar',
