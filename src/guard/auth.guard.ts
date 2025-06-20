@@ -25,21 +25,21 @@ export class AuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException('Invalid token format');
     }
-
-    console.log(token)
     try {
-      
+      console.log(token)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const userInPayload = this.jwtService.verify<JwtPayload>(token.token as string)
+      const userInPayload = this.jwtService.verify<JwtPayload>(token as string)
+      console.log(userInPayload)
       const user:User = await this.userService.findOne(userInPayload.id)
       const updatedPayload: JwtPayload = {
         ...userInPayload,
         roles: user.isAdmin ? [Role.Admin] : [Role.User],
       };
-
+      console.log(updatedPayload)
       request.user = updatedPayload;
 
-    } catch {
+    } catch(error) {
+      console.log(error)
       throw new UnauthorizedException('Invalid token');
     }
 
