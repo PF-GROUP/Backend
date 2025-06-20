@@ -20,24 +20,26 @@ export class AuthGuard implements CanActivate {
     if (!request.cookies || !request.cookies.token || !request)  {
       throw new UnauthorizedException('Invalid token format');
     }
-    const token = request.cookies?.token as string
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const token = request.cookies?.token
     if (!token) {
       throw new UnauthorizedException('Invalid token format');
     }
-
-
     try {
-
-      const userInPayload = this.jwtService.verify<JwtPayload>(token)
+      console.log(token)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const userInPayload = this.jwtService.verify<JwtPayload>(token as string)
+      console.log(userInPayload)
       const user:User = await this.userService.findOne(userInPayload.id)
       const updatedPayload: JwtPayload = {
         ...userInPayload,
         roles: user.isAdmin ? [Role.Admin] : [Role.User],
       };
-
+      console.log(updatedPayload)
       request.user = updatedPayload;
 
-    } catch {
+    } catch(error) {
+      console.log(error)
       throw new UnauthorizedException('Invalid token');
     }
 

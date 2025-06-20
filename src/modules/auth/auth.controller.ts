@@ -1,10 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Res, UseGuards } from '@nestjs/common';
-import {  createUserAndAgencyDto } from './create-register.dto';
+import {  Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
 import { Response } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
 import {config as dotenvconfig} from "dotenv"
+import { createUserAndAgencyDto } from './create-register.dto';
 dotenvconfig({path: ".env.development"});
 
 @Controller('auth')
@@ -28,15 +28,15 @@ export class AuthController {
   async login(@Body() createLoginDto: CreateLoginDto, @Res({passthrough: true}) res: Response) {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`); // log de intento
     try {
-      const {token}= await this.authService.login(createLoginDto); //
+      const {token, user}= await this.authService.login(createLoginDto); //
       this.logger.log(`Login exitoso para email: ${createLoginDto.email}`); // log con exito
       res.cookie('token', token, {
-        httpOnly: false,
+        httpOnly: true,
         sameSite: 'lax',
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
     });
-      
+      return user
     } catch (error) {
       this.logger.error(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -49,20 +49,20 @@ export class AuthController {
 
   @Post('login/tokenSignin')
   async tokenSignin(@Body() tokenOfGoogle: GoogleLoginDto, @Res({passthrough: true}) res: Response) {
-    const {token} = await this.authService.tokenSignin(tokenOfGoogle);
+    const {token, user} = await this.authService.tokenSignin(tokenOfGoogle);
     res.cookie('token', token, {
-      httpOnly: false,
+      httpOnly: true,
       sameSite: 'lax',
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
     });
-    
+    return user 
   }
 
   @Get('me')
   @UseGuards(AuthGuard)
-   me(@Res({passthrough: true}) res: Response & {user: any}) {
+   me(@Req() req: Request & {user: any}) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return res.user
+    return req.user
   }
 }

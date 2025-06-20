@@ -31,7 +31,7 @@ export class UserService {
   }
   
   async findOneByEmail(email: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ where: { email }, relations: ['agency', 'agency.customization', 'agency.properties'] });
     if (!user) {
 return null   
 }
@@ -40,7 +40,9 @@ return null
     return user;
   }
 async findOneByGoogleId(googleId: string): Promise<User | null> {
-  return await this.userRepository.findOne({ where: { googleId } });
+  return await this.userRepository.findOne({ where: { googleId },
+    relations: ['agency', 'agency.customization', 'agency.properties'],
+   });
 }
   async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });

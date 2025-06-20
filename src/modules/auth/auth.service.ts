@@ -137,7 +137,7 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
 
 
   
-  async login(createLoginDto: CreateLoginDto): Promise<{token: string}> {
+  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: { id: number; name: string; surname: string; email: string; isAdmin: boolean}}> {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`);
     const user = await this.findUserByEmail(
       createLoginDto.email,
@@ -164,8 +164,8 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
       );
       throw new UnauthorizedException('Invalid credentials');
     }
-    const token = this.signJWT(user);
-    return token;
+    const {token, user:userToSend} = this.signJWT(user);
+    return {token,user:userToSend};
   }
   async tokenSignin(token: GoogleLoginDto) {
    const res = await this.verify(token.token)
@@ -183,9 +183,9 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
       throw new UnauthorizedException('Invalid token');
   }
   const user = await this.findOrCreateByGoogleId(payload)
-  const  payloadToSend = this.signJWT(user)
+  const  {token: payloadToSend, user:userToSend} = this.signJWT(user)
 
-  return payloadToSend
+  return {token: payloadToSend , user: userToSend}
   
 }
 
@@ -193,12 +193,14 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
   console.log(user)
   const payload = {
     id: user.id,
+    name: user.name,
+    surname: user.surname,
     email: user.email,
     isAdmin: user.isAdmin,
     agencyId: user.agency?.id
   };
   const token = this.jwtService.sign(payload);
-  return { token };
+  return { token , user: payload };
 }
 
 
