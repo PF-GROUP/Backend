@@ -20,15 +20,17 @@ export class AuthGuard implements CanActivate {
     if (!request.cookies || !request.cookies.token || !request)  {
       throw new UnauthorizedException('Invalid token format');
     }
-    const token = request.cookies?.token as string
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const token = request.cookies?.token
     if (!token) {
       throw new UnauthorizedException('Invalid token format');
     }
 
-
+    console.log(token)
     try {
-
-      const userInPayload = this.jwtService.verify<JwtPayload>(token)
+      
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const userInPayload = this.jwtService.verify<JwtPayload>(token.token as string)
       const user:User = await this.userService.findOne(userInPayload.id)
       const updatedPayload: JwtPayload = {
         ...userInPayload,
