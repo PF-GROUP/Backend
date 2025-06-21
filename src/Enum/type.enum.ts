@@ -1,4 +1,4 @@
 export enum Type {
-    Rent = "Rent",
-    Sell = "Sell"
+  Alquiler = 'Alquiler',
+  Venta = 'Venta',
 }

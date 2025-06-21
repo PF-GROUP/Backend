@@ -7,7 +7,7 @@ import { User } from '../modules/user/user.entity';
 import { Images } from '../modules/images/image.entity';
 import * as bcrypt from 'bcrypt';
 import { Status } from '../Enum/status.enum';
-import { Type as PropertyTypeEnum } from '../Enum/type.enum';
+import { Type } from '../Enum/type.enum';
 // import { Rol } from '../Enum/rol.enum';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   constructor(private dataSource: DataSource) {}
 
   async onApplicationBootstrap() {
-    console.log(process.env.SEEDER_ENABLED)
+    console.log(process.env.SEEDER_ENABLED);
     if (process.env.SEEDER_ENABLED === 'true') {
       await this.seed();
     }
@@ -97,10 +97,10 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const userRepo = queryRunner.manager.getRepository(User);
       const usersToCreate = [
         {
-          name: 'John',
-          surname: 'Doe',
+          name: 'Mark',
+          surname: 'Julien',
           phone: '+1234567890',
-          email: 'john.doe@example.com',
+          email: 'mark.julien@example.com',
           password: await this.hashPassword('password123'),
           rol: 0, // Asumiendo que 0 es Admin y que 1 es Agent
           agency: agencies[0], // Associate user con la agency en la creacion
@@ -115,10 +115,10 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           agency: agencies[1],
         },
         {
-          name: 'Admin',
-          surname: 'User',
+          name: 'Tom',
+          surname: 'Clancy',
           phone: '+1122334455',
-          email: 'admin@example.com',
+          email: 'tom.clancy@example.com',
           password: await this.hashPassword('admin123'),
           rol: 0, // Asumiendo que 0 es Admin
           agency: agencies[2],
@@ -140,8 +140,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const propertiesToCreate = [
         {
           name: 'Apartamento moderno downtown',
-          status: Status.Available,
-          type: PropertyTypeEnum.Rent,
+          status: Status.Disponible,
+          type: Type.Alquiler,
           address: '123 Main St',
           city: 'New York',
           price: 2500,
@@ -155,8 +155,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         },
         {
           name: 'Villa de lujo con picina',
-          status: Status.Available,
-          type: PropertyTypeEnum.Sell,
+          status: Status.Disponible,
+          type: Type.Venta,
           address: '456 Ocean View',
           city: 'Miami',
           price: 1250000,
@@ -170,8 +170,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         },
         {
           name: 'Casa familiar acogedora',
-          status: Status.Sold,
-          type: PropertyTypeEnum.Rent,
+          status: Status.Vendido,
+          type: Type.Alquiler,
           address: '789 Park Ave',
           city: 'Los Angeles',
           price: 850000,
