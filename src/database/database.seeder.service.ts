@@ -8,7 +8,7 @@ import { Images } from '../modules/images/image.entity';
 import * as bcrypt from 'bcrypt';
 import { Status } from '../Enum/status.enum';
 import { Type } from '../Enum/type.enum';
-// import { Rol } from '../Enum/rol.enum';
+import { PropertyTypeName } from '../modules/typeOfProperty/property-type.enum';
 
 @Injectable()
 export class DatabaseSeederService implements OnApplicationBootstrap {
@@ -26,6 +26,30 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
     return bcrypt.hash(password, saltRounds);
   }
 
+  async getPropertyType(queryRunner: any, type: string) {
+    const typeRepo = queryRunner.manager.getRepository(TypeOfProperty);
+    return await typeRepo.findOne({ where: { type } });
+  }
+
+  private async seedPropertyTypes(queryRunner: any) {
+    const propertyTypeRepository =
+      queryRunner.manager.getRepository(TypeOfProperty);
+
+    // Get all enum values
+    const propertyTypes = Object.values(PropertyTypeName);
+
+    // Crear TypeOfProperty entities para cada valor de enum
+    const propertyTypeEntities = propertyTypes.map((type) => {
+      const entity = new TypeOfProperty();
+      entity.type = type;
+      return entity;
+    });
+
+    // Guardar todos los tipos de propiedad en una sola transaccion
+    await propertyTypeRepository.save(propertyTypeEntities);
+    console.log(`Seeded ${propertyTypeEntities.length} property types`);
+  }
+
   async seed() {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -34,17 +58,16 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
     try {
       console.log('Starting database seeding...');
 
+      // Clear existing data
       await queryRunner.query(
         'TRUNCATE TABLE "Images" RESTART IDENTITY CASCADE;',
       );
       await queryRunner.query(
         'TRUNCATE TABLE "Property" RESTART IDENTITY CASCADE;',
       );
-
       await queryRunner.query(
         'TRUNCATE TABLE "Appointment" RESTART IDENTITY CASCADE;',
       );
-
       await queryRunner.query(
         'TRUNCATE TABLE "User" RESTART IDENTITY CASCADE;',
       );
@@ -57,16 +80,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
 
       console.log('Existing data cleared.');
 
-      // Seeder inserta los tipos de propiedad
-      const typeRepo = queryRunner.manager.getRepository(TypeOfProperty);
-      const typesToCreate = [
-        { type: 'Apartment' },
-        { type: 'House' },
-        { type: 'Villa' },
-      ];
-      const createdTypes = typesToCreate.map((data) => typeRepo.create(data));
-      const types = await typeRepo.save(createdTypes);
-      console.log(`Seeded ${types.length} TypeOfProperty records.`);
+      // Seeder de tipos de propiedad
+      await this.seedPropertyTypes(queryRunner);
 
       // Seeder de agencias
       const agencyRepo = queryRunner.manager.getRepository(Agency);
@@ -78,7 +93,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         },
         {
           name: 'Dream Homes',
-          description: 'La casa de tus suenos.',
+          description: 'La casa de tus sueños.',
           document: '0987654321',
         },
         {
@@ -93,7 +108,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const agencies = await agencyRepo.save(createdAgencies);
       console.log(`Seeded ${agencies.length} Agency records.`);
 
-      // Seeder de usuarios con contrasenas hasheadas
+      // Seeder de usuarios con contraseñas hasheadas
       const userRepo = queryRunner.manager.getRepository(User);
       const usersToCreate = [
         {
@@ -148,13 +163,16 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           m2: 85,
           bathrooms: 1,
           description:
-            'Hermoso apartamento moderno en el corazon de la ciudad con excelentes vistas',
+            'Hermoso apartamento moderno en el corazón de la ciudad con excelentes vistas',
           rooms: 2,
-          type_of_property: types[0],
+          type_of_property: await this.getPropertyType(
+            queryRunner,
+            PropertyTypeName.DEPARTAMENTO,
+          ),
           agency: agencies[0],
         },
         {
-          name: 'Villa de lujo con picina',
+          name: 'Chalet de lujo con piscina',
           status: Status.Disponible,
           type: Type.Venta,
           address: '456 Ocean View',
@@ -163,9 +181,12 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           m2: 320,
           bathrooms: 4,
           description:
-            'Hermosa villa de lujo con piscina y vistas panoramicas.',
+            'Hermoso chalet de lujo con piscina y vistas panorámicas.',
           rooms: 5,
-          type_of_property: types[2],
+          type_of_property: await this.getPropertyType(
+            queryRunner,
+            PropertyTypeName.CHALET,
+          ),
           agency: agencies[1],
         },
         {
@@ -178,9 +199,12 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           m2: 180,
           bathrooms: 2,
           description:
-            'Encantadora casa familiar con jardin en un barrio tranquilo',
+            'Encantadora casa familiar con jardín en un barrio tranquilo',
           rooms: 3,
-          type_of_property: types[1],
+          type_of_property: await this.getPropertyType(
+            queryRunner,
+            PropertyTypeName.CASA,
+          ),
           agency: agencies[2],
         },
       ];
@@ -191,7 +215,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const properties = await propertyRepo.save(createdProperties);
       console.log(`Seeded ${properties.length} Property records.`);
 
-      // Seeder de imagenes
+      // Seeder de imágenes
       const imagesRepo = queryRunner.manager.getRepository(Images);
       const imagesToCreate: Partial<Images>[] = [
         {
@@ -203,19 +227,19 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         {
           file: 'https://example.com/property1_img2.jpg',
           title: 'Apartamento',
-          description: 'Cocina moderna con electrodomesticos',
+          description: 'Cocina moderna con electrodomésticos',
           property: properties[0],
         },
         {
           file: 'https://example.com/property2_img1.jpg',
-          title: 'Villa',
-          description: 'Vista panoramica de la villa',
+          title: 'Chalet',
+          description: 'Vista panorámica del chalet',
           property: properties[1],
         },
         {
           file: 'https://example.com/property3_img1.jpg',
-          title: 'Jardin',
-          description: 'Jardin con piscina',
+          title: 'Jardín',
+          description: 'Jardín con piscina',
           property: properties[2],
         },
       ];
