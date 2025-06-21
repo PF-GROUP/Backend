@@ -62,7 +62,6 @@ export class ImagesController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard, RolesGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar una imagen por ID (Agente o Admin dueño)' })
   @ApiResponse({ status: 204, description: 'Imagen eliminada exitosamente.' })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
