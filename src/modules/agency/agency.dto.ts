@@ -37,6 +37,9 @@ export class UpdateAgencyDto extends PartialType(CreateAgencyDto){
 
 
   name?: string | undefined;
-  
+
   description?: string | undefined;
+  customizationId?: number;
+  propertiesId?: number;
+  onBoarding?: boolean;
 }
