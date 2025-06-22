@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put} from '@nestjs/common';
 import { AgencyService } from './agency.service';
-import { CreateAgencyDto } from './agency.dto';
+import { CreateAgencyDto, UpdateAgencyDto } from './agency.dto';
 
 
 @Controller('agency')
@@ -39,4 +39,9 @@ export class AgencyController {
   remove(@Param('id') id: string) {
     return this.agencyService.remove(id);
   }
+
+  @Put(':id')
+updateAgency(@Param('id') id: string, @Body() updateAgencyDto: UpdateAgencyDto) {
+  return this.agencyService.updateAgencyNameAndDescription(id, updateAgencyDto);
+}
 }

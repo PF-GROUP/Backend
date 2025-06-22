@@ -28,11 +28,10 @@ export class CreateAgencyDto {
 
 export class UpdateAgencyDto extends PartialType(CreateAgencyDto){
   customerId?: string;
-
+  name?: string | undefined;
+  description?: string | undefined;
   customizationId?: number;
-
   propertiesId?: number;
-
-  onBoarding?: boolean
+  onBoarding?: boolean;
 
 }
