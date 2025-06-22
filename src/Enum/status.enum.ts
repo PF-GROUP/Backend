@@ -1,4 +1,4 @@
 export enum Status {
-    Available = "Available",
-    Sold = "Sold"
+  Disponible = 'Disponible',
+  Vendido = 'Vendido',
 }
