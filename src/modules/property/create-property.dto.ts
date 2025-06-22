@@ -4,11 +4,13 @@ import {
   IsNumber,
   IsEnum,
   IsOptional,
+  IsUUID,
+  IsArray,
+  ArrayMinSize,
 } from 'class-validator';
-
-import { Agency } from '../agency/agency.entity';
 import { Status } from 'src/Enum/status.enum';
 import { Type } from 'src/Enum/type.enum';
+import { PropertyTypeName } from '../typeOfProperty/property-type.enum';
 
 export class CreatePropertyDto {
   @IsNotEmpty()
@@ -52,12 +54,16 @@ export class CreatePropertyDto {
   rooms: number;
 
   @IsOptional()
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1)
   id_images?: string[];
 
   @IsNotEmpty()
+  @IsString()
   type_of_property: string;
 
   @IsNotEmpty()
-  agency: Agency;
+  @IsNumber()
+  agency: number;
 }
