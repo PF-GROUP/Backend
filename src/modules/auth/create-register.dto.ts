@@ -1,3 +1,4 @@
+
 import {
   IsEmail,
   IsNotEmpty,
@@ -38,4 +39,15 @@ export class CreateRegisterDto {
   // @IsOptional()
   // @IsString()
   // document?: string;
+}
+
+export class createUserAndAgencyDto extends CreateRegisterDto{
+
+  agencyName: string;
+
+  agencyDescription: string | null;
+
+  document: string | null;
+
+  slug: string
 }

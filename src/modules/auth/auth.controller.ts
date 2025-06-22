@@ -1,10 +1,10 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { CreateRegisterDto } from './create-register.dto';
+import {  Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
 import { Response } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
 import {config as dotenvconfig} from "dotenv"
+import { createUserAndAgencyDto } from './create-register.dto';
 dotenvconfig({path: ".env.development"});
 
 @Controller('auth')
@@ -14,25 +14,11 @@ export class AuthController {
         this.logger = new Logger(AuthController.name); // Initialize Logger
     }
 
-  @Post("register")
+  @Post("createBoth")
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() registerDto: CreateRegisterDto) {
-    try {
-      const result = await this.authService.register(registerDto);
-      return {
-        success: true,
-        message: 'Usuario y Agencia registrados exitosamente',
-        data: {
-          userId: result.user.id,
-          // agencyId: result.agency.id,
-          userEmail: result.user.email,
-          // agencyName: result.agency.name,
-        },
-      };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      throw new BadRequestException("Hubo un error al registrarse");
-    }
+  async register(@Body() registerDto: createUserAndAgencyDto) {
+      return await this.authService.registerUserAndAgency(registerDto);
+
   }
 
 
