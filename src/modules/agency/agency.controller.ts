@@ -31,7 +31,7 @@ export class AgencyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAgencyDto: CreateAgencyDto) {
+  update(@Param('id') id: string, @Body() updateAgencyDto: UpdateAgencyDto) {
     return this.agencyService.update(id, updateAgencyDto);
   }
 
