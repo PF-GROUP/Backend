@@ -24,6 +24,7 @@ import {
 
 @ApiTags('agency')
 @ApiBearerAuth()
+
 @Controller('agency')
 export class AgencyController {
   constructor(private readonly agencyService: AgencyService) {}
@@ -50,6 +51,7 @@ export class AgencyController {
   }
 
   @Get('getByUser/:id')
+
   @UseGuards(AuthGuard, AgencyGuard)
   @ApiOperation({ summary: 'Obtener agency por ID del usuario' })
   @ApiResponse({
@@ -57,6 +59,7 @@ export class AgencyController {
     description: 'Es la agency para el usuario especificado.',
   })
   @ApiResponse({ status: 404, description: 'Usuario o agency no encontrado.' })
+
   async getByUser(@Param('id') id: string) {
     const useId = parseInt(id);
     console.log(useId);
@@ -74,6 +77,7 @@ export class AgencyController {
     return this.agencyService.findOne(id);
   }
 
+
   @Patch(':id')
   @UseGuards(AuthGuard, AgencyGuard)
   @ApiOperation({ summary: 'Actualizar agency' })
@@ -87,6 +91,7 @@ export class AgencyController {
     return this.agencyService.update(id, updateAgencyDto);
   }
 
+
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.User)
@@ -99,5 +104,16 @@ export class AgencyController {
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
   remove(@Param('id') id: string) {
     return this.agencyService.remove(id);
+  }
+
+  @Patch(':id')
+  updateAgency(
+    @Param('id') id: string,
+    @Body() updateAgencyDto: UpdateAgencyDto,
+  ) {
+    return this.agencyService.updateAgencyNameAndDescription(
+      id,
+      updateAgencyDto,
+    );
   }
 }

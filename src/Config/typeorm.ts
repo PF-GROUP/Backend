@@ -3,7 +3,7 @@ import {config as dotenvconfig} from "dotenv"
 
 dotenvconfig({path: ".env.development"});
 
-
+ 
 const config = {
   type: 'postgres',
   database: `${process.env.DB_NAME}`,
@@ -16,7 +16,7 @@ const config = {
   autoLoadEntities: true,
   synchronize: true, 
   logging: true, 
-// dropSchema: true,
+dropSchema: true, 
   
 };
 
