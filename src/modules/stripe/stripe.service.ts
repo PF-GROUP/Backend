@@ -114,6 +114,15 @@ async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buff
       case 'customer.subscription.deleted':
       await this.handleSuscriptionEvent(event.data.object, event.type);
       break;
+      case 'payment_intent.succeeded':
+        await this.handleChargeSucceeded(event.data.object);
+        break;
+      case 'payment_intent.payment_failed':
+        await this.handleChargeFailed(event.data.object);  
+        break;
+      case 'payment_intent.canceled':
+        await this.handleChargeCanceled(event.data.object);
+        break;
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
