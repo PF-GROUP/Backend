@@ -15,6 +15,7 @@ import { AuthModule } from './modules/auth/auth.module';
 
 import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
 import { DatabaseSeederModule } from './database/database-seeder.module';
+import { CloudinaryModule } from './shared/cloudinary.module';
 
 
 
@@ -46,7 +47,8 @@ import { DatabaseSeederModule } from './database/database-seeder.module';
     CustomizationModule,
     AuthModule,
     NodeMailerModule,
-    DatabaseSeederModule
+    DatabaseSeederModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

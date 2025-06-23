@@ -7,8 +7,8 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn
     name: "User"
 })
 export class User extends SoftDeletableEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column({
         type: "varchar",
@@ -58,7 +58,12 @@ export class User extends SoftDeletableEntity {
     })
     googleId: string | null;
 
-    
+    @Column({
+        type: "varchar",
+        nullable: true,
+        default: null,
+    })
+    profilePictureUrl: string | null;
 
     @OneToMany(() => Appointment, (appointment: Appointment) => appointment,{
     cascade: true,
