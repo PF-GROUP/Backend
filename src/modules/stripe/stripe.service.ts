@@ -20,7 +20,7 @@ export class StripeService {
   const customerId = await this.searchOrCreateCustomer({email, agencyId});
     
   const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
-  success_url: 'http://localhost:3001/success',
+  success_url: 'http://kasapp.serveminecraft.net:3001/DashboardAgente',
   customer: customerId,
   payment_method_types: ['card'],
   line_items: [

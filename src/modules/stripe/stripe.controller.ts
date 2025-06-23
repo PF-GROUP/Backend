@@ -7,6 +7,7 @@ export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 
   @Post('checkout/:id')
+
   crearCheckout(@Body() body: { email: string }, @Param('id') id:string) {
     return this.stripeService.crearSesionPago(body.email, id);
   }
