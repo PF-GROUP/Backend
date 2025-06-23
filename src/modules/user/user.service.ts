@@ -5,6 +5,8 @@ import { User } from './user.entity';
 import { createGoogleUserDto, CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { CloudinaryService } from 'src/shared/cloudinary.service';
+import * as bcrypt from 'bcrypt';
+import { Role } from 'src/Enum/roles.enum';
 
 @Injectable()
 export class UserService {
@@ -15,8 +17,22 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.userRepository.create(createUserDto);
-    return await this.userRepository.save(user);
+    const {email, password, ...restOfUserData} = createUserDto;
+    
+    const existngUser = await this.userRepository.findOne({where:{email} });
+    if (existngUser){
+      throw new BadRequestException('El email ya está registrado. Por favor, utiliza otro.');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = this.userRepository.create({
+      ...restOfUserData,
+      email,
+      password: hashedPassword,
+    });
+
+    return await this.userRepository.save(newUser);
   }
 
   async createFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
