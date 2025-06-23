@@ -1,5 +1,5 @@
 import { UserRole } from "src/Interface/enum";
-import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from "class-validator";
 import { OmitType } from "@nestjs/mapped-types";
 
 export class CreateUserDto {
@@ -38,6 +38,11 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   rol: UserRole;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl({ require_protocol: true })
+  profilePictureUrl?: string | null;
 }
 
 export class createGoogleUserDto extends OmitType(CreateUserDto, ['password','phone']) {

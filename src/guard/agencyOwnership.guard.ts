@@ -3,12 +3,10 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Role } from '../Enum/roles.enum';
 import { AgencyService } from 'src/modules/agency/agency.service';
-import { User } from 'src/modules/user/user.entity';
 
 @Injectable()
 export class AgencyOwnershipGuard implements CanActivate {
   constructor(
-    private readonly reflector: Reflector,
     private readonly agencyService: AgencyService,
   ) {}
 
