@@ -1,15 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { createGoogleUserDto, CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
+import { CloudinaryService } from 'src/shared/cloudinary.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -71,10 +73,37 @@ async findOneByGoogleId(googleId: string): Promise<User | null> {
     return user;
   }
 
-  async updateProfilePicture(userId: string, url: string | null): Promise<User> {
-    const user = await this.findOne(userId);
-    user.profilePictureUrl = url;
-    return await this.userRepository.save(user);
+  async updateProfilePicture(userId: string, file: Express.Multer.File): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('No se ha proporcionado ningún archivo para la foto de perfil.');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID "${userId}" no encontrado.`);
+    }
+
+    try {
+
+      if (user.profilePictureUrl) {
+        const publicId = this.cloudinaryService.getPublicIdFromUrl(user.profilePictureUrl);
+        if (publicId) {
+          await this.cloudinaryService.deleteFile(publicId);
+        }
+      }
+
+
+      const newImageUrl = await this.cloudinaryService.uploadFile(file);
+
+
+      user.profilePictureUrl = newImageUrl;
+      await this.userRepository.save(user);
+
+      return newImageUrl; 
+    } catch (error) {
+      console.error('Error en UserService al actualizar la foto de perfil:', error);
+      throw new InternalServerErrorException('No se pudo actualizar la foto de perfil debido a un error interno.');
+    }
   }
 
 }

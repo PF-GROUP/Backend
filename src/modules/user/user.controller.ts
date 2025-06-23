@@ -1,13 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, ParseUUIDPipe, UseInterceptors, UploadedFile, Req, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { RolesGuard } from 'src/guard/roles.guard';
 import { Role } from 'src/Enum/roles.enum';
 import { Roles } from 'src/decorators/role.decorator';
 import { IsOwnerOrAdminGuard } from 'src/guard/isOwnerOrAdmin.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 ApiTags('User')
 ApiBearerAuth()
@@ -45,6 +46,49 @@ export class UserController {
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.userService.findOne(id);
   }
+
+  @Post(':id/profile-picture') //se usa POST para actualizar o subir una imagen por que es una decisión pragmática y funcionalmente correcta que no causa problemas y es común en el desarrollo web.
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard, IsOwnerOrAdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Subir o actualizar la foto de perfil de un usuario',
+    description: 'Permite al usuario autenticado (o a un administrador) subir o cambiar su foto de perfil. La imagen se sube a Cloudinary y su URL se guarda en el perfil del usuario.'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'El archivo de imagen a subir (JPEG, PNG, etc.)'
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Foto de perfil actualizada exitosamente.' }) 
+  @ApiResponse({ status: 400, description: 'Solicitud inválida.' }) 
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Prohibido (no es el usuario o no es admin).' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
+  async uploadProfilePicture(
+    @Param('id', ParseUUIDPipe) userId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No se ha proporcionado ningún archivo para la foto de perfil.');
+    }
+    const newImageUrl = await this.userService.updateProfilePicture(userId, file);
+    return {
+      message: 'Foto de perfil actualizada exitosamente',
+      profilePictureUrl: newImageUrl,
+    };
+  }
+
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK) 
