@@ -21,16 +21,13 @@ export class AgencyService {
       );
     }
 
-
-    const user = await this.userService.findOne(createAgencyDto.agentUser);
     const agency = new Agency();
     agency.name = createAgencyDto.name;
-    agency.description = createAgencyDto.description;
-    agency.document = createAgencyDto.document;
+    agency.description = createAgencyDto.description as string | null;
+    agency.document = createAgencyDto.document as string | null;
     agency.id_customization = null;
-    agency.slug = createAgencyDto.slug
-    agency.user = user; ;
-
+    agency.slug = createAgencyDto.slug;
+    agency.user = user;
 
     return this.agencyRepository.save(agency);
   }
@@ -65,7 +62,7 @@ export class AgencyService {
     }
     return agency;
   }
-  async findOneByUserId(userId: number): Promise<Agency> {
+  async findOneByUserId(userId: string): Promise<Agency> {
     const agency = await this.agencyRepository.findOne({
       where: { user: { id: userId } },
       relations: ['customization', 'properties', 'user'],
@@ -77,13 +74,6 @@ export class AgencyService {
   }
   async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
     const agency = await this.findOne(id);
-
-    if ( !updateAgencyDto.agentUser ) throw new NotFoundException("User not found");
-    const user = await this.userService.findOne(updateAgencyDto.agentUser);
-    if (updateAgencyDto.name) agency.name = updateAgencyDto.name;
-    if (updateAgencyDto.description) agency.description = updateAgencyDto.description;
-    if (updateAgencyDto.document) agency.document = updateAgencyDto.document;
-
 
     if (updateAgencyDto.agentUser) {
       const user = await this.userService.findOne(updateAgencyDto.agentUser);
@@ -132,6 +122,15 @@ export class AgencyService {
   if (updateAgencyDto.description) {
     agency.description = updateAgencyDto.description;
   }
+  return await this.agencyRepository.save(agency);
+}
+
+async updateCustomerId(agencyId: string, customerId: string): Promise<Agency> {
+  const agency = await this.findOne(agencyId);
+  if (!agency) {
+    throw new NotFoundException(`Agencia con id ${agencyId} no encontrada`);
+  }
+  agency.stripeCustomerId = customerId;
   return await this.agencyRepository.save(agency);
 }
 }

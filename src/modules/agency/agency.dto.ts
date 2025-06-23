@@ -1,15 +1,12 @@
-
 import {
   IsNotEmpty,
   IsString,
   MinLength,
   MaxLength,
   IsArray,
+  IsOptional,
 } from 'class-validator';
-
-import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
 import { PartialType } from "@nestjs/mapped-types";
-
 
 export class CreateAgencyDto {
   @IsNotEmpty()
@@ -18,36 +15,32 @@ export class CreateAgencyDto {
   @MaxLength(80)
   name: string;
 
-  
+  @IsOptional()
   @IsString()
-  description?: string | null;
+  description: string | null;
 
+  @IsOptional()
+  @IsString()
+  customization?: string;
 
-  @IsNotEmpty()
-  customization: string;
-
-  @IsNotEmpty()
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  propertyIds: string[];
+  propertyIds?: string[];
 
   @IsNotEmpty()
-  agentUser: number;
+  agentUser: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  cuit_dni_m: string;
+  cuit_dni_m?: string;
 
-
+  @IsOptional()
   document: string | null;
 
   @IsNotEmpty()
-  agentUser: number; 
-
-  @IsNotEmpty()
   @IsString()
-  slug: string
-
+  slug: string;
 }
 
 export class UpdateAgencyDto extends PartialType(CreateAgencyDto) {
@@ -57,5 +50,4 @@ export class UpdateAgencyDto extends PartialType(CreateAgencyDto) {
   customizationId?: number;
   propertiesId?: number;
   onBoarding?: boolean;
-
 }

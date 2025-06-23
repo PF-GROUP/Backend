@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AgencyService } from './agency.service';
-import { CreateAgencyDto } from './agency.dto';
+import { CreateAgencyDto, UpdateAgencyDto } from './agency.dto';
 import { AuthGuard } from '../../guard/auth.guard';
 import { AgencyGuard } from '../../guard/agency.guard';
 import { RolesGuard } from '../../guard/roles.guard';
@@ -61,9 +61,7 @@ export class AgencyController {
   @ApiResponse({ status: 404, description: 'Usuario o agency no encontrado.' })
 
   async getByUser(@Param('id') id: string) {
-    const useId = parseInt(id);
-    console.log(useId);
-    const agency = await this.agencyService.findOneByUserId(useId);
+    const agency = await this.agencyService.findOneByUserId(id);
     console.log(agency);
     return agency;
   }
@@ -87,7 +85,7 @@ export class AgencyController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
-  update(@Param('id') id: string, @Body() updateAgencyDto: CreateAgencyDto) {
+  update(@Param('id') id: string, @Body() updateAgencyDto: UpdateAgencyDto) {
     return this.agencyService.update(id, updateAgencyDto);
   }
 

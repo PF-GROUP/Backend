@@ -32,7 +32,7 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
     const {agencyName, agencyDescription, document, email, name, surname, password, phone, slug} = data
 
     const user = await this.register({name, surname, phone, email, password})
-    const agency = await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+    const agency = await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser: user.user.id, slug})
 
     return {success: true, agencyId: agency.id, userId: user.user.id}
 
@@ -44,7 +44,7 @@ async registerUserAndAgencyWithGoogle(registerDto: createUserAndAgencyWithGoogle
       throw new ConflictException('User already exists')
     }
     const user = await this.registerGoogle({name, surname, phone, email, password, token})
-    await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+    await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser: user.user.id, slug})
     const reNewUser = await this.userService.findOneByEmail(email)
     const {token: payloadToSend, user:userToSend} = this.signJWT(reNewUser!)
 
@@ -161,7 +161,7 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
 
 
   
-  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: { id: number; name: string; surname: string; email: string; isAdmin: boolean}}> {
+  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: { id: string; name: string; surname: string; email: string; isAdmin: boolean}}> {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`);
     const user = await this.findUserByEmail(
       createLoginDto.email,
