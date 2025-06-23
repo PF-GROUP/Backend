@@ -42,7 +42,7 @@ return null
 async findOneByGoogleId(googleId: string): Promise<User | null> {
   return await this.userRepository.findOne({ where: { googleId } });
 }
-  async findOne(id: number): Promise<User> {
+  async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
@@ -50,17 +50,17 @@ async findOneByGoogleId(googleId: string): Promise<User | null> {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
     Object.assign(user, updateUserDto);
     return await this.userRepository.save(user);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
   }
-  async findOneWithAllRelations(id: number) {
+  async findOneWithAllRelations(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['agency', 'agency.customization', 'agency.properties'],
@@ -70,4 +70,11 @@ async findOneByGoogleId(googleId: string): Promise<User | null> {
     }
     return user;
   }
+
+  async updateProfilePicture(userId: string, url: string | null): Promise<User> {
+    const user = await this.findOne(userId);
+    user.profilePictureUrl = url;
+    return await this.userRepository.save(user);
+  }
+
 }
