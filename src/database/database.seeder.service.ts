@@ -31,6 +31,16 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
     return await typeRepo.findOne({ where: { type } });
   }
 
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^\w_]+/g, '')
+      .replace(/_+/g, '_')
+      .replace(/^_+/, '')
+      .replace(/_+$/, '');
+  }
+
   private async seedPropertyTypes(queryRunner: any) {
     const propertyTypeRepository =
       queryRunner.manager.getRepository(TypeOfProperty);
@@ -90,16 +100,19 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           name: 'Luxury Estates',
           description: 'Premier properties y servicios real estate.',
           document: '1234567890',
+          slug: this.generateSlug('Luxury Estates'),
         },
         {
           name: 'Dream Homes',
           description: 'La casa de tus sueños.',
           document: '0987654321',
+          slug: this.generateSlug('Dream Homes'),
         },
         {
           name: 'Prime Properties',
           description: 'Exelencia en real estate.',
           document: '1122334455',
+          slug: this.generateSlug('Prime Properties'),
         },
       ];
       const createdAgencies = agenciesToCreate.map((data) =>
@@ -108,7 +121,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const agencies = await agencyRepo.save(createdAgencies);
       console.log(`Seeded ${agencies.length} Agency records.`);
 
-      // Seeder de usuarios con contraseñas hasheadas
+      // Seeder de usuarios con contrasenas hasheadas
       const userRepo = queryRunner.manager.getRepository(User);
       const usersToCreate = [
         {
@@ -148,111 +161,99 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       agencies[1].user = users[1];
       agencies[2].user = users[2];
       await agencyRepo.save(agencies);
-      console.log('Agencias actualizadas con relaciones de usuario.');
 
-      // Seeder de las propiedades
+      // Get property types for seeding properties
+      const propertyType1 = await this.getPropertyType(
+        queryRunner,
+        PropertyTypeName.CASA,
+      );
+      const propertyType2 = await this.getPropertyType(
+        queryRunner,
+        PropertyTypeName.DEPARTAMENTO,
+      );
+      const propertyType3 = await this.getPropertyType(
+        queryRunner,
+        PropertyTypeName.OFICINA,
+      );
+
+      // Seeder de propiedades
       const propertyRepo = queryRunner.manager.getRepository(Property);
       const propertiesToCreate = [
         {
-          name: 'Apartamento moderno downtown',
+          name: 'Modern Apartment in City Center',
+          description: 'Beautiful modern apartment with great views.',
+          price: 250000,
+          address: '123 Main St, New York, NY',
+          city: 'New York',
+          rooms: 2,
+          bathrooms: 2,
+          m2: 120,
           status: Status.Disponible,
           type: Type.Alquiler,
-          address: '123 Main St',
-          city: 'New York',
-          price: 2500,
-          m2: 85,
-          bathrooms: 1,
-          description:
-            'Hermoso apartamento moderno en el corazón de la ciudad con excelentes vistas',
-          rooms: 2,
-          type_of_property: await this.getPropertyType(
-            queryRunner,
-            PropertyTypeName.DEPARTAMENTO,
-          ),
           agency: agencies[0],
+          typeOfProperty: propertyType2,
         },
         {
-          name: 'Chalet de lujo con piscina',
+          name: 'Luxury Villa with Pool',
+          description: 'Amazing villa with private pool and garden.',
+          price: 850000,
+          address: '456 Ocean Dr, Miami, FL',
+          city: 'Miami',
+          rooms: 4,
+          bathrooms: 3,
+          m2: 320,
           status: Status.Disponible,
           type: Type.Venta,
-          address: '456 Ocean View',
-          city: 'Miami',
-          price: 1250000,
-          m2: 320,
-          bathrooms: 4,
-          description:
-            'Hermoso chalet de lujo con piscina y vistas panorámicas.',
-          rooms: 5,
-          type_of_property: await this.getPropertyType(
-            queryRunner,
-            PropertyTypeName.CHALET,
-          ),
           agency: agencies[1],
+          typeOfProperty: propertyType1,
         },
         {
-          name: 'Casa familiar acogedora',
-          status: Status.Vendido,
-          type: Type.Alquiler,
-          address: '789 Park Ave',
-          city: 'Los Angeles',
-          price: 850000,
-          m2: 180,
-          bathrooms: 2,
-          description:
-            'Encantadora casa familiar con jardín en un barrio tranquilo',
+          name: 'Downtown Office Space',
+          description: 'Prime office space in the heart of the city.',
+          price: 500000,
+          address: '789 Business Ave, Chicago, IL',
+          city: 'Chicago',
           rooms: 3,
-          type_of_property: await this.getPropertyType(
-            queryRunner,
-            PropertyTypeName.CASA,
-          ),
+          bathrooms: 2,
+          m2: 500,
+          status: Status.Disponible,
+          type: Type.Alquiler,
           agency: agencies[2],
+          typeOfProperty: propertyType3,
         },
       ];
-
       const createdProperties = propertiesToCreate.map((data) =>
         propertyRepo.create(data),
       );
       const properties = await propertyRepo.save(createdProperties);
       console.log(`Seeded ${properties.length} Property records.`);
 
-      // Seeder de imágenes
-      const imagesRepo = queryRunner.manager.getRepository(Images);
-      const imagesToCreate: Partial<Images>[] = [
+      // Seeder de imagenes
+      const imageRepo = queryRunner.manager.getRepository(Images);
+      const imagesToCreate = [
         {
-          file: 'https://example.com/property1_img1.jpg',
-          title: 'Sala de estar',
-          description: 'Sala de estar amplia',
+          file: 'https://example.com/image1.jpg',
           property: properties[0],
         },
         {
-          file: 'https://example.com/property1_img2.jpg',
-          title: 'Apartamento',
-          description: 'Cocina moderna con electrodomésticos',
-          property: properties[0],
-        },
-        {
-          file: 'https://example.com/property2_img1.jpg',
-          title: 'Chalet',
-          description: 'Vista panorámica del chalet',
+          file: 'https://example.com/image2.jpg',
           property: properties[1],
         },
         {
-          file: 'https://example.com/property3_img1.jpg',
-          title: 'Jardín',
-          description: 'Jardín con piscina',
+          file: 'https://example.com/image3.jpg',
           property: properties[2],
         },
       ];
-
       const createdImages = imagesToCreate.map((data) =>
-        imagesRepo.create(data),
+        imageRepo.create(data),
       );
-      const images = await imagesRepo.save(createdImages);
-      console.log(`Seeded ${images.length} Image logs.`);
+      await imageRepo.save(createdImages);
+      console.log(`Seeded ${createdImages.length} Image records.`);
 
       await queryRunner.commitTransaction();
-      console.log('✅ Base de datos seeded exitosamente!');
+      console.log('✅ Database seeded successfully!');
     } catch (error) {
+      console.error('Error seeding database:', error);
       await queryRunner.rollbackTransaction();
       console.error('❌ Error al seedear la base de datos:', error);
       throw error;
