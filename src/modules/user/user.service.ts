@@ -16,7 +16,6 @@ export class UserService {
     const user = this.userRepository.create(createUserDto);
     return await this.userRepository.save(user);
   }
-
   async createFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
     const user = this.userRepository.create(googleUser);
     return await this.userRepository.save(user);

@@ -1,10 +1,10 @@
-import {  Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {  Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Logger, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
 import { Response } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
 import {config as dotenvconfig} from "dotenv"
-import { createUserAndAgencyDto } from './create-register.dto';
+import { createUserAndAgencyDto, createUserAndAgencyWithGoogleDto } from './create-register.dto';
 dotenvconfig({path: ".env.development"});
 
 @Controller('auth')
@@ -21,7 +21,25 @@ export class AuthController {
 
   }
 
+@Post("createBothWithGoogle")
+  @HttpCode(HttpStatus.CREATED)
+  async registerGoogle(@Body() registerDto: createUserAndAgencyWithGoogleDto, @Res({passthrough: true}) res: Response) {
+      const {token, user} = await this.authService.registerUserAndAgencyWithGoogle(registerDto);
+      res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        expires: new Date(Date.now() + 60 * 60 * 1000),
+        secure: process.env.NODE_ENV === 'production',
+      })
+      return user
+  }
 
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  logout(@Req() req, @Res({passthrough: true}) res: Response) {
+    res.clearCookie('token');
+    return { message: 'Logout successful' };
+  }
 
   @Post("login")
   @HttpCode(HttpStatus.OK) // Login devolvera 200 OK
@@ -59,10 +77,17 @@ export class AuthController {
     return user 
   }
 
+  @Get('login/tokenSignin/:tokenId')
+  async verify(@Param('tokenId') tokenId: string) {
+    return await this.authService.getDataFromToken(tokenId)
+    
+  }
   @Get('me')
   @UseGuards(AuthGuard)
    me(@Req() req: Request & {user: any}) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return req.user
   }
+
+
 }

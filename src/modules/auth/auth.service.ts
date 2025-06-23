@@ -1,7 +1,7 @@
-import { ConflictException, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { User } from '../user/user.entity';
-import { CreateRegisterDto, createUserAndAgencyDto } from './create-register.dto';
+import { CreateRegisterDto, createUserAndAgencyDto, createUserAndAgencyWithGoogleDto } from './create-register.dto';
 import * as bcrypt from 'bcrypt';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { JwtService } from '@nestjs/jwt';
@@ -11,11 +11,11 @@ import { AgencyService } from '../agency/agency.service';
 import { Role } from 'src/Enum/roles.enum';
 @Injectable()
 export class AuthService {
-
-
+  
+  
     private readonly logger: Logger
     private readonly client : OAuth2Client
-
+    
   
 
 
@@ -36,6 +36,36 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
 
     return {success: true, agencyId: agency.id, userId: user.user.id}
 
+}
+async registerUserAndAgencyWithGoogle(registerDto: createUserAndAgencyWithGoogleDto) {
+    const {agencyName, agencyDescription, document, email, name, surname, password, phone, slug, token} = registerDto
+    const existsUser = await this.userService.findOneByEmail(email)
+    if (existsUser) {
+      throw new ConflictException('User already exists')
+    }
+    const user = await this.registerGoogle({name, surname, phone, email, password, token})
+    await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+    const reNewUser = await this.userService.findOneByEmail(email)
+    const {token: payloadToSend, user:userToSend} = this.signJWT(reNewUser!)
+
+    return {token: payloadToSend, user: userToSend} 
+}
+
+async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: string, email: string, password: string, token: string}) {
+    const {token} = registerGoogleDto
+
+    const ticket = await this.client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    })
+
+    const payload = ticket.getPayload()
+    if (!payload) {
+      throw new UnauthorizedException('Invalid token')
+    }
+    const user = await this.userService.createFromGoogle({...registerGoogleDto, googleId: payload.sub, rol: Role.User })
+    return {user}
+  
 }
   async register(
     registerDto: CreateRegisterDto,
@@ -114,14 +144,8 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
         await this.userService.update(existingUser.id, existingUser)
         return existingUser
       }else {
-        const user = this.userService.createFromGoogle({
-          name: payload.name!,
-          surname: payload.family_name!,
-          email: payload.email!,
-          googleId,
-          rol: Role.User,
-        })
-        return user
+        //debe registrarse con google
+        throw new NotFoundException('User not found')
       }
     }catch (error) {
       this.logger.error(
@@ -173,6 +197,17 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
    return res
   }
 
+  async getDataFromToken(token: string) {
+    const ticket = await this.client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,  
+    });
+    const payload = ticket.getPayload();
+    if (!payload) {
+        throw new UnauthorizedException('Invalid token');
+    }
+    return payload
+  }
   private async  verify(token: string) {
   const ticket = await this.client.verifyIdToken({
       idToken: token,
