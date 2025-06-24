@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as nodeMailer  from 'nodemailer';
 import {config as dotenvConfig} from "dotenv"
-
+import { readFile } from 'fs/promises'; 
+import { join } from 'path';
 dotenvConfig({path: ".env.development"})
 @Injectable()
 export class NodeMailerService {
@@ -65,4 +66,42 @@ export class NodeMailerService {
       html: html
     });
   }
+
+
+
+private async loadTemplate(templateName: string, data: Record<string, string>) {
+  try {
+    const templatePath = join(__dirname, 'templates', templateName);
+    let html = await readFile(templatePath, 'utf8'); // 👈 ¡Ahora con await!
+
+    // Reemplaza variables dinámicas
+    Object.keys(data).forEach(key => {
+      html = html.replace(new RegExp(`{{${key}}}`, 'g'), data[key]);
+    });
+
+    return html;
+  } catch (error) {
+    throw new Error(`Error al cargar el template: ${error}`);
+  }
+}
+
+async sendMailRegistered(mail: string, name: string, surname: string) {
+  try {
+    const html = await this.loadTemplate('welcome-email.html', {
+      name,
+      surname,
+      clientUrl: process.env.CLIENT_URL || 'https://default-url.com',
+    });
+
+    await this.sendEasyMailWithHTML(
+      mail,
+      'Bienvenido a la plataforma de Kasapp',
+      'Bienvenido a la plataforma de Kasapp',
+      html,
+    );
+  } catch (error) {
+    console.error('Error al enviar el correo:', error);
+    throw error; // O maneja el error según tu lógica
+  }
+}
 }

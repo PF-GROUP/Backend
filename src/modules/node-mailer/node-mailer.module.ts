@@ -4,6 +4,7 @@ import { NodeMailerController } from './node-mailer.controller';
 
 @Module({
   providers: [NodeMailerService],
-  controllers: [NodeMailerController]
+  controllers: [NodeMailerController],
+  exports:[NodeMailerService]
 })
 export class NodeMailerModule {}

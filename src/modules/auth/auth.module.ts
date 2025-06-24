@@ -5,10 +5,11 @@ import { UserModule } from '../user/user.module';
 
 import { AgencyModule } from '../agency/agency.module';
 import { JwtModule } from '@nestjs/jwt';
+import { NodeMailerModule } from '../node-mailer/node-mailer.module';
 
 @Module({
   imports: [JwtModule,
-    UserModule,AgencyModule],
+    UserModule,AgencyModule,NodeMailerModule],
   controllers: [AuthController],
   providers: [AuthService],
   exports:[AuthService]

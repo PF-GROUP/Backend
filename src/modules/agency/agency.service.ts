@@ -16,6 +16,7 @@ export class AgencyService {
   async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
     const user = await this.userService.findOne(createAgencyDto.agentUser);
     const agency = new Agency();
+
     agency.name = createAgencyDto.name;
     agency.description = createAgencyDto.description;
     agency.document = createAgencyDto.document;
