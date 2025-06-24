@@ -20,7 +20,7 @@ export class StripeService {
   const customerId = await this.searchOrCreateCustomer({email, agencyId});
     
   const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
-  success_url: 'http://localhost:3001/success',
+  success_url: 'http://kasapp.serveminecraft.net:3001/DashboardAgente',
   customer: customerId,
   payment_method_types: ['card'],
   line_items: [
@@ -65,11 +65,9 @@ async createCustomer(email: string) {
 }
 async searchCustomerByEmail(email: string) {
   try {
-    console.log("TRIOOO")
     const customer = await this.stripe.customers.list({
       email: email,
     });
-    console.log("TE PUSEEE EN 4")
     return customer
   } catch  {
     throw new BadRequestException("Hubo un error al buscar el cliente");
@@ -114,18 +112,33 @@ async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buff
       case 'customer.subscription.deleted':
       await this.handleSuscriptionEvent(event.data.object, event.type);
       break;
+      case 'payment_intent.succeeded':
+        await this.handleChargeSucceeded(event.data.object);
+        break;
+      // case 'payment_intent.payment_failed':
+      //   await this.handleChargeFailed(event.data.object);  
+      //   break;
+      // case 'payment_intent.canceled':
+      //   await this.handleChargeCanceled(event.data.object);
+      //   break;
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
 
     return { received: true };
   }
+  async handleChargeFailed(object: Stripe.PaymentIntent & {subscription : Stripe.Subscription}) {
+    if (!object.subscription) {
+      return;
+    }
+    const suscription = object.subscription ;
+    await this.handleSuscriptionEvent(suscription, "customer.subscription.created");
+  }
 
 private async handleCheckoutSessionCompleted(session : Stripe.Checkout.Session) {
  const suscription = await this.stripe.subscriptions.retrieve(session.subscription as string);
  await this.handleSuscriptionEvent(suscription, "customer.subscription.created");
 }
-
 private async handleSuscriptionEvent(suscription: Stripe.Subscription, eventType: "customer.subscription.created" | "customer.subscription.updated" | "customer.subscription.deleted") {
   switch(eventType){
     case "customer.subscription.created":
@@ -157,6 +170,7 @@ private async createOrUpdateSubscription(suscription: Stripe.Subscription & {cur
   } else{
     await this.suscriptionRepository.insert(sucriptionData);
   }
+  await this.agencyService.update(agency.id, {onBoarding: false})
 }
 private async deleteSubscription(suscription: Stripe.Subscription) {
   await this.suscriptionRepository.softDelete({suscriptionId: suscription.id})
@@ -170,12 +184,12 @@ async getSuscriptionByCustomer(customerId: string){
   const agency = await this.agencyService.findOneByCustomerId(customerId); 
   return await this.suscriptionRepository.find({where: {agency: agency}});
 } 
-private async handleChargeSucceeded(charge: Stripe.Charge) {
-  await Promise.resolve(charge).then((charge) => {
-    console.log(charge);
-  }).catch((error) => {
-    console.error(error);
-  })  
+private async handleChargeSucceeded(charge: Stripe.PaymentIntent & {subscription?: string}) {
+  if (!charge.subscription) {
+    return;
+  }
+  const suscription = await this.stripe.subscriptions.retrieve(charge.subscription);
+  await this.createOrUpdateSubscription(suscription);
 
 }
 

@@ -15,20 +15,13 @@ export class AgencyService {
 
   async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
     const user = await this.userService.findOne(createAgencyDto.agentUser);
-    if (!user) {
-      throw new NotFoundException(
-        `User with ID ${createAgencyDto.agentUser} not found`,
-      );
-    }
-
     const agency = new Agency();
     agency.name = createAgencyDto.name;
     agency.description = createAgencyDto.description;
-    agency.document = createAgencyDto.cuit_dni_m;
-    agency.id_customization = Number(createAgencyDto.customization);
-    if (createAgencyDto.propertyIds?.length > 0) {
-      agency.id_property = Number(createAgencyDto.propertyIds[0]);
-    }
+    agency.document = createAgencyDto.document;
+    agency.id_customization = null;
+    agency.slug = createAgencyDto.slug
+    agency.user = user; ;
 
     agency.user = user;
 
@@ -77,6 +70,10 @@ export class AgencyService {
   }
   async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
     const agency = await this.findOne(id);
+    if ( !updateAgencyDto.agentUser ) throw new NotFoundException("User not found");
+    if (updateAgencyDto.name) agency.name = updateAgencyDto.name;
+    if (updateAgencyDto.description) agency.description = updateAgencyDto.description;
+    if (updateAgencyDto.document) agency.document = updateAgencyDto.document;
 
     if (updateAgencyDto.agentUser) {
       const user = await this.userService.findOne(updateAgencyDto.agentUser);
@@ -127,4 +124,18 @@ export class AgencyService {
     agency.stripeCustomerId = customerId;
     return this.agencyRepository.save(agency);
   }
+
+  async updateAgencyNameAndDescription(id: string, updateAgencyDto: { name?: string; description?: string | null }): Promise<Agency> {
+  const agency = await this.findOne(id);
+  if (!agency) {
+    throw new NotFoundException(`Agencia con id ${id} no encontrada`);
+  }
+  if (updateAgencyDto.name) {
+    agency.name = updateAgencyDto.name;
+  }
+  if (updateAgencyDto.description) {
+    agency.description = updateAgencyDto.description;
+  }
+  return await this.agencyRepository.save(agency);
+}
 }

@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AgencyService } from './agency.service';
-import { CreateAgencyDto } from './agency.dto';
+import { CreateAgencyDto, UpdateAgencyDto } from './agency.dto';
 import { AuthGuard } from '../../guard/auth.guard';
 import { AgencyGuard } from '../../guard/agency.guard';
 import { RolesGuard } from '../../guard/roles.guard';
@@ -96,5 +96,16 @@ export class AgencyController {
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
   remove(@Param('id') id: string) {
     return this.agencyService.remove(id);
+  }
+
+  @Patch(':id')
+  updateAgency(
+    @Param('id') id: string,
+    @Body() updateAgencyDto: UpdateAgencyDto,
+  ) {
+    return this.agencyService.updateAgencyNameAndDescription(
+      id,
+      updateAgencyDto,
+    );
   }
 }

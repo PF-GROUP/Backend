@@ -24,6 +24,8 @@ export const MOCK_AGENCY: Agency = {
   id_customization: 0,
   properties: [],
   id_property: 0,
+  onBoarding: false,
+  slug:"inmobiliaria-ejemplo-sa",
   stripeCustomerId: "cus_1234567890",
   user: MOCK_USER, // Relación establecida
   document: '30123456789',

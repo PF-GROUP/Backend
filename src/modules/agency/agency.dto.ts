@@ -14,9 +14,10 @@ export class CreateAgencyDto {
   @MaxLength(80)
   name: string;
 
-  @IsNotEmpty()
   @IsString()
-  description: string;
+  description?: string | null;
+
+  document: string | null;
 
   @IsNotEmpty()
   customization: string;
@@ -32,8 +33,18 @@ export class CreateAgencyDto {
   @IsNotEmpty()
   @IsString()
   cuit_dni_m: string;
+
+  @IsNotEmpty()
+  @IsString()
+  slug: string
 }
 
 export class UpdateAgencyDto extends PartialType(CreateAgencyDto) {
   customerId?: string;
+  name?: string | undefined;
+  description?: string | null;
+  customizationId?: number;
+  propertiesId?: number;
+  onBoarding?: boolean;
+
 }

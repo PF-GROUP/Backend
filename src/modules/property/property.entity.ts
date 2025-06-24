@@ -24,10 +24,18 @@ export class Property extends SoftDeletableEntity {
   @Column()
   name: string;
 
-  @Column('enum', { enum: Status })
+  @Column({
+    type: 'enum',
+    enum: Status,
+    enumName: 'property_status_enum',
+  })
   status: Status;
 
-  @Column('enum', { enum: Type })
+  @Column({
+    type: 'enum',
+    enum: Type,
+    enumName: 'property_type_enum',
+  })
   type: Type;
 
   @Column()
@@ -57,29 +65,30 @@ export class Property extends SoftDeletableEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => Images, (image) => image.property) 
+  @OneToMany(() => Images, (image) => image.property)
   images: Images[];
 
-  @ManyToOne(() => TypeOfProperty, (type) => type.property,
-{
+  @ManyToOne(() => TypeOfProperty, (type) => type.property, {
     nullable: true,
-    onDelete: "SET NULL"
+    onDelete: 'SET NULL',
   }) // Relacion con la tabla de tipo de propiedad
   @JoinColumn({ name: 'type_of_property_id' })
   type_of_property: TypeOfProperty;
 
-  @ManyToOne(() => Agency, (agency) => agency.properties,
-{
+  @ManyToOne(() => Agency, (agency) => agency.properties, {
     nullable: true,
-    onDelete: "SET NULL"
+    onDelete: 'SET NULL',
   }) // Relacion con la tabla de agencia
   @JoinColumn({ name: 'agency_id' })
   agency: Agency;
 
-  @OneToMany(()=> Appointment, (appointment: Appointment)=> appointment.property,
-{
-    cascade: true,
-    onDelete: "SET NULL"
-  })
-  appointment: Appointment[]
+  @OneToMany(
+    () => Appointment,
+    (appointment: Appointment) => appointment.property,
+    {
+      cascade: true,
+      onDelete: 'SET NULL',
+    },
+  )
+  appointment: Appointment[];
 }
