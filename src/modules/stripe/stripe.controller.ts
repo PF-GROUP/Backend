@@ -1,6 +1,7 @@
-import { Body, Controller, Param, Post, Req, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req, UseInterceptors, Get} from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { StripeWebhookInterceptor } from 'src/interceptors/rawBody.interceptor';
+
 
 @Controller('stripe')
 export class StripeController {
@@ -18,4 +19,8 @@ export class StripeController {
   return this.stripeService.getPaymentStatus(req);
 
 }
+  @Get()
+  async getAllSuscriptions() {
+    return await this.stripeService.getAllSuscriptions();
+  }
 }
