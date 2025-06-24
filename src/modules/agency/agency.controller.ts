@@ -62,6 +62,15 @@ export class AgencyController {
     return agency;
   }
 
+  @Get('by-slug/:slug')
+  @ApiOperation({ summary: 'Obtener agency por slug (Public)' })
+  @ApiResponse({ status: 200, description: 'Obtuviste la agency por slug.' })
+  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
+  @ApiBearerAuth('public')
+  async findBySlug(@Param('slug') slug: string) {
+    return await this.agencyService.findOneBySlug(slug);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener agency por ID (Public)' })
   @ApiResponse({ status: 200, description: 'Obtuviste la agency.' })

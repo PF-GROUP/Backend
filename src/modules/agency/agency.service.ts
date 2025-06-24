@@ -132,4 +132,17 @@ export class AgencyService {
   }
   return await this.agencyRepository.save(agency);
 }
+
+  async findOneBySlug(slug: string): Promise<Agency> {
+    const agency = await this.agencyRepository.findOne({
+      where: { slug },
+      relations: ['customization', 'properties', 'user'],
+    });
+
+    if (!agency) {
+      throw new NotFoundException(`Agencia con slug '${slug}' no encontrada`);
+    }
+
+    return agency;
+  }
 }
