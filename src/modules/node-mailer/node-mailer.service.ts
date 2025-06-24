@@ -71,7 +71,7 @@ export class NodeMailerService {
 
 private async loadTemplate(templateName: string, data: Record<string, string>) {
   try {
-    const templatePath = join(__dirname, 'templates', templateName);
+    const templatePath = join(process.cwd(), 'src', 'modules', 'node-mailer', 'templates', templateName);
     let html = await readFile(templatePath, 'utf8'); // 👈 ¡Ahora con await!
 
     // Reemplaza variables dinámicas
