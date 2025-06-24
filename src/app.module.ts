@@ -27,7 +27,7 @@ dotenvconfig({path: ".env.development"})
 @Module({
   imports: [JwtModule.register({
     global: true,
-        secret: process.env.JWT_SECRET, // Reemplaza este valor por una variable de entorno en producción
+        secret:'secret', // Reemplaza este valor por una variable de entorno en producción
         signOptions: { expiresIn: '1d' }, // Configura el tiempo de expiración del token
       }),
     ConfigModule.forRoot({

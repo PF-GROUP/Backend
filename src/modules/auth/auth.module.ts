@@ -4,10 +4,10 @@ import { AuthService } from './auth.service';
 import { UserModule } from '../user/user.module';
 
 import { AgencyModule } from '../agency/agency.module';
-import { JwtModule } from '@nestjs/jwt';
+
 
 @Module({
-  imports: [JwtModule,
+  imports: [
     UserModule,AgencyModule],
   controllers: [AuthController],
   providers: [AuthService],
