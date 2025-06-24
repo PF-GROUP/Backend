@@ -1,3 +1,4 @@
+import { JwtModule } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,13 +16,20 @@ import { AuthModule } from './modules/auth/auth.module';
 
 import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
 import { DatabaseSeederModule } from './database/database-seeder.module';
+import { CloudinaryModule } from './shared/cloudinary.module';
+import { config as dotenvconfig} from "dotenv"
 
+dotenvconfig({path: ".env.development"})
 
 
 
 
 @Module({
-  imports: [
+  imports: [JwtModule.register({
+    global: true,
+        secret:'secret', // Reemplaza este valor por una variable de entorno en producción
+        signOptions: { expiresIn: '1d' }, // Configura el tiempo de expiración del token
+      }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [typeorm],
@@ -46,7 +54,8 @@ import { DatabaseSeederModule } from './database/database-seeder.module';
     CustomizationModule,
     AuthModule,
     NodeMailerModule,
-    DatabaseSeederModule
+    DatabaseSeederModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

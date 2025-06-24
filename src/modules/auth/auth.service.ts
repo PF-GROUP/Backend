@@ -166,7 +166,7 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
 
 
   
-  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: { id: number; name: string; surname: string; email: string; isAdmin: boolean}}> {
+  async login(createLoginDto: CreateLoginDto): Promise<{token: string, user: { id: string; name: string; surname: string; email: string; isAdmin: boolean}}> {
     this.logger.log(`Verificando login para email: ${createLoginDto.email}`);
     const user = await this.findUserByEmail(
       createLoginDto.email,

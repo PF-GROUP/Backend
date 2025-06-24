@@ -1,12 +1,12 @@
+import { Role } from "src/Enum/roles.enum";
 
 
 
 export interface JwtPayload {
-  id: number;
+  id: string;
   email: string;
-  isAdmin: boolean;
   agencyId?: string;
-  roles?: string[];
+  roles?: Role[];
   iat?: number;
   exp?: number;
 }
