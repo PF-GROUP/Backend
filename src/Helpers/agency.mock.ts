@@ -2,7 +2,7 @@ import { User } from '../modules/user/user.entity';
 import { Agency } from '../modules/agency/agency.entity';
 
 export const MOCK_USER: User = {
-  id: 101,
+  id: "sd23-sd23-sd23-sd23-sd23",
   name: 'Juan',
   surname: 'Pérez',
   phone: '+5491112345678',
@@ -13,6 +13,7 @@ export const MOCK_USER: User = {
   appointment: [],
   agency: null, 
  deletedAt: null,
+ profilePictureUrl: "tumama.com",
 }as User;
 
 export const MOCK_AGENCY: Agency = {

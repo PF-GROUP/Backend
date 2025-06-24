@@ -86,4 +86,15 @@ export class ImagesService {
     }
     await this.imagesRepository.softRemove(imageToRemove);
     }
+
+    async findOneWithPropertyAndOwner(id: string): Promise<Images | null> {
+    return await this.imagesRepository.findOne({
+      where: { id },
+      relations: [
+        'property',
+        'property.agency',
+        'property.agency.user'
+      ],
+    });
+  }
 }

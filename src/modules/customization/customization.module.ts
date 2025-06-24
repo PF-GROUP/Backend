@@ -5,8 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Customization } from './customization.entity';
 import { Agency } from 'src/modules/agency/agency.entity';
 
+import { UserModule } from '../user/user.module';
+import { AgencyModule } from '../agency/agency.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Customization, Agency])
+  imports: [TypeOrmModule.forFeature([Customization, Agency ]),UserModule,AgencyModule
 ],
   controllers: [CustomizationController],
   providers: [CustomizationService],
