@@ -3,15 +3,13 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
-
 import { AgencyModule } from '../agency/agency.module';
 
+import { NodeMailerModule } from '../node-mailer/node-mailer.module';
+
 @Module({
-  imports: [
-    JwtModule.register({
-      secret: 'theBestPassword??', // Reemplaza este valor por una variable de entorno en producción
-      signOptions: { expiresIn: '1d' }, // Configura el tiempo de expiración del token
-    }),UserModule,AgencyModule],
+  imports: [JwtModule,
+    UserModule,AgencyModule,NodeMailerModule],
   controllers: [AuthController],
   providers: [AuthService]
 })

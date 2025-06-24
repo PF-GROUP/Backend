@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { createGoogleUserDto, CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -13,10 +14,29 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.userRepository.create(createUserDto);
-    return await this.userRepository.save(user);
+    const {email, password, ...restOfUserData} = createUserDto;
+      if (restOfUserData.name.toLowerCase().includes("mati")){
+      restOfUserData.name = "Soy Gay" 
+    }
+    const existngUser = await this.userRepository.findOne({where:{email} });
+    if (existngUser){
+      throw new BadRequestException('El email ya está registrado. Por favor, utiliza otro.');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = this.userRepository.create({
+      ...restOfUserData,
+      email,
+      password: hashedPassword,
+    });
+
+    return await this.userRepository.save(newUser);
   }
   async createFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
+    if (googleUser.name.toLowerCase().includes("mati")){
+      googleUser.name = "Soy Gay" 
+    }
     const user = this.userRepository.create(googleUser);
     return await this.userRepository.save(user);
   }

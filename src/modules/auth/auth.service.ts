@@ -9,6 +9,9 @@ import { CreateLoginDto, GoogleLoginDto } from './create-login.dto';
 import { UserService } from '../user/user.service';
 import { AgencyService } from '../agency/agency.service';
 import { Role } from 'src/Enum/roles.enum';
+import { NodeMailerService } from '../node-mailer/node-mailer.service';
+import { config as dotenvconfig } from "dotenv"
+dotenvconfig({path: ".env.development"});
 @Injectable()
 export class AuthService {
   
@@ -22,7 +25,8 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly agencyService: AgencyService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private readonly mailService:NodeMailerService
   ) {
    this.logger = new Logger(AuthService.name)
    this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
@@ -33,7 +37,7 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
 
     const user = await this.register({name, surname, phone, email, password})
     const agency = await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
-
+    await this.mailService.sendMailRegistered(email, name, surname)
     return {success: true, agencyId: agency.id, userId: user.user.id}
 
 }
@@ -47,7 +51,7 @@ async registerUserAndAgencyWithGoogle(registerDto: createUserAndAgencyWithGoogle
     await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
     const reNewUser = await this.userService.findOneByEmail(email)
     const {token: payloadToSend, user:userToSend} = this.signJWT(reNewUser!)
-
+    await this.mailService.sendMailRegistered(email, name, surname)
     return {token: payloadToSend, user: userToSend} 
 }
 
@@ -67,6 +71,7 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     return {user}
   
 }
+
   async register(
     registerDto: CreateRegisterDto,
   ): Promise<{ user: User /*; agency: Agency */ }> {

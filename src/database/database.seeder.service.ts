@@ -9,6 +9,8 @@ import * as bcrypt from 'bcrypt';
 import { Status } from '../Enum/status.enum';
 import { Type } from '../Enum/type.enum';
 import { PropertyTypeName } from '../modules/typeOfProperty/property-type.enum';
+import { Query } from 'typeorm/driver/Query';
+import { Customization } from 'src/Customization/customization.entity';
 
 @Injectable()
 export class DatabaseSeederService implements OnApplicationBootstrap {
@@ -94,6 +96,43 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       await this.seedPropertyTypes(queryRunner);
 
       // Seeder de agencias
+
+      const customizationRepo = queryRunner.manager.getRepository(Customization);
+      const customizationes = [
+        await customizationRepo.save(
+          queryRunner.manager.create(Customization, {
+            logoImage: 'https://picsum.photos/200/300',
+            mainColors: '#000',
+            backgroundColor: '#fff',
+            font: 'Open Sans',
+            isDefault: true,
+          }),
+        ),
+        await customizationRepo.save(
+          queryRunner.manager.create(Customization, {
+            theme: 'dark',
+            logoImage: 'https://picsum.photos/200/300?grayscale',
+            mainColors: '#fff',
+            backgroundColor: '#000',
+            font: 'Montserrat',
+            isDefault: false,
+          }),
+        ),
+        await customizationRepo.save(
+          queryRunner.manager.create(Customization, {
+            name: 'Minimalist',
+            theme: 'minimalist',
+            logoImage: 'https://picsum.photos/200/300?blur',
+            mainColors: '#333',
+            backgroundColor: '#fff',
+            font: 'Lato',
+            isDefault: false,
+          }),
+        ),
+
+      ]
+      console.log(`Seeded ${customizationes.length} Customization records.`);
+
       const agencyRepo = queryRunner.manager.getRepository(Agency);
       const agenciesToCreate = [
         {
@@ -101,18 +140,21 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           description: 'Premier properties y servicios real estate.',
           document: '1234567890',
           slug: this.generateSlug('Luxury Estates'),
+          customization: customizationes[0],
         },
         {
           name: 'Dream Homes',
           description: 'La casa de tus sueños.',
           document: '0987654321',
           slug: this.generateSlug('Dream Homes'),
+          customization: customizationes[1],
         },
         {
           name: 'Prime Properties',
           description: 'Exelencia en real estate.',
           document: '1122334455',
           slug: this.generateSlug('Prime Properties'),
+          customization: customizationes[2],
         },
       ];
       const createdAgencies = agenciesToCreate.map((data) =>
