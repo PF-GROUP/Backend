@@ -8,6 +8,10 @@
       "name": "@nestjs/swagger/dist/plugin",
       "classValidator": true,
       "introspectComments": true
-    }]
+    }],
+    "assets": [{
+        "include": "src/modules/node-mailer/templates/**/*",
+        "outDir": "dist/modules/node-mailer/templates"
+      }]
   }
 }
