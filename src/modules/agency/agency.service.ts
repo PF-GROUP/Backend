@@ -88,14 +88,8 @@ export class AgencyService {
     if (updateAgencyDto.name) agency.name = updateAgencyDto.name;
     if (updateAgencyDto.description)
       agency.description = updateAgencyDto.description;
-    if (updateAgencyDto.cuit_dni_m)
-      agency.document = updateAgencyDto.cuit_dni_m;
-    if (updateAgencyDto.customization) {
-      agency.id_customization = Number(updateAgencyDto.customization);
-    }
-    if (updateAgencyDto.propertyIds && updateAgencyDto.propertyIds.length > 0) {
-      agency.id_property = Number(updateAgencyDto.propertyIds[0]);
-    }
+    if (updateAgencyDto.document)
+      agency.document = updateAgencyDto.document;
 
     return this.agencyRepository.save(agency);
   }

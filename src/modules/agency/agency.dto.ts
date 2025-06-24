@@ -3,7 +3,6 @@ import {
   IsString,
   MinLength,
   MaxLength,
-  IsArray,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
@@ -19,20 +18,10 @@ export class CreateAgencyDto {
 
   document: string | null;
 
-  @IsNotEmpty()
-  customization: string;
-
-  @IsNotEmpty()
-  @IsArray()
-  @IsString({ each: true })
-  propertyIds: string[];
 
   @IsNotEmpty()
   agentUser: string;
 
-  @IsNotEmpty()
-  @IsString()
-  cuit_dni_m: string;
 
   @IsNotEmpty()
   @IsString()
