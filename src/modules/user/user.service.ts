@@ -6,7 +6,6 @@ import { createGoogleUserDto, CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { CloudinaryService } from 'src/shared/cloudinary.service';
 import * as bcrypt from 'bcrypt';
-import { Role } from 'src/Enum/roles.enum';
 
 @Injectable()
 export class UserService {

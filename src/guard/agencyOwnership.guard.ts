@@ -1,5 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { CanActivate, ExecutionContext, Injectable, ForbiddenException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { Request } from 'express';
 import { Role } from '../Enum/roles.enum';
 import { AgencyService } from 'src/modules/agency/agency.service';

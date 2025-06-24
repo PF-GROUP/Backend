@@ -58,10 +58,7 @@ export class AgencyController {
   })
   @ApiResponse({ status: 404, description: 'Usuario o agency no encontrado.' })
   async getByUser(@Param('id') id: string) {
-    const useId = parseInt(id);
-    console.log(useId);
-    const agency = await this.agencyService.findOneByUserId(useId);
-    console.log(agency);
+    const agency = await this.agencyService.findOneByUserId(id);
     return agency;
   }
 

@@ -65,7 +65,7 @@ export class AgencyService {
     }
     return agency;
   }
-  async findOneByUserId(userId: number): Promise<Agency> {
+  async findOneByUserId(userId: string): Promise<Agency> {
     const agency = await this.agencyRepository.findOne({
       where: { user: { id: userId } },
       relations: ['customization', 'properties', 'user'],

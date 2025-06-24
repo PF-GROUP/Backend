@@ -27,7 +27,7 @@ export class CreateAgencyDto {
   propertyIds: string[];
 
   @IsNotEmpty()
-  agentUser: number;
+  agentUser: string;
 
   @IsNotEmpty()
   @IsString()

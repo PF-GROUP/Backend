@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, ParseUUIDPipe, UseInterceptors, UploadedFile, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, ParseUUIDPipe, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
@@ -77,7 +77,6 @@ export class UserController {
   async uploadProfilePicture(
     @Param('id', ParseUUIDPipe) userId: string,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: Request,
   ) {
     if (!file) {
       throw new BadRequestException('No se ha proporcionado ningún archivo para la foto de perfil.');

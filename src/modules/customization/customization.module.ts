@@ -4,18 +4,15 @@ import { CustomizationController } from './customization.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Customization } from './customization.entity';
 import { Agency } from 'src/modules/agency/agency.entity';
-import { AgencyOwnershipGuard } from 'src/guard/agencyOwnership.guard';
-import { AgencyService } from '../agency/agency.service';
-import { UserService } from '../user/user.service';
-import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from 'src/guard/auth.guard';
-import { RolesGuard } from 'src/guard/roles.guard';
+
+import { UserModule } from '../user/user.module';
+import { AgencyModule } from '../agency/agency.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customization, Agency])
+  imports: [TypeOrmModule.forFeature([Customization, Agency ]),UserModule,AgencyModule
 ],
   controllers: [CustomizationController],
-  providers: [CustomizationService, AgencyOwnershipGuard, AgencyService, UserService, JwtService, AuthGuard, RolesGuard],
+  providers: [CustomizationService],
   exports: [CustomizationService, TypeOrmModule],
 })
 export class CustomizationModule {}
