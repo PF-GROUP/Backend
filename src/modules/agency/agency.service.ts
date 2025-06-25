@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAgencyDto, UpdateAgencyDto } from './agency.dto';
@@ -10,7 +10,9 @@ export class AgencyService {
   constructor(
     @InjectRepository(Agency)
     private agencyRepository: Repository<Agency>,
-    private readonly userService: UserService,
+    @Inject(forwardRef(() => UserService)) 
+    private readonly userService: UserService
+    
   ) {}
 
   async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {

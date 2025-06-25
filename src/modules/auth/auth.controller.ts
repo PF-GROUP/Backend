@@ -61,7 +61,7 @@ export class AuthController {
         `Login fallo para email: ${createLoginDto.email}. Error: ${error.message}`, // Error de log
       )
       return new InternalServerErrorException('Error al iniciar sesión');
-    }
+    } 
   }
 
 

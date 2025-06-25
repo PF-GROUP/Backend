@@ -43,14 +43,31 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
 }
 async registerUserAndAgencyWithGoogle(registerDto: createUserAndAgencyWithGoogleDto) {
     const {agencyName, agencyDescription, document, email, name, surname, password, phone, slug, token} = registerDto
-    const existsUser = await this.userService.findOneByEmail(email)
+
+    let existsUser:User | null
+    try {
+        existsUser = await this.userService.findOneByEmail(email)
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        console.log("El usuario no existe, continuar")
+        existsUser = null
+      }else{
+        throw new InternalServerErrorException('Error al buscar el usuario')
+      }
+    }
+
     if (existsUser) {
       throw new ConflictException('User already exists')
     }
     const user = await this.registerGoogle({name, surname, phone, email, password, token})
-    await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+    const agency = await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+    console.warn(agency)
+
     const reNewUser = await this.userService.findOneByEmail(email)
     const {token: payloadToSend, user:userToSend} = this.signJWT(reNewUser!)
+    console.log(reNewUser)
+    console.log(payloadToSend)
+    console.log(userToSend)
     await this.mailService.sendMailRegistered(email, name, surname)
     return {token: payloadToSend, user: userToSend} 
 }
@@ -78,9 +95,9 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     console.log(registerDto)
     this.logger.log(`Comenzando registro para email: ${registerDto.email}`);
     this.logger.log('Transaccion de base de datos iniciada.');
-
+      let existingUser: User | null = null
     try {
-      const existingUser = await this.userService.findOneByEmail(
+       existingUser = await this.userService.findOneByEmail(
         registerDto.email,
       )
 
@@ -90,15 +107,18 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
         );
         throw new ConflictException('Usuario con este email ya existe');
       }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        console.log("El usuario no existe, continuar")
+        existingUser = null
+      }else{
+        throw new InternalServerErrorException('Error al buscar el usuario')
+      }
+    }
 
-      const saltRounds = 10;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      const hashedPassword: string = await bcrypt.hash(
-        registerDto.password,
-        saltRounds,
-      ) ;
+    try {
       this.logger.debug('Contrasena hasheada exitosamente.');
-      const user = await this.userService.create({...registerDto,password: hashedPassword, rol: Role.User });
+      const user = await this.userService.create({...registerDto, rol: Role.User });
 
       this.logger.log(
         `User creado con ID: ${user.id} y email: ${user.email}`,
@@ -171,8 +191,8 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     const user = await this.findUserByEmail(
       createLoginDto.email,
     );
-    
-    if (!user) {
+
+    if (!user || !user.password) {
       this.logger.warn(`Login fallo para email: ${createLoginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -180,12 +200,17 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     this.logger.log(
       `Usuario encontrado para email: ${createLoginDto.email}. Comparando contrasenas.`,
     );
+    console.log(user.password)
+    console.log(createLoginDto.password)
+    console.log('→ Password plano:', JSON.stringify(createLoginDto.password));
+    console.log('→ Hash en DB   :', JSON.stringify(user.password));
+    console.log('→ Longitudes   :', createLoginDto.password.length, user.password.length);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const isPasswordValid:boolean = await bcrypt.compare(
+    const isPasswordValid = await  bcrypt.compare(
       createLoginDto.password,
-      user.password as unknown as string,
+      user.password,
     );
+    console.log(isPasswordValid)
 
     if (!isPasswordValid) {
       this.logger.warn(

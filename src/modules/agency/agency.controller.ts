@@ -50,7 +50,7 @@ export class AgencyController {
   }
 
   @Get('getByUser/:id')
-  @UseGuards(AuthGuard, AgencyGuard)
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener agency por ID del usuario' })
   @ApiResponse({
     status: 200,

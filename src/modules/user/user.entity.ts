@@ -1,7 +1,7 @@
 import { Agency } from "src/modules/agency/agency.entity";
 import { Appointment } from "src/modules/appointment/appointment.entity";
 import { SoftDeletableEntity } from "src/Helpers/softDelete.entity";
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({
     name: "User"
@@ -12,7 +12,7 @@ export class User extends SoftDeletableEntity {
 
     @Column({
         type: "varchar",
-        length: 50,
+        length: 150,
         nullable: false,
     })
     name: string;
@@ -76,7 +76,6 @@ export class User extends SoftDeletableEntity {
     onDelete: "SET NULL",
     nullable: true
   })
-    @JoinColumn({name: 'id_agency'})
     agency?: Agency | null;
 }
 
