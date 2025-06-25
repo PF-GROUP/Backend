@@ -26,7 +26,6 @@ import {
   ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../guard/auth.guard';
 import { RolesGuard } from '../../guard/roles.guard';
@@ -35,7 +34,6 @@ import { Role } from '../../Enum/roles.enum';
 
 @ApiTags('Property')
 @Controller('property')
-// @ApiBearerAuth()
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
