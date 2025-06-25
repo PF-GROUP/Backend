@@ -296,7 +296,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           status: Status.Disponible,
           type: Type.Alquiler,
           agency: agencies[0],
-          type_of_property: propertyType2,
+          type_of_property_id: propertyType2,
         },
         {
           name: 'Casa de Lujo en Barrio Cerrado',
@@ -311,7 +311,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           status: Status.Disponible,
           type: Type.Venta,
           agency: agencies[1],
-          type_of_property: propertyType1,
+          type_of_property_id: propertyType1,
         },
         {
           name: 'Oficina en Microcentro',
@@ -326,7 +326,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           status: Status.Disponible,
           type: Type.Alquiler,
           agency: agencies[2],
-          type_of_property: propertyType3,
+          type_of_property_id: propertyType3,
         },
         {
           name: 'Casa Familiar en Barrio Cerrado',
@@ -341,7 +341,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           status: Status.Disponible,
           type: Type.Alquiler,
           agency: agencies[3],
-          type_of_property: propertyType1,
+          type_of_property_id: propertyType1,
         },
       ];
       const createdProperties = propertiesToCreate.map((data) =>
