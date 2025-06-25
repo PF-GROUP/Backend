@@ -47,7 +47,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
     const propertyTypeRepository =
       queryRunner.manager.getRepository(TypeOfProperty);
 
-    // Get all enum values
+    // Obtener todo los valores de enum
     const propertyTypes = Object.values(PropertyTypeName);
 
     // Crear TypeOfProperty entities para cada valor de enum
@@ -97,40 +97,72 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
 
       // Seeder de agencias
 
-      const customizationRepo = queryRunner.manager.getRepository(Customization);
+      const customizationRepo =
+        queryRunner.manager.getRepository(Customization);
       const customizationes = [
+        // Personalizacion para Luxury Estates
         await customizationRepo.save(
           queryRunner.manager.create(Customization, {
-            logoImage: 'https://picsum.photos/200/300',
-            mainColors: '#000',
-            backgroundColor: '#fff',
-            font: 'Open Sans',
+            logoImage:
+              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+            information:
+              'Especialistas en propiedades premium con atención personalizada.',
+            mainColors: '#1E3A8A',
+            banner: 'https://i.imgur.com/def456.jpg',
+            navbarColor: '#1D4ED8',
+            buttonColor: '#2563EB',
+            backgroundColor: '#EFF6FF',
+            secondaryColor: '#64748B',
+            isDefault: false,
+          }),
+        ),
+        // Personalizacion para Dream Homes
+        await customizationRepo.save(
+          queryRunner.manager.create(Customization, {
+            logoImage:
+              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+            information:
+              'Encontrá la casa de tus sueños con nuestro asesoramiento experto.',
+            mainColors: '#0F4C81',
+            banner: 'https://i.imgur.com/ghi789.jpg',
+            navbarColor: '#0F4C81',
+            buttonColor: '#3A7CA5',
+            backgroundColor: '#F8F9FA',
+            secondaryColor: '#5B8EAD',
+            isDefault: false,
+          }),
+        ),
+        // Personalizacion para Prime Properties
+        await customizationRepo.save(
+          queryRunner.manager.create(Customization, {
+            logoImage:
+              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+            information: 'Excelencia en asesoramiento inmobiliario desde 1995.',
+            mainColors: '#2A5C45',
+            banner: 'https://i.imgur.com/jkl012.jpg',
+            navbarColor: '#2A5C45',
+            buttonColor: '#3A7D44',
+            backgroundColor: '#F5F5F5',
+            secondaryColor: '#6B8F71',
+            isDefault: false,
+          }),
+        ),
+        // Personalizacion para Admin Properties
+        await customizationRepo.save(
+          queryRunner.manager.create(Customization, {
+            logoImage:
+              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+            information: 'Panel de administración del sistema inmobiliario.',
+            mainColors: '#1E3A8A',
+            banner: 'https://i.imgur.com/mno345.jpg',
+            navbarColor: '#1D4ED8',
+            buttonColor: '#2563EB',
+            backgroundColor: '#FFFFFF',
+            secondaryColor: '#64748B',
             isDefault: true,
           }),
         ),
-        await customizationRepo.save(
-          queryRunner.manager.create(Customization, {
-            theme: 'dark',
-            logoImage: 'https://picsum.photos/200/300?grayscale',
-            mainColors: '#fff',
-            backgroundColor: '#000',
-            font: 'Montserrat',
-            isDefault: false,
-          }),
-        ),
-        await customizationRepo.save(
-          queryRunner.manager.create(Customization, {
-            name: 'Minimalist',
-            theme: 'minimalist',
-            logoImage: 'https://picsum.photos/200/300?blur',
-            mainColors: '#333',
-            backgroundColor: '#fff',
-            font: 'Lato',
-            isDefault: false,
-          }),
-        ),
-
-      ]
+      ];
       console.log(`Seeded ${customizationes.length} Customization records.`);
 
       const agencyRepo = queryRunner.manager.getRepository(Agency);
@@ -144,7 +176,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         },
         {
           name: 'Dream Homes',
-          description: 'La casa de tus sueños.',
+          description: 'La casa de tus suenos.',
           document: '0987654321',
           slug: this.generateSlug('Dream Homes'),
           customization: customizationes[1],
@@ -156,6 +188,13 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           slug: this.generateSlug('Prime Properties'),
           customization: customizationes[2],
         },
+        {
+          name: 'Admin Properties',
+          description: 'Agencia administrativa del sistema.',
+          document: '9999999999',
+          slug: this.generateSlug('Admin Properties'),
+          customization: customizationes[0],
+        },
       ];
       const createdAgencies = agenciesToCreate.map((data) =>
         agencyRepo.create(data),
@@ -166,14 +205,24 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // Seeder de usuarios con contrasenas hasheadas
       const userRepo = queryRunner.manager.getRepository(User);
       const usersToCreate = [
+        // Usuario administrador - Credenciales para Swagger
+        {
+          name: 'Admin',
+          surname: 'User',
+          phone: '+1234567890',
+          email: 'admin@example.com',
+          password: await this.hashPassword('admin123'),
+          isAdmin: true,
+          agency: agencies[3], // Usa la cuarta agencia (Admin Properties)
+        },
         {
           name: 'Mark',
           surname: 'Julien',
-          phone: '+1234567890',
+          phone: '+1234567891',
           email: 'mark.julien@example.com',
           password: await this.hashPassword('password123'),
-          rol: 0, // Asumiendo que 0 es Admin y que 1 es Agent
-          agency: agencies[0], // Associate user con la agency en la creacion
+          isAdmin: false,
+          agency: agencies[0],
         },
         {
           name: 'Jane',
@@ -181,7 +230,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           phone: '+1987654321',
           email: 'jane.smith@example.com',
           password: await this.hashPassword('password123'),
-          rol: 1, // Asumiendo que 1 es Agent
+          isAdmin: false,
           agency: agencies[1],
         },
         {
@@ -189,8 +238,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           surname: 'Clancy',
           phone: '+1122334455',
           email: 'tom.clancy@example.com',
-          password: await this.hashPassword('admin123'),
-          rol: 0, // Asumiendo que 0 es Admin
+          password: await this.hashPassword('agent123'),
+          isAdmin: false,
           agency: agencies[2],
         },
       ];
@@ -199,9 +248,10 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       console.log(`Seeded ${users.length} User records.`);
 
       // Asignar los usuarios a las agencias
-      agencies[0].user = users[0];
-      agencies[1].user = users[1];
-      agencies[2].user = users[2];
+      agencies[0].user = users[1];
+      agencies[1].user = users[2];
+      agencies[2].user = users[3];
+      agencies[3].user = users[0]; // Admin Properties -> Admin
       await agencyRepo.save(agencies);
 
       // Get property types for seeding properties
@@ -222,46 +272,64 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const propertyRepo = queryRunner.manager.getRepository(Property);
       const propertiesToCreate = [
         {
-          name: 'Modern Apartment in City Center',
-          description: 'Beautiful modern apartment with great views.',
+          name: 'Moderno Departamento en Palermo',
+          description:
+            'Amplio departamento con excelentes terminaciones y vista panoramica a la ciudad.',
           price: 250000,
-          address: '123 Main St, New York, NY',
-          city: 'New York',
+          address: 'Av. Santa Fe 4500, C1425 CABA',
+          city: 'Buenos Aires',
           rooms: 2,
-          bathrooms: 2,
-          m2: 120,
+          bathrooms: 1,
+          m2: 65,
           status: Status.Disponible,
           type: Type.Alquiler,
           agency: agencies[0],
-          typeOfProperty: propertyType2,
+          type_of_property: propertyType2,
         },
         {
-          name: 'Luxury Villa with Pool',
-          description: 'Amazing villa with private pool and garden.',
-          price: 850000,
-          address: '456 Ocean Dr, Miami, FL',
-          city: 'Miami',
+          name: 'Casa de Lujo en Barrio Cerrado',
+          description:
+            'Espectacular casa con piscina, parque y quincho en exclusivo barrio cerrado.',
+          price: 450000,
+          address: 'Las Lomas del Golf, Pilar',
+          city: 'Pilar',
           rooms: 4,
           bathrooms: 3,
-          m2: 320,
+          m2: 280,
           status: Status.Disponible,
           type: Type.Venta,
           agency: agencies[1],
-          typeOfProperty: propertyType1,
+          type_of_property: propertyType1,
         },
         {
-          name: 'Downtown Office Space',
-          description: 'Prime office space in the heart of the city.',
-          price: 500000,
-          address: '789 Business Ave, Chicago, IL',
-          city: 'Chicago',
+          name: 'Oficina en Microcentro',
+          description:
+            'Excelente oficina en pleno centro financiero, lista para usar con excelentes vistas.',
+          price: 3500,
+          address: 'Av. Corrientes 1234, C1043 CABA',
+          city: 'Buenos Aires',
           rooms: 3,
           bathrooms: 2,
-          m2: 500,
+          m2: 90,
           status: Status.Disponible,
           type: Type.Alquiler,
           agency: agencies[2],
-          typeOfProperty: propertyType3,
+          type_of_property: propertyType3,
+        },
+        {
+          name: 'Casa Familiar en Barrio Cerrado',
+          description:
+            'Hermosa casa familiar con parque, piscina y parrilla en Nordelta.',
+          price: 3800,
+          address: 'Los Alerces 123, Nordelta',
+          city: 'Tigre',
+          rooms: 3,
+          bathrooms: 2,
+          m2: 180,
+          status: Status.Disponible,
+          type: Type.Alquiler,
+          agency: agencies[3],
+          type_of_property: propertyType1,
         },
       ];
       const createdProperties = propertiesToCreate.map((data) =>
