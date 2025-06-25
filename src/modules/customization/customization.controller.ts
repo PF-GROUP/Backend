@@ -2,7 +2,7 @@ import {Controller, Get, Post, Body, Patch, Param, UseGuards} from '@nestjs/comm
 import { CustomizationService } from './customization.service';
 import { UpdateCustomizationDto } from './update-customization.dto';
 import { CreateCustomizationDto } from './create-customization.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/role.decorator';
 import { Role } from 'src/Enum/roles.enum';
 import { AuthGuard } from 'src/guard/auth.guard';
