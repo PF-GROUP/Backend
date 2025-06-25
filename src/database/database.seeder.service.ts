@@ -30,7 +30,19 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
 
   async getPropertyType(queryRunner: any, type: string) {
     const typeRepo = queryRunner.manager.getRepository(TypeOfProperty);
-    return await typeRepo.findOne({ where: { type } });
+    const propertyType = await typeRepo.findOne({ where: { type } });
+
+    if (!propertyType) {
+      console.error(`Tipo de propiedad no encontrado: ${type}`);
+      throw new Error(
+        `Tipo de propiedad '${type}' no encontrado en la base de datos`,
+      );
+    }
+
+    console.log(
+      `Tipo de propiedad encontrado: ${type} con ID: ${propertyType.id}`,
+    );
+    return propertyType;
   }
 
   private generateSlug(name: string): string {
