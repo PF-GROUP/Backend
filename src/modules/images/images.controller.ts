@@ -2,14 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, HttpC
 import { ImagesService } from './images.service';
 import { CreateImageDto } from './create-image.dto';
 import { UpdateImageDto } from './update-image.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { RolesGuard } from 'src/guard/roles.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { Role } from 'src/Enum/roles.enum';
 
 @ApiTags('images')
-@ApiBearerAuth()
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}

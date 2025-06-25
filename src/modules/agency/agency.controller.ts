@@ -16,14 +16,12 @@ import { RolesGuard } from '../../guard/roles.guard';
 import { Roles } from '../../decorators/role.decorator';
 import { Role } from '../../Enum/roles.enum';
 import {
-  ApiBearerAuth,
   ApiTags,
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('agency')
-@ApiBearerAuth()
 @Controller('agency')
 export class AgencyController {
   constructor(private readonly agencyService: AgencyService) {}
@@ -66,7 +64,6 @@ export class AgencyController {
   @ApiOperation({ summary: 'Obtener agency por slug (Public)' })
   @ApiResponse({ status: 200, description: 'Obtuviste la agency por slug.' })
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
-  @ApiBearerAuth('public')
   async findBySlug(@Param('slug') slug: string) {
     return await this.agencyService.findOneBySlug(slug);
   }
@@ -75,7 +72,6 @@ export class AgencyController {
   @ApiOperation({ summary: 'Obtener agency por ID (Public)' })
   @ApiResponse({ status: 200, description: 'Obtuviste la agency.' })
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
-  @ApiBearerAuth('public')
   findOne(@Param('id') id: string) {
     return this.agencyService.findOne(id);
   }
@@ -107,7 +103,15 @@ export class AgencyController {
     return this.agencyService.remove(id);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
+  @UseGuards(AuthGuard, AgencyGuard)
+  @ApiOperation({ summary: 'Actualizar nombre y descripción de agency' })
+  @ApiResponse({
+    status: 200,
+    description: 'La agency ha sido actualizada exitosamente.',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
   updateAgency(
     @Param('id') id: string,
     @Body() updateAgencyDto: UpdateAgencyDto,

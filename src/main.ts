@@ -26,7 +26,12 @@ async function bootstrap() {
     .setTitle('Kasapp')
     .setVersion('1.0')
     .setDescription('Esta es la documentacionde nuestra app Kasapp')
-    .addBearerAuth()
+    .addCookieAuth('token', {
+      type: 'apiKey',
+      in: 'cookie',
+      name: 'token',
+      description: 'Token de autenticación almacenado en cookie'
+    })
     .build();
   app.use(cookieParser());
   const document = SwaggerModule.createDocument(app, swaggerConfig);
