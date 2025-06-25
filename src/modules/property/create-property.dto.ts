@@ -64,6 +64,6 @@ export class CreatePropertyDto {
   type_of_property_id: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  agency: number;
+  @IsUUID()
+  agency: string;
 }
