@@ -60,8 +60,8 @@ export class CreatePropertyDto {
   id_images?: string[];
 
   @IsNotEmpty()
-  @IsString()
-  type_of_property: string;
+  @IsUUID()
+  type_of_property_id: string;
 
   @IsNotEmpty()
   @IsNumber()
