@@ -57,13 +57,11 @@ export class PropertyService {
     includeDeleted: boolean = false,
   ): Promise<Property> {
     try {
-      const options = {
+      const property = await this.propertyRepository.findOne({
         where: { id },
         relations: ['type_of_property', 'agency', 'images'],
         withDeleted: includeDeleted,
-      };
-
-      const property = await this.propertyRepository.findOne(options);
+      });
 
       if (!property) {
         throw new Error('Propiedad no encontrada');
