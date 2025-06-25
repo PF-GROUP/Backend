@@ -15,11 +15,7 @@ import { AgencyGuard } from '../../guard/agency.guard';
 import { RolesGuard } from '../../guard/roles.guard';
 import { Roles } from '../../decorators/role.decorator';
 import { Role } from '../../Enum/roles.enum';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('agency')
 @Controller('agency')
@@ -92,15 +88,29 @@ export class AgencyController {
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.User)
-  @ApiOperation({ summary: 'Eliminar agency (Solo User)' })
+  @ApiOperation({ summary: 'Eliminar permanentemente una agencia (Solo User)' })
   @ApiResponse({
     status: 200,
-    description: 'La agency ha sido eliminada exitosamente.',
+    description: 'La agencia ha sido eliminada permanentemente.',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
   remove(@Param('id') id: string) {
     return this.agencyService.remove(id);
+  }
+
+  @Delete('soft/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.User)
+  @ApiOperation({
+    summary: 'Eliminar/restaurar logicamente una agencia (Solo User)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'La agencia ha sido eliminada/restaurada logicamente.',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  async softRemove(@Param('id') id: string) {
+    return this.agencyService.softRemove(id);
   }
 
   @Patch('update/:id')
