@@ -10,7 +10,6 @@ import { RolesGuard } from 'src/guard/roles.guard';
 import { AgencyOwnershipGuard } from 'src/guard/agencyOwnership.guard';
 
 @ApiTags('Customization')
-@ApiBearerAuth()
 @Controller('agencies/:agencyId/customization')
 export class CustomizationController {
   constructor(private readonly customizationService: CustomizationService) {}

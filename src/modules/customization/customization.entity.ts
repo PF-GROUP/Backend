@@ -16,7 +16,7 @@ export class Customization extends SoftDeletableEntity {
   @Column({nullable: true, default:"#000000"})
   mainColors: string;
   
-  @Column({nullable: true, default: "http://localhost:3000/asdsa.img"})
+  @Column({nullable: true, default: null})
   banner: string;
 
   @Column({nullable: true,default: "#8787FF"})

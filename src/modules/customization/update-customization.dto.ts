@@ -1,7 +1,7 @@
-import { IsOptional, IsString, IsHexColor } from 'class-validator';
+import { IsOptional, IsString, IsHexColor, IsUrl } from 'class-validator';
 
 export class UpdateCustomizationDto {
-  @IsString({ message: 'logoImage debe ser una cadena de texto.' })
+  @IsUrl({}, { message: 'logoImage debe ser un URL valido.' })
   @IsOptional()
   logoImage?: string;
 
@@ -13,7 +13,7 @@ export class UpdateCustomizationDto {
   @IsOptional()
   mainColors?: string;
 
-  @IsHexColor({ message: 'banner debe ser un color hexadecimal válido.' })
+  @IsUrl({}, { message: 'logoImage debe ser un URL valido.' })
   @IsOptional()
   banner?: string;
 
