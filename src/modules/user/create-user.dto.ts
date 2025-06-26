@@ -39,9 +39,6 @@ export class CreateUserDto {
   @IsNotEmpty()
   rol: UserRole;
 
-  @IsOptional()
-  @IsUrl({ require_protocol: true })
-  profilePictureUrl?: string | null;
 }
 
 export class createGoogleUserDto extends OmitType(CreateUserDto, ['password','phone']) {
