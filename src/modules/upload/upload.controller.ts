@@ -21,9 +21,4 @@ export class UploadController {
     return { url: imageUrl };
   }
 
-  @Delete('image/:publicId')
-  async deleteImage(@Param('publicId') publicId: string) {
-    await this.uploadService.deleteImage(publicId);
-    return { message: 'Imagen eliminada exitosamente' };
-  }
 }

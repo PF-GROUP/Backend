@@ -7,8 +7,8 @@ export class Images extends SoftDeletableEntity{
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ type: 'varchar', length: 255 })
-    file!: string;
+    @Column({ type: 'varchar', length: 255, nullable: false})
+    file: string;
 
     @Column({ type: 'varchar', length: 255, nullable: true })
     title?: string;

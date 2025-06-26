@@ -14,7 +14,7 @@ export class CreateImageDto {
   @IsOptional()
   description?: string;
 
-  @IsNumber({}, { message: 'El "propertyId" debe ser un número.' })
+  @IsString({ message: 'El "propertyId" debe ser una cadena de texto (UUID).' })
   @IsNotEmpty({ message: 'El "propertyId" es obligatorio para asociar la imagen a una propiedad.' })
   propertyId!: string;
 }

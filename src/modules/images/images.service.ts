@@ -5,6 +5,7 @@ import { Images } from './image.entity';
 import { Repository } from 'typeorm';
 import { Property } from '../property/property.entity';
 import { UpdateImageDto } from './update-image.dto';
+import { CloudinaryService } from 'src/shared/cloudinary.service';
 
 
 @Injectable()
@@ -14,6 +15,7 @@ export class ImagesService {
     private readonly imagesRepository: Repository<Images>,
     @InjectRepository(Property)
     private readonly propertyRepository: Repository<Property>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createImageDto: CreateImageDto): Promise<Images> {
@@ -55,8 +57,16 @@ export class ImagesService {
     if (!imageToUpdate) {
       throw new NotFoundException(`Imagen con ID "${id}" no encontrada para actualizar.`);
     }
-    
-    if (updateImageDto.file !== undefined) {
+
+    if (updateImageDto.file !== undefined && updateImageDto.file !== imageToUpdate.file) {
+      const oldImageUrl = imageToUpdate.file;
+      const oldPublicId = this.cloudinaryService.getPublicIdFromUrl(oldImageUrl);
+      if (oldPublicId) {
+        console.log(`Eliminando imagen antigua de Cloudinary con publicId: ${oldPublicId}`);
+        await this.cloudinaryService.deleteFile(oldPublicId);
+      } else {
+        console.warn(`No se pudo extraer publicId de la URL antigua: ${oldImageUrl}. No se eliminó de Cloudinary.`);
+      }
       imageToUpdate.file = updateImageDto.file;
     }
 
@@ -74,7 +84,7 @@ export class ImagesService {
 
     try {
       return await this.imagesRepository.save(imageToUpdate);
-    } catch (Error) {
+    } catch (error) {
       throw new InternalServerErrorException('Error al actualizar la información de la imagen.');
     }
   }
@@ -84,10 +94,19 @@ export class ImagesService {
     if (!imageToRemove) {
       throw new NotFoundException(`Imagen con ID "${id}" no encontrada para eliminar.`);
     }
-    await this.imagesRepository.softRemove(imageToRemove);
+
+    const publicIdToDelete = this.cloudinaryService.getPublicIdFromUrl(imageToRemove.file);
+    if (publicIdToDelete) {
+      console.log(`Eliminando imagen de Cloudinary con publicId: ${publicIdToDelete}`);
+      await this.cloudinaryService.deleteFile(publicIdToDelete);
+    } else {
+      console.warn(`No se pudo extraer publicId de la URL: ${imageToRemove.file}. No se eliminó de Cloudinary.`);
     }
 
-    async findOneWithPropertyAndOwner(id: string): Promise<Images | null> {
+    await this.imagesRepository.softRemove(imageToRemove);
+  }
+
+  async findOneWithPropertyAndOwner(id: string): Promise<Images | null> {
     return await this.imagesRepository.findOne({
       where: { id },
       relations: [

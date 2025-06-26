@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class UpdateImageDto {
   @IsString({ message: 'El campo "file" debe ser una cadena de texto.' })
@@ -14,7 +14,7 @@ export class UpdateImageDto {
   @IsOptional()
   description?: string;
 
-  @IsNumber({}, { message: 'El "propertyId" debe ser un número.' })
-  @IsOptional()
-  propertyId?: string;
+  @IsString({ message: 'El "propertyId" debe ser una cadena de texto (UUID).' })
+  @IsNotEmpty({ message: 'El "propertyId" es obligatorio para asociar la imagen a una propiedad.' })
+  propertyId!: string;
 }
