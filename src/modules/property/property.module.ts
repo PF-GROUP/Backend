@@ -15,6 +15,6 @@ import { TypeofpropertyModule } from '../typeOfProperty/typeofproperty.module';
   ],
   controllers: [PropertyController],
   providers: [PropertyService],
-  exports: [PropertyService],
+  exports: [PropertyService, TypeOrmModule.forFeature([Property])],
 })
 export class PropertyModule {}

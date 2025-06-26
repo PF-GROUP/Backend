@@ -7,7 +7,6 @@ import { Roles } from 'src/decorators/role.decorator';
 import { Role } from 'src/Enum/roles.enum';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { RolesGuard } from 'src/guard/roles.guard';
-import { AgencyOwnershipGuard } from 'src/guard/agencyOwnership.guard';
 
 @ApiTags('Customization')
 @Controller('agencies/:agencyId/customization')
@@ -16,7 +15,7 @@ export class CustomizationController {
 
 
   @Post()
-  @UseGuards(AuthGuard, RolesGuard, AgencyOwnershipGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
   @ApiOperation({ summary: 'Crea la configuración de personalización (branding) para una agencia.' })
   async create(
@@ -35,7 +34,7 @@ export class CustomizationController {
   }
 
   @Patch()
-  @UseGuards(AuthGuard, RolesGuard, AgencyOwnershipGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
   @ApiOperation({ summary: 'Actualiza la configuración de personalización (branding) de una agencia.' })
   async update(

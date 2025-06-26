@@ -10,6 +10,9 @@ export class Images extends SoftDeletableEntity{
     @Column({ type: 'varchar', length: 255, nullable: false})
     file: string;
 
+    @Column({type: 'varchar', nullable: true})
+    publicId:string | null;
+
     @Column({ type: 'varchar', length: 255, nullable: true })
     title?: string;
 

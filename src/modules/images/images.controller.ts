@@ -1,53 +1,85 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, HttpCode, HttpStatus, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Post, Param, Delete, ParseUUIDPipe, HttpCode, HttpStatus, BadRequestException, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import { CreateImageDto } from './create-image.dto';
-import { UpdateImageDto } from './update-image.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
-import { RolesGuard } from 'src/guard/roles.guard';
-import { Roles } from 'src/decorators/role.decorator';
-import { Role } from 'src/Enum/roles.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { IsOwnerOrAdminGuard } from 'src/guard/isOwnerOrAdmin.guard';
+import { PropertyOwnershipGuard } from 'src/guard/property-ownership.guard';
+import { CustomizationOwnershipGuard } from 'src/guard/customization-ownership.guard';
 
 @ApiTags('images')
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.User, Role.Admin)
-  async create(@Body() createImageDto: CreateImageDto) {
-    return this.imagesService.create(createImageDto);
-  }
 
-  @Get()
-  async findAll() {
-    return this.imagesService.findAll();
-  }
-
-  @Get(':id')
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.imagesService.findOne(id);
-  }
-
-  @Patch(':id')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.User, Role.Admin)
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateImageDto: UpdateImageDto,
+  @Post('property/:propertyId/gallery')
+  @UseGuards(AuthGuard, PropertyOwnershipGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPropertyGalleryImage(
+    @Param('propertyId', ParseUUIDPipe) propertyId: string,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    if (Object.keys(updateImageDto).length === 0) {
-      throw new BadRequestException('Se requiere al menos un campo para actualizar la imagen.');
+    if (!file) {
+      throw new BadRequestException('Se requiere un archivo de imagen.');
     }
-    return this.imagesService.update(id, updateImageDto);
+    const imageUrl = await this.imagesService.uploadAndAddPropertyGalleryImage(propertyId, file);
+    return { message: 'Imagen de galería subida con éxito', url: imageUrl };
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard, RolesGuard)
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
-    await this.imagesService.remove(id);
+
+  @Post('profile/:userId')
+  @UseGuards(AuthGuard, IsOwnerOrAdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadUserProfilePicture(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Se requiere un archivo de imagen.');
+    }
+    const imageUrl = await this.imagesService.uploadAndSetUserProfilePicture(userId, file);
+    return { message: 'Foto de perfil de usuario actualizada con éxito', url: imageUrl };
+  }
+
+
+  @Post('customization/:customizationId/logo')
+  @UseGuards(AuthGuard, CustomizationOwnershipGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCustomizationLogo(
+    @Param('customizationId', ParseUUIDPipe) customizationId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Se requiere un archivo de imagen.');
+    }
+    const imageUrl = await this.imagesService.uploadAndSetCustomizationLogo(customizationId, file);
+    return { message: 'Logo de customización actualizado con éxito', url: imageUrl };
+  }
+
+
+  @Post('customization/:customizationId/banner')
+  @UseGuards(AuthGuard, CustomizationOwnershipGuard) 
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCustomizationBanner(
+    @Param('customizationId', ParseUUIDPipe) customizationId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Se requiere un archivo de imagen.');
+    }
+    const imageUrl = await this.imagesService.uploadAndSetCustomizationBanner(customizationId, file);
+    return { message: 'Banner de customización actualizado con éxito', url: imageUrl };
+  }
+
+
+  @Delete('property/:propertyId/gallery/:imageId')
+  @UseGuards(AuthGuard, PropertyOwnershipGuard)
+  async removePropertyGalleryImage(
+    @Param('propertyId', ParseUUIDPipe) propertyId: string,
+    @Param('imageId', ParseUUIDPipe) imageId: string,
+  ) {
+    await this.imagesService.removePropertyGalleryImage(propertyId, imageId);
+    return { message: 'Imagen de galería eliminada con éxito.' };
   }
 }
