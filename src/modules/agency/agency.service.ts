@@ -5,7 +5,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { CreateAgencyDto, UpdateAgencyDto } from './agency.dto';
 import { Agency } from './agency.entity';
 import { UserService } from '../user/user.service';
@@ -109,7 +109,7 @@ export class AgencyService {
     }
   }
 
-  async softRemove(id: string): Promise<Agency> {
+  async softRemove(id: string): Promise<Agency | null> {
     const agency = await this.agencyRepository.findOne({
       where: { id },
       withDeleted: true,
@@ -119,15 +119,21 @@ export class AgencyService {
       throw new NotFoundException('Agencia no encontrada');
     }
 
-    // Si ya esta eliminada logicamente, se restaura
+    // Si ya esta eliminada logicamente, la restaura
     if (agency.deletedAt) {
       await this.agencyRepository.restore({ id });
-      return this.findOne(id);
+      return this.agencyRepository.findOne({
+        where: { id },
+        withDeleted: true,
+      });
     }
 
-    // Si no esta eliminada logicamente, se elimina logicamente
+    // Si no esta eliminada logicamente, la elimina
     await this.agencyRepository.softRemove(agency);
-    return this.findOne(id);
+    return this.agencyRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
   }
 
   async existsAgency(id: string): Promise<boolean> {
@@ -178,5 +184,15 @@ export class AgencyService {
     }
 
     return agency;
+  }
+  // Buscar agencias eliminadas logicamente
+  async findRemoved(): Promise<Agency[]> {
+    return this.agencyRepository.find({
+      withDeleted: true,
+      where: {
+        deletedAt: Not(IsNull()),
+      },
+      relations: ['customization', 'properties', 'user'],
+    });
   }
 }

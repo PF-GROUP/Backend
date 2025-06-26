@@ -64,6 +64,22 @@ export class AgencyController {
     return await this.agencyService.findOneBySlug(slug);
   }
 
+  // Buscar agencias eliminadas logicamente
+  @Get('soft-removed')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Obtener todas las agencias eliminadas logicamente (Solo Admin)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de agencias eliminadas logicamente.',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  async findRemoved() {
+    return this.agencyService.findRemoved();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener agency por ID (Public)' })
   @ApiResponse({ status: 200, description: 'Obtuviste la agency.' })
@@ -87,8 +103,10 @@ export class AgencyController {
 
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.User)
-  @ApiOperation({ summary: 'Eliminar permanentemente una agencia (Solo User)' })
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Eliminar permanentemente una agencia (Solo Admin)',
+  })
   @ApiResponse({
     status: 200,
     description: 'La agencia ha sido eliminada permanentemente.',
@@ -100,9 +118,9 @@ export class AgencyController {
 
   @Delete('soft/:id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.User)
+  @Roles(Role.Admin)
   @ApiOperation({
-    summary: 'Eliminar/restaurar logicamente una agencia (Solo User)',
+    summary: 'Eliminar/restaurar logicamente una agencia (Solo Admin)',
   })
   @ApiResponse({
     status: 200,
