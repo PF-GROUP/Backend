@@ -14,7 +14,6 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly agencyService: AgencyService,
-    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -96,39 +95,6 @@ const theUser = await this.userRepository.findOne({ where: { googleId } });
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const userToUpdate = await this.findOne(id);
 
-    if (updateUserDto.profilePictureUrl !== undefined) {
-      const oldProfilePictureUrl = userToUpdate.profilePictureUrl;
-      const newProfilePictureUrl = updateUserDto.profilePictureUrl;
-
-      if (oldProfilePictureUrl && oldProfilePictureUrl !== newProfilePictureUrl) {
-        try {
-          const publicId = this.cloudinaryService.getPublicIdFromUrl(oldProfilePictureUrl);
-          if (publicId) {
-            await this.cloudinaryService.deleteFile(publicId);
-            console.log(`Old profile picture deleted from Cloudinary: ${oldProfilePictureUrl}`);
-          } else {
-            console.warn(`Could not extract publicId from old profile URL: ${oldProfilePictureUrl}. Not deleted from Cloudinary.`);
-          }
-        } catch (error) {
-          console.error(`Error trying to delete old profile picture from Cloudinary for user ${id}: ${error.message}`);
-
-        }
-      }
-      else if (oldProfilePictureUrl && newProfilePictureUrl === null) {
-          try {
-              const publicId = this.cloudinaryService.getPublicIdFromUrl(oldProfilePictureUrl);
-              if (publicId) {
-                  await this.cloudinaryService.deleteFile(publicId);
-                  console.log(`Profile picture deleted (set to null): ${oldProfilePictureUrl}`);
-              } else {
-                  console.warn(`Could not extract publicId from profile URL: ${oldProfilePictureUrl}. Not deleted from Cloudinary.`);
-              }
-          } catch (error) {
-              console.error(`Error trying to delete profile picture from Cloudinary when setting to null for user ${id}: ${error.message}`);
-          }
-      }
-    }
-
     Object.assign(userToUpdate, updateUserDto);
 
     return await this.userRepository.save(userToUpdate);
@@ -153,39 +119,6 @@ const theUser = await this.userRepository.findOne({ where: { googleId } });
  
 
   return agency.user;
-  }
-
-  async updateProfilePicture(userId: string, file: Express.Multer.File): Promise<string> {
-    if (!file) {
-      throw new BadRequestException('No se ha proporcionado ningún archivo para la foto de perfil.');
-    }
-
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException(`Usuario con ID "${userId}" no encontrado.`);
-    }
-
-    try {
-
-      if (user.profilePictureUrl) {
-        const publicId = this.cloudinaryService.getPublicIdFromUrl(user.profilePictureUrl);
-        if (publicId) {
-          await this.cloudinaryService.deleteFile(publicId);
-        }
-      }
-
-
-      const newImageUrl = await this.cloudinaryService.uploadFile(file);
-
-
-      user.profilePictureUrl = newImageUrl;
-      await this.userRepository.save(user);
-
-      return newImageUrl; 
-    } catch (error) {
-      console.error('Error en UserService al actualizar la foto de perfil:', error);
-      throw new InternalServerErrorException('No se pudo actualizar la foto de perfil debido a un error interno.');
-    }
   }
 
 }

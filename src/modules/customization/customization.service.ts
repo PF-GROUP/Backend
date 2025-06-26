@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Customization } from './customization.entity';
 import { Repository } from 'typeorm';
 import { Agency } from 'src/modules/agency/agency.entity';
-import { CloudinaryService } from 'src/shared/cloudinary.service';
 
 @Injectable()
 export class CustomizationService {
@@ -15,40 +14,10 @@ export class CustomizationService {
 
     @InjectRepository(Agency)
     private agencyRepository: Repository<Agency>,
-
-    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async updateByAgencyId(agencyId: string, updateCustomizationDto: UpdateCustomizationDto): Promise<Customization> {
     const customizationUpdate = await this.findOneByAgencyId(agencyId);
-
-    if (updateCustomizationDto.logoImage !== undefined && updateCustomizationDto.logoImage !== customizationUpdate.logoImage) {
-      const oldLogoUrl = customizationUpdate.logoImage;
-
-      if (oldLogoUrl) {
-        const publicIdToDelete = this.cloudinaryService.getPublicIdFromUrl(oldLogoUrl);
-        if (publicIdToDelete) {
-          console.log(`Eliminando logo antiguo de Cloudinary con publicId: ${publicIdToDelete}`);
-          await this.cloudinaryService.deleteFile(publicIdToDelete);
-        } else {
-          console.warn(`No se pudo extraer publicId del logo antiguo: ${oldLogoUrl}. No se eliminó de Cloudinary.`);
-        }
-      }
-    }
-
-    if (updateCustomizationDto.banner !== undefined && updateCustomizationDto.banner !== customizationUpdate.banner) {
-      const oldBannerUrl = customizationUpdate.banner;
-
-      if (oldBannerUrl) {
-        const publicIdToDelete = this.cloudinaryService.getPublicIdFromUrl(oldBannerUrl);
-        if (publicIdToDelete) {
-          console.log(`Eliminando banner antiguo de Cloudinary con publicId: ${publicIdToDelete}`);
-          await this.cloudinaryService.deleteFile(publicIdToDelete);
-        } else {
-          console.warn(`No se pudo extraer publicId del banner antiguo: ${oldBannerUrl}. No se eliminó de Cloudinary.`);
-        }
-      }
-    }
 
     this.customizationRepository.merge(customizationUpdate, updateCustomizationDto);
 
