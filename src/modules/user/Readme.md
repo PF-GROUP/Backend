@@ -1,34 +1,32 @@
-# Módulo de Usuario (User)
+# 🚀 Flujo del Frontend: Actualización de Foto de Perfil de Usuario
 
-Este módulo gestiona la lógica relacionada con los usuarios de la aplicación, incluyendo la autenticación, la gestión de perfiles y la interacción con fotos de perfil alojadas en Cloudinary.
-
-## Estructura y Componentes Clave
-
-* **`UserController`**: Define los endpoints de la API para las operaciones CRUD sobre usuarios y la gestión de la foto de perfil.
-* **`UserService`**: Contiene la lógica de negocio para las operaciones de usuario, incluyendo la interacción con la base de datos y Cloudinary.
-* **`UserEntity`**: La definición de la tabla de usuarios en la base de datos.
-* **`CreateUserDto` / `UpdateUserDto`**: Data Transfer Objects para la validación de entrada.
-* **`AuthGuard`**: Guard de NestJS que verifica la autenticación del usuario mediante JWT.
-* **`RolesGuard`**: Guard de NestJS que verifica los roles del usuario (ej. Admin).
-* **`IsOwnerOrAdminGuard`**: Guard de NestJS personalizado para controlar el acceso a recursos específicos del usuario, permitiendo el acceso solo al propio usuario o a un administrador.
-* **`CloudinaryService`**: Servicio para interactuar con la API de Cloudinary para la subida y eliminación de imágenes.
+Este `README` describe el flujo que tu frontend debe seguir para permitir a los usuarios **subir y actualizar sus fotos de perfil**. El proceso se divide en **dos pasos principales** para asegurar una gestión correcta de la imagen en Cloudinary y su posterior actualización en tu base de datos a través de tu `UserController`.
 
 ---
 
-## **`IsOwnerOrAdminGuard`**
+## 📸 Paso 1: Subir la Nueva Foto a Cloudinary y Obtener su URL
 
-### Propósito
+El frontend es responsable de tomar el archivo de imagen que el usuario selecciona y enviarlo directamente a tu endpoint de carga de imágenes.
 
-Este `Guard` es fundamental para implementar una capa de autorización fina en los endpoints de usuario. Su función principal es asegurar que:
+### Acciones del Frontend:
 
-1.  **Solo el propietario del recurso** puede acceder o modificarlo.
-2.  **Un usuario con rol de `Admin`** también puede acceder o modificar cualquier recurso, independientemente de la propiedad.
+1.  **Capturar el archivo:** El usuario elige una nueva foto mediante un `input` de tipo `file`.
+2.  **Preparar la solicitud:** Crea un objeto `FormData`. Este objeto, clave para enviar archivos, debe incluir tu imagen bajo la clave **`file`** (el nombre de campo que espera tu backend).
+3.  **Enviar el archivo (POST):** Realiza una solicitud **`POST`** a tu endpoint de carga de imágenes: `/upload/image`.
+    * **Ejemplo:** `POST /upload/image`
+    * **Importante:** El navegador configurará automáticamente el `Content-Type` adecuado (`multipart/form-data`) para `FormData`.
+    * Opcionalmente, puedes añadir un parámetro de query como `?folder=user-profiles` para organizar las imágenes en Cloudinary.
+4.  **Recibir la URL:** Si la subida es exitosa, tu backend responderá con un JSON que contiene la **URL pública** de la imagen en Cloudinary (ej., `{"url": "https://res.cloudinary.com/tu-cloud/..."}`). **Almacena esta URL temporalmente** en el frontend.
 
-### ¿Cómo funciona?
 
-1.  **Recupera el ID del usuario** del token JWT autenticado (generalmente de `req.user.id`).
-2.  **Recupera el ID del recurso** de los parámetros de la solicitud (ej. `:id` en `/users/:id`).
-3.  **Compara ambos IDs**: Si coinciden, el usuario es el propietario y se concede el acceso.
-4.  **Verifica el rol**: Si los IDs no coinciden, verifica si el usuario autenticado tiene el rol `Admin`. Si lo tiene, se concede el acceso.
-5.  **Deniega el acceso**: Si ninguna de las condiciones anteriores se cumple, se deniega el acceso (generalmente con un error `403 Forbidden`).
 
+### 📸 Paso 2: Actualizar el Perfil del Usuario con la Nueva URL
+
+Una vez que el frontend tiene la URL de Cloudinary de la nueva foto, el siguiente paso es enviarla a tu backend para actualizar el registro del usuario. Esto se hará usando tu endpoint existente **`PATCH /user/:id`** en el `UserController`.
+
+#### Acciones del Frontend:
+
+1.  **Construir el `payload`:** Crea un objeto JSON que incluya la propiedad **`profilePictureUrl`** con la URL obtenida en el Paso 1. Puedes añadir otros campos del perfil (`name`, `phone`, etc.) si el usuario los está actualizando al mismo tiempo.
+2.  **Enviar la actualización (PATCH):** Realiza una solicitud **`PATCH`** a tu endpoint de actualización de usuario: `/user/:id`.
+    * **Ejemplo:** `PATCH /user/ID_DEL_USUARIO` (donde `ID_DEL_USUARIO` es el UUID del usuario).
+    * **Tu `UserController` ya tiene este endpoint configurado (`@Patch(':id')`) y está protegido por `AuthGuard` e `IsOwnerOrAdminGuard`.**
