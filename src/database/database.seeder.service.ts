@@ -9,7 +9,6 @@ import * as bcrypt from 'bcrypt';
 import { Status } from '../Enum/status.enum';
 import { Type } from '../Enum/type.enum';
 import { PropertyTypeName } from '../modules/typeOfProperty/property-type.enum';
-import { Query } from 'typeorm/driver/Query';
 import { Customization } from 'src/Customization/customization.entity';
 
 @Injectable()
@@ -48,11 +47,12 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   private generateSlug(name: string): string {
     return name
       .toLowerCase()
-      .replace(/\s+/g, '_')
-      .replace(/[^\w_]+/g, '')
-      .replace(/_+/g, '_')
-      .replace(/^_+/, '')
-      .replace(/_+$/, '');
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
   }
 
   private async seedPropertyTypes(queryRunner: any) {
@@ -116,11 +116,12 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         await customizationRepo.save(
           queryRunner.manager.create(Customization, {
             logoImage:
-              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970243/logo1_n2evmh.png',
             information:
               'Especialistas en propiedades premium con atención personalizada.',
             mainColors: '#1E3A8A',
-            banner: 'https://i.imgur.com/def456.jpg',
+            banner:
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970242/banner1_amu36t.png',
             navbarColor: '#1D4ED8',
             buttonColor: '#2563EB',
             backgroundColor: '#EFF6FF',
@@ -132,11 +133,12 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         await customizationRepo.save(
           queryRunner.manager.create(Customization, {
             logoImage:
-              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970243/logo1_n2evmh.png',
             information:
               'Encontrá la casa de tus sueños con nuestro asesoramiento experto.',
             mainColors: '#0F4C81',
-            banner: 'https://i.imgur.com/ghi789.jpg',
+            banner:
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970242/banner1_amu36t.png',
             navbarColor: '#0F4C81',
             buttonColor: '#3A7CA5',
             backgroundColor: '#F8F9FA',
@@ -148,10 +150,11 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         await customizationRepo.save(
           queryRunner.manager.create(Customization, {
             logoImage:
-              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970243/logo1_n2evmh.png',
             information: 'Excelencia en asesoramiento inmobiliario desde 1995.',
             mainColors: '#2A5C45',
-            banner: 'https://i.imgur.com/jkl012.jpg',
+            banner:
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970242/banner1_amu36t.png',
             navbarColor: '#2A5C45',
             buttonColor: '#3A7D44',
             backgroundColor: '#F5F5F5',
@@ -163,10 +166,11 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         await customizationRepo.save(
           queryRunner.manager.create(Customization, {
             logoImage:
-              'https://static.vecteezy.com/resources/thumbnails/small/real-estate-logo-design-png.png',
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970243/logo1_n2evmh.png',
             information: 'Panel de administración del sistema inmobiliario.',
             mainColors: '#1E3A8A',
-            banner: 'https://i.imgur.com/mno345.jpg',
+            banner:
+              'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970242/banner1_amu36t.png',
             navbarColor: '#1D4ED8',
             buttonColor: '#2563EB',
             backgroundColor: '#FFFFFF',
@@ -266,7 +270,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       agencies[3].user = users[0]; // Admin Properties -> Admin
       await agencyRepo.save(agencies);
 
-      // Get property types for seeding properties
+      // Obtener los tipos de propiedad
       const propertyType1 = await this.getPropertyType(
         queryRunner,
         PropertyTypeName.CASA,
@@ -354,15 +358,15 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const imageRepo = queryRunner.manager.getRepository(Images);
       const imagesToCreate = [
         {
-          file: 'https://example.com/image1.jpg',
+          file: 'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970244/property1_cz1jav.jpg',
           property: properties[0],
         },
         {
-          file: 'https://example.com/image2.jpg',
+          file: 'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970244/property1_cz1jav.jpg',
           property: properties[1],
         },
         {
-          file: 'https://example.com/image3.jpg',
+          file: 'https://res.cloudinary.com/dqpy1fd8i/image/upload/v1750970244/property1_cz1jav.jpg',
           property: properties[2],
         },
       ];
