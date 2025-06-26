@@ -21,6 +21,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiTags,
+  ApiBearerAuth,
   ApiQuery,
   ApiParam,
   ApiBody,
