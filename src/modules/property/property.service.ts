@@ -130,4 +130,19 @@ export class PropertyService {
       );
     }
   }
+
+  async findOneWithAgencyAndOwner(id: string): Promise<Property | null> {
+    const property = await this.propertyRepository.findOne({
+      where: { id },
+      relations: {
+        agency: {
+          user: true,
+        },
+      },
+
+      withDeleted: false,
+    });
+
+    return property;
+  }
 }

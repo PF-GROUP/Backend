@@ -13,12 +13,10 @@ import { TypeofpropertyModule } from './modules/typeOfProperty/typeofproperty.mo
 import { UserModule } from './modules/user/user.module';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { AuthModule } from './modules/auth/auth.module';
-
 import { NodeMailerModule } from './modules/node-mailer/node-mailer.module';
 import { DatabaseSeederModule } from './database/database-seeder.module';
 import { CloudinaryModule } from './shared/cloudinary.module';
 import { config as dotenvconfig} from "dotenv"
-import { UploadModule } from './modules/upload/upload.module';
 
 dotenvconfig({path: ".env.development"})
 
@@ -52,7 +50,6 @@ dotenvconfig({path: ".env.development"})
     NodeMailerModule,
     DatabaseSeederModule,
     CloudinaryModule,
-    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

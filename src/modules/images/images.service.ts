@@ -1,113 +1,197 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateImageDto } from './create-image.dto';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Images } from './image.entity';
 import { Repository } from 'typeorm';
-import { Property } from '../property/property.entity';
-import { UpdateImageDto } from './update-image.dto';
 import { CloudinaryService } from 'src/shared/cloudinary.service';
+import { Property } from '../property/property.entity';
+import { User } from '../user/user.entity';
+import { Images } from './image.entity';
+import { Customization } from '../customization/customization.entity';
 
 
 @Injectable()
 export class ImagesService {
- constructor(
-    @InjectRepository(Images)
-    private readonly imagesRepository: Repository<Images>,
+  constructor(
+    private readonly cloudinaryService: CloudinaryService,
     @InjectRepository(Property)
     private readonly propertyRepository: Repository<Property>,
-    private readonly cloudinaryService: CloudinaryService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Images)
+    private readonly imageRepository: Repository<Images>,
+    @InjectRepository(Customization)
+    private readonly customizationRepository: Repository<Customization>,
+
   ) {}
 
-  async create(createImageDto: CreateImageDto): Promise<Images> {
-    const { file, propertyId, title, description } = createImageDto;
-    const property = await this.propertyRepository.findOneBy({ id: propertyId });
-    if (!property) {
-      throw new NotFoundException(`Propiedad con ID "${propertyId}" no encontrada. Una imagen debe asociarse a una propiedad existente.`);
+  private async deleteOldImageFromCloudinary(publicIdOrUrl: string): Promise<void> {
+    if (!publicIdOrUrl) return;
+
+    let publicIdToDelete: string | null = null;
+
+    if (publicIdOrUrl.includes('/res.cloudinary.com/')) { 
+        publicIdToDelete = this.cloudinaryService.getPublicIdFromUrl(publicIdOrUrl);
+    } else { 
+        publicIdToDelete = publicIdOrUrl;
     }
-
-    const newImage = this.imagesRepository.create({
-      file: file,
-      title: title,
-      description: description,
-      property: property,
-      propertyId: propertyId,
-    });
-
-    try {
-      return await this.imagesRepository.save(newImage);
-    } catch (error) {
-      throw new InternalServerErrorException('Error al guardar la información de la imagen en la base de datos.');
-    }
-  }
-
-  async findAll(): Promise<Images[]> {
-    return await this.imagesRepository.find({ relations: ['property'] });
-  }
-
-  async findOne(id: string): Promise<Images> {
-    const image = await this.imagesRepository.findOne({ where: { id }, relations: ['property'] });
-    if (!image) {
-      throw new NotFoundException(`Imagen con ID "${id}" no encontrada.`);
-    }
-    return image;
-  }
-
-  async update(id: string, updateImageDto: UpdateImageDto): Promise<Images> {
-    const imageToUpdate = await this.imagesRepository.findOneBy({ id });
-    if (!imageToUpdate) {
-      throw new NotFoundException(`Imagen con ID "${id}" no encontrada para actualizar.`);
-    }
-
-    if (updateImageDto.file !== undefined && updateImageDto.file !== imageToUpdate.file) {
-      const oldImageUrl = imageToUpdate.file;
-      const oldPublicId = this.cloudinaryService.getPublicIdFromUrl(oldImageUrl);
-      if (oldPublicId) {
-        console.log(`Eliminando imagen antigua de Cloudinary con publicId: ${oldPublicId}`);
-        await this.cloudinaryService.deleteFile(oldPublicId);
-      } else {
-        console.warn(`No se pudo extraer publicId de la URL antigua: ${oldImageUrl}. No se eliminó de Cloudinary.`);
-      }
-      imageToUpdate.file = updateImageDto.file;
-    }
-
-    if (updateImageDto.propertyId !== undefined) {
-      const newProperty = await this.propertyRepository.findOneBy({ id: updateImageDto.propertyId });
-      if (!newProperty) {
-        throw new BadRequestException(`La nueva propiedad con ID "${updateImageDto.propertyId}" no existe.`);
-      }
-      imageToUpdate.property = newProperty;
-      imageToUpdate.propertyId = newProperty.id;
-    }
-
-    imageToUpdate.title = updateImageDto.title ?? imageToUpdate.title;
-    imageToUpdate.description = updateImageDto.description ?? imageToUpdate.description;
-
-    try {
-      return await this.imagesRepository.save(imageToUpdate);
-    } catch (error) {
-      throw new InternalServerErrorException('Error al actualizar la información de la imagen.');
-    }
-  }
-
-  async remove(id: string): Promise<void> {
-    const imageToRemove = await this.imagesRepository.findOneBy({ id });
-    if (!imageToRemove) {
-      throw new NotFoundException(`Imagen con ID "${id}" no encontrada para eliminar.`);
-    }
-
-    const publicIdToDelete = this.cloudinaryService.getPublicIdFromUrl(imageToRemove.file);
+    
     if (publicIdToDelete) {
-      console.log(`Eliminando imagen de Cloudinary con publicId: ${publicIdToDelete}`);
-      await this.cloudinaryService.deleteFile(publicIdToDelete);
+        try {
+            await this.cloudinaryService.deleteFile(publicIdToDelete);
+            console.log(`[ImagesService] Old image deleted from Cloudinary: ${publicIdToDelete}`);
+        } catch (error) {
+            console.error(`[ImagesService] Error deleting old image from Cloudinary (ID: ${publicIdToDelete}):`, error.message);
+        }
     } else {
-      console.warn(`No se pudo extraer publicId de la URL: ${imageToRemove.file}. No se eliminó de Cloudinary.`);
+        console.warn(`[ImagesService] Could not determine publicId from input: ${publicIdOrUrl}. Not deleted from Cloudinary.`);
+    }
+  }
+
+
+  async uploadAndAddPropertyGalleryImage(propertyId: string, file: Express.Multer.File): Promise<string> {
+
+    const property = await this.propertyRepository.findOne({ 
+        where: { id: propertyId }
+    });
+    if (!property) {
+      throw new NotFoundException(`Propiedad con ID "${propertyId}" no encontrada.`);
     }
 
-    await this.imagesRepository.softRemove(imageToRemove);
+    try {
+      const newImageUrl = await this.cloudinaryService.uploadFile(file); 
+      const newPublicId = this.cloudinaryService.getPublicIdFromUrl(newImageUrl);
+      
+      const newImage = this.imageRepository.create({
+        file: newImageUrl,
+        publicId: newPublicId,
+        property: property, 
+      });
+
+      await this.imageRepository.save(newImage);
+
+      return newImageUrl; 
+    } catch (error) {
+      console.error(`[ImagesService] Error al subir y añadir imagen de galería para propiedad ${propertyId}:`, error);
+      throw new InternalServerErrorException('No se pudo subir y/o asociar la imagen de galería a la propiedad.');
+    }
+  }
+
+  async uploadAndSetUserProfilePicture(userId: string, file: Express.Multer.File): Promise<string> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID "${userId}" no encontrado.`);
+    }
+
+    try {
+
+      if(user.profilePictureUrl)
+      await this.deleteOldImageFromCloudinary(user.profilePictureUrl); 
+
+
+      const newImageUrl = await this.cloudinaryService.uploadFile(file);
+
+
+      user.profilePictureUrl = newImageUrl;
+      await this.userRepository.save(user); 
+      
+      return newImageUrl;
+    } catch (error) {
+      console.error(`[ImagesService] Error al subir y actualizar foto de perfil para usuario ${userId}:`, error);
+      throw new InternalServerErrorException('No se pudo subir y/o asociar la foto de perfil del usuario.');
+    }
+  }
+
+  async uploadAndSetCustomizationLogo(customizationId: string, file: Express.Multer.File): Promise<string> {
+
+    const customization = await this.customizationRepository.findOne({ 
+        where: { id: customizationId }
+    });
+    if (!customization) {
+      throw new NotFoundException(`Customization con ID "${customizationId}" no encontrada. Asegúrese de que la entidad de personalización ya existe.`);
+    }
+
+    try {
+
+      if (customization.logoImage) { 
+        await this.deleteOldImageFromCloudinary(customization.logoImage);
+      }
+      
+      const newImageUrl = await this.cloudinaryService.uploadFile(file); 
+
+      customization.logoImage = newImageUrl; 
+      await this.customizationRepository.save(customization); 
+      
+      return newImageUrl;
+    } catch (error) {
+      console.error(`[ImagesService] Error al subir y actualizar logo para customización ${customizationId}:`, error);
+      throw new InternalServerErrorException('No se pudo subir y/o asociar el logo a la customización.');
+    }
+  }
+
+  async uploadAndSetCustomizationBanner(customizationId: string, file: Express.Multer.File): Promise<string> {
+    const customization = await this.customizationRepository.findOne({ 
+        where: { id: customizationId }
+    });
+    if (!customization) {
+      throw new NotFoundException(`Customization con ID "${customizationId}" no encontrada. Asegúrese de que la entidad de personalización ya existe.`);
+    }
+
+    try {
+
+      if (customization.banner) { 
+        await this.deleteOldImageFromCloudinary(customization.banner);
+      }
+      
+      const newImageUrl = await this.cloudinaryService.uploadFile(file); 
+      
+      customization.banner = newImageUrl;
+      await this.customizationRepository.save(customization); 
+
+      return newImageUrl;
+    } catch (error) {
+      console.error(`[ImagesService] Error al subir y actualizar banner para customización ${customizationId}:`, error);
+      throw new InternalServerErrorException('No se pudo subir y/o asociar el banner a la customización.');
+    }
+  }
+
+
+  async removePropertyGalleryImage(propertyId: string, imageId: string): Promise<void> {
+
+    const property = await this.propertyRepository.findOne({ 
+        where: { id: propertyId }, 
+        relations: ['images'] 
+    });
+    if (!property) {
+      throw new NotFoundException(`Propiedad con ID "${propertyId}" no encontrada.`);
+    }
+
+
+    const imageToRemove = property.images.find(img => img.id === imageId);
+    if (!imageToRemove) {
+      throw new BadRequestException('La imagen especificada no se encuentra en la galería de esta propiedad.');
+    }
+
+    try {
+
+      if (imageToRemove.publicId) {
+        await this.deleteOldImageFromCloudinary(imageToRemove.publicId);
+      } else {
+
+        console.warn(`[ImagesService] publicId no encontrado para la imagen ${imageId}. Intentando eliminar con la URL: ${imageToRemove.file}`);
+        await this.deleteOldImageFromCloudinary(imageToRemove.file);
+      }
+
+      await this.imageRepository.remove(imageToRemove);
+      
+      console.log(`[ImagesService] Imagen de galería ${imageId} eliminada con éxito de la propiedad ${propertyId}.`);
+
+    } catch (error) {
+      console.error(`[ImagesService] Error al eliminar imagen de galería ${imageId} de propiedad ${propertyId}:`, error);
+      throw new InternalServerErrorException('No se pudo eliminar la imagen de galería.');
+    }
   }
 
   async findOneWithPropertyAndOwner(id: string): Promise<Images | null> {
-    return await this.imagesRepository.findOne({
+    return await this.imageRepository.findOne({
       where: { id },
       relations: [
         'property',
@@ -115,5 +199,6 @@ export class ImagesService {
         'property.agency.user'
       ],
     });
-  }
+}
+
 }

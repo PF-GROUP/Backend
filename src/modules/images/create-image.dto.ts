@@ -1,10 +1,10 @@
-import { IsNotEmpty, IsString, IsOptional, IsNumber, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsUrl } from 'class-validator';
 
 export class CreateImageDto {
   @IsString({ message: 'El campo "file" debe ser una cadena de texto.' })
   @IsUrl({}, { message: 'El campo "file" debe ser una URL válida.' })
   @IsNotEmpty({ message: 'El campo "file" (URL de la imagen) no puede estar vacío.' })
-  file!: string;
+  file: string;
 
   @IsString({ message: 'El campo "title" debe ser una cadena de texto.' })
   @IsOptional()

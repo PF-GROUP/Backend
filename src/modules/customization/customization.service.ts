@@ -105,4 +105,18 @@ export class CustomizationService {
     return savedCustomization;
   }
 
+
+   async findOneWithAgencyAndOwner(id: string): Promise<Customization | null> {
+    const customization = await this.customizationRepository.findOne({
+      where: { id },
+      relations: {
+        agency: {
+          user: true,
+        },
+      },
+      withDeleted: false,
+    });
+    return customization;
+  }
+
 }
