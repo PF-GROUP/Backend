@@ -35,15 +35,15 @@ import { Role } from '../../Enum/roles.enum';
 
 @ApiTags('Property')
 @Controller('property')
-// @ApiBearerAuth()
+@ApiBearerAuth()
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe({ transform: true }))
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(Role.Admin, Role.User)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({
     summary: 'Crear una nueva propiedad (Agente o Admin)',
     description: 'Crea una nueva propiedad.',
@@ -162,8 +162,8 @@ export class PropertyController {
 
   @Patch(':id')
   @UsePipes(new ValidationPipe({ transform: true }))
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(Role.Admin, Role.User)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({
     summary: 'Actualizar una propiedad existente por ID (Agente o Admin)',
     description: 'Actualiza los datos de una propiedad por su ID.',
@@ -220,8 +220,8 @@ export class PropertyController {
   }
 
   @Delete(':id')
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   @ApiOperation({
     summary: 'Eliminar una propiedad de forma permanente (Solo Admin)',
     description:
