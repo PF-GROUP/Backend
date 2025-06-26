@@ -11,6 +11,7 @@ import { AgencyService } from '../agency/agency.service';
 import { Role } from 'src/Enum/roles.enum';
 import { NodeMailerService } from '../node-mailer/node-mailer.service';
 import { config as dotenvconfig } from "dotenv"
+import { userPayload } from './update-register.dto';
 dotenvconfig({path: ".env.development"});
 @Injectable()
 export class AuthService {
@@ -256,13 +257,16 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
 
  private signJWT(user: User) {
   console.log(user)
-  const payload = {
+  const payload:userPayload = {
     id: user.id,
     name: user.name,
     surname: user.surname,
     email: user.email,
     isAdmin: user.isAdmin,
-    agencyId: user.agency?.id
+    agencyId: user.agency?.id,
+    onBoarding: user.agency?.onBoarding,
+    status: user.agency?.suscription?.status,
+    suscriptionId: user.agency?.suscription?.suscriptionId  
   };
   const token = this.jwtService.sign(payload);
   return { token , user: payload };
