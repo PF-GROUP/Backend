@@ -40,7 +40,6 @@ export class CreateUserDto {
   rol: UserRole;
 
   @IsOptional()
-  @IsString()
   @IsUrl({ require_protocol: true })
   profilePictureUrl?: string | null;
 }

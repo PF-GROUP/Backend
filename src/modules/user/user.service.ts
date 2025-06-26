@@ -92,10 +92,46 @@ const theUser = await this.userRepository.findOne({ where: { googleId } });
     return user;
   }
 
+  
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-    Object.assign(user, updateUserDto);
-    return await this.userRepository.save(user);
+    const userToUpdate = await this.findOne(id);
+
+    if (updateUserDto.profilePictureUrl !== undefined) {
+      const oldProfilePictureUrl = userToUpdate.profilePictureUrl;
+      const newProfilePictureUrl = updateUserDto.profilePictureUrl;
+
+      if (oldProfilePictureUrl && oldProfilePictureUrl !== newProfilePictureUrl) {
+        try {
+          const publicId = this.cloudinaryService.getPublicIdFromUrl(oldProfilePictureUrl);
+          if (publicId) {
+            await this.cloudinaryService.deleteFile(publicId);
+            console.log(`Old profile picture deleted from Cloudinary: ${oldProfilePictureUrl}`);
+          } else {
+            console.warn(`Could not extract publicId from old profile URL: ${oldProfilePictureUrl}. Not deleted from Cloudinary.`);
+          }
+        } catch (error) {
+          console.error(`Error trying to delete old profile picture from Cloudinary for user ${id}: ${error.message}`);
+
+        }
+      }
+      else if (oldProfilePictureUrl && newProfilePictureUrl === null) {
+          try {
+              const publicId = this.cloudinaryService.getPublicIdFromUrl(oldProfilePictureUrl);
+              if (publicId) {
+                  await this.cloudinaryService.deleteFile(publicId);
+                  console.log(`Profile picture deleted (set to null): ${oldProfilePictureUrl}`);
+              } else {
+                  console.warn(`Could not extract publicId from profile URL: ${oldProfilePictureUrl}. Not deleted from Cloudinary.`);
+              }
+          } catch (error) {
+              console.error(`Error trying to delete profile picture from Cloudinary when setting to null for user ${id}: ${error.message}`);
+          }
+      }
+    }
+
+    Object.assign(userToUpdate, updateUserDto);
+
+    return await this.userRepository.save(userToUpdate);
   }
 
   async remove(id: string): Promise<void> {

@@ -34,7 +34,6 @@ import { Role } from '../../Enum/roles.enum';
 
 @ApiTags('Property')
 @Controller('property')
-@ApiBearerAuth()
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
