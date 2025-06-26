@@ -15,15 +15,9 @@ import { AgencyGuard } from '../../guard/agency.guard';
 import { RolesGuard } from '../../guard/roles.guard';
 import { Roles } from '../../decorators/role.decorator';
 import { Role } from '../../Enum/roles.enum';
-import {
-  ApiBearerAuth,
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('agency')
-@ApiBearerAuth()
 @Controller('agency')
 export class AgencyController {
   constructor(private readonly agencyService: AgencyService) {}
@@ -50,7 +44,7 @@ export class AgencyController {
   }
 
   @Get('getByUser/:id')
-  @UseGuards(AuthGuard, AgencyGuard)
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener agency por ID del usuario' })
   @ApiResponse({
     status: 200,
@@ -62,11 +56,34 @@ export class AgencyController {
     return agency;
   }
 
+  @Get('by-slug/:slug')
+  @ApiOperation({ summary: 'Obtener agency por slug (Public)' })
+  @ApiResponse({ status: 200, description: 'Obtuviste la agency por slug.' })
+  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
+  async findBySlug(@Param('slug') slug: string) {
+    return await this.agencyService.findOneBySlug(slug);
+  }
+
+  // Buscar agencias eliminadas logicamente
+  @Get('soft-removed')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Obtener todas las agencias eliminadas logicamente (Solo Admin)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de agencias eliminadas logicamente.',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  async findRemoved() {
+    return this.agencyService.findRemoved();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener agency por ID (Public)' })
   @ApiResponse({ status: 200, description: 'Obtuviste la agency.' })
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
-  @ApiBearerAuth('public')
   findOne(@Param('id') id: string) {
     return this.agencyService.findOne(id);
   }
@@ -86,19 +103,43 @@ export class AgencyController {
 
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.User)
-  @ApiOperation({ summary: 'Eliminar agency (Solo User)' })
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Eliminar permanentemente una agencia (Solo Admin)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'La agency ha sido eliminada exitosamente.',
+    description: 'La agencia ha sido eliminada permanentemente.',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
   remove(@Param('id') id: string) {
     return this.agencyService.remove(id);
   }
 
-  @Patch(':id')
+  @Delete('soft/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({
+    summary: 'Eliminar/restaurar logicamente una agencia (Solo Admin)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'La agencia ha sido eliminada/restaurada logicamente.',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  async softRemove(@Param('id') id: string) {
+    return this.agencyService.softRemove(id);
+  }
+
+  @Patch('update/:id')
+  @UseGuards(AuthGuard, AgencyGuard)
+  @ApiOperation({ summary: 'Actualizar nombre y descripción de agency' })
+  @ApiResponse({
+    status: 200,
+    description: 'La agency ha sido actualizada exitosamente.',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
   updateAgency(
     @Param('id') id: string,
     @Body() updateAgencyDto: UpdateAgencyDto,

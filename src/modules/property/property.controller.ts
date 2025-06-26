@@ -26,7 +26,6 @@ import {
   ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../guard/auth.guard';
 import { RolesGuard } from '../../guard/roles.guard';

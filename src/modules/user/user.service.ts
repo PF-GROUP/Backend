@@ -6,19 +6,21 @@ import { createGoogleUserDto, CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { CloudinaryService } from 'src/shared/cloudinary.service';
 import * as bcrypt from 'bcrypt';
+import { AgencyService } from '../agency/agency.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly agencyService: AgencyService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const {email, password, ...restOfUserData} = createUserDto;
       if (restOfUserData.name.toLowerCase().includes("mati")){
-      restOfUserData.name = "Soy Gay" 
+      restOfUserData.name = "Soy Matias el HOMOSEXUAL REPRIMIDO TRAGA LECHE DE TORO" 
     }
     const existngUser = await this.userRepository.findOne({where:{email} });
     if (existngUser){
@@ -37,7 +39,7 @@ export class UserService {
   }
   async createFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
     if (googleUser.name.toLowerCase().includes("mati")){
-      googleUser.name = "Soy Gay" 
+      googleUser.name = "Soy Matias el HOMOSEXUAL REPRIMIDO TRAGA LECHE DE TORO" 
     }
     const user = this.userRepository.create(googleUser);
     return await this.userRepository.save(user);
@@ -50,20 +52,37 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
   }
-  
-  async findOneByEmail(email: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({ where: { email }, relations: ['agency', 'agency.customization', 'agency.properties'] });
-    if (!user) {
-return null   
-}
-
-
-    return user;
+async findOneByEmail(email: string): Promise<User | null> {
+  const theUser = await this.userRepository.findOne({ where: { email } });
+  if (!theUser) {
+    throw new NotFoundException(`User with email ${email} not found`);
   }
+  const agency = await this.agencyService.findOneByUserId(theUser.id);
+
+  if (!agency || !agency.user) {
+   return theUser
+  }
+
+    agency.user.agency = agency
+ 
+
+  return agency.user;
+}
 async findOneByGoogleId(googleId: string): Promise<User | null> {
-  return await this.userRepository.findOne({ where: { googleId },
-    relations: ['agency', 'agency.customization', 'agency.properties'],
-   });
+const theUser = await this.userRepository.findOne({ where: { googleId } });
+  if (!theUser) {
+    throw new NotFoundException(`User with googleId ${googleId} not found`);
+  }
+  const agency = await this.agencyService.findOneByUserId(theUser.id);
+
+  if (!agency || !agency.user) {
+   return theUser
+  }
+  
+    agency.user.agency = agency
+ 
+
+  return agency.user;
 }
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
@@ -84,14 +103,20 @@ async findOneByGoogleId(googleId: string): Promise<User | null> {
     await this.userRepository.remove(user);
   }
   async findOneWithAllRelations(id: string) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['agency', 'agency.customization', 'agency.properties'],
-    });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-    return user;
+    const theUser = await this.userRepository.findOne({ where: { id } });
+  if (!theUser) {
+    throw new NotFoundException(`User with id ${id} not found`);
+  }
+  const agency = await this.agencyService.findOneByUserId(theUser.id);
+
+  if (!agency || !agency.user) {
+   return theUser
+  }
+  
+    agency.user.agency = agency
+ 
+
+  return agency.user;
   }
 
   async updateProfilePicture(userId: string, file: Express.Multer.File): Promise<string> {

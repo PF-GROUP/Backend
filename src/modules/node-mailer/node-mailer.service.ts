@@ -6,9 +6,13 @@ import { join } from 'path';
 dotenvConfig({path: ".env.development"})
 @Injectable()
 export class NodeMailerService {
+  
       private transporter: nodeMailer.Transporter;
       private allMails = ["danielgenarog@gmail.com", "soyhenryorozco@gmail.com"]
   constructor() {
+    console.log("Auth Email:", process.env.SMTP_EMAIL);
+console.log("Auth Pass (oculto):", process.env.SMTP_APP_PASSWORD?.length ? "✔️" : "❌ FALTA");
+
     this.transporter = nodeMailer.createTransport({
       service: "gmail",
       secure: true,
