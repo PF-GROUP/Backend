@@ -22,7 +22,13 @@ La estrategia para la personalización de la agencia, incluyendo logo y banner, 
 
 5.  **Frontend Envía la Personalización Completa**: Una vez obtenidas todas las URLs de las imágenes (o `null` si no se subió alguna), el frontend construye un objeto JSON que incluye estas URLs y el resto de la información textual y de colores del formulario.
     * Envía este objeto JSON al endpoint **`POST /agencies/:agencyId/customization`** (para crear) o **`PATCH /agencies/:agencyId/customization`** (para actualizar).
-    * El **Backend (`CustomizationModule`)** recibe este JSON (donde `logoImage` y `banner` son las URLs) y guarda/actualiza los datos en la base de datos, asociándolos a la `agencyId` proporcionada en la ruta.
+    * El **Backend (`CustomizationModule`)** recibe este JSON (donde `logoImage` y `banner` son las URLs).
+        * **Al crear (`POST`)**: Simplemente guarda los datos y las URLs en la base de datos.
+        * **Al actualizar (`PATCH`)**: Si se proporciona una **nueva URL** para `logoImage` o `banner`, el backend se encarga de:
+            1.  **Recuperar la URL de la imagen antigua** de la base de datos.
+            2.  **Extraer el `publicId`** de esa URL antigua usando `CloudinaryService.getPublicIdFromUrl()`.
+            3.  Llamar a `CloudinaryService.deleteFile()` para **eliminar físicamente la imagen antigua de Cloudinary**.
+            4.  Finalmente, guarda la **nueva URL** en la base de datos junto con el resto de los datos actualizados.
 
 6.  **Respuesta al Usuario**: El frontend recibe la confirmación del guardado de personalización y notifica al usuario.
 
@@ -30,7 +36,7 @@ La estrategia para la personalización de la agencia, incluyendo logo y banner, 
 
 ## 📂 Endpoints de Gestión de Archivos (`UploadModule`)
 
-Este módulo proporciona los endpoints para subir y eliminar archivos de imagen en Cloudinary.
+Este módulo proporciona el endpoint para subir archivos de imagen a Cloudinary.
 
 ### `POST /upload/image`
 
@@ -72,31 +78,7 @@ Este módulo proporciona los endpoints para subir y eliminar archivos de imagen 
       "url": "[https://res.cloudinary.com/tu-cloud-name/image/upload/v1234567890/public_id_del_archivo.jpg](https://res.cloudinary.com/tu-cloud-name/image/upload/v1234567890/public_id_del_archivo.jpg)"
     }
     ```
-* **Acción Siguiente (Frontend)**: Una vez obtenida la URL (`response.url`), almacénala temporalmente. Si necesitas subir varios archivos (ej. logo y banner), repite la llamada para cada uno y guarda todas las URLs para el siguiente paso.
-
-### `DELETE /upload/image/:publicId`
-
-* **Descripción**: Elimina una imagen de Cloudinary utilizando su `publicId`.
-* **Método HTTP**: `DELETE`
-* **Ruta**: `/upload/image/:publicId`
-    * `:publicId` (string): El ID público del archivo en Cloudinary (parte de la URL, a veces incluye la carpeta, ej. `folder/image_name`).
-        *(Ejemplo: Si la URL es `.../upload/v123/my_logo_123.jpg`, el `publicId` es `my_logo_123` o `folder/my_logo_123` si está en una carpeta).*
-* **Ejemplo de Request (Frontend)**:
-    ```javascript
-    const publicIdToDelete = 'public_id_del_logo_en_cloudinary'; // Debes obtenerlo de la URL o guardarlo
-    fetch(`http://localhost:3000/upload/image/${publicIdToDelete}`, {
-      method: 'DELETE',
-    })
-    .then(response => response.json())
-    .then(data => console.log(data.message)) // Espera "Imagen eliminada exitosamente"
-    .catch(error => console.error('Error al eliminar imagen:', error));
-    ```
-* **Ejemplo de Respuesta Exitosa**:
-    ```json
-    {
-      "message": "Imagen eliminada exitosamente"
-    }
-    ```
+* **Acción Siguiente (Frontend)**: Una vez obtenida la URL (`response.url`), almacenala temporalmente. Si necesitás subir varios archivos (ej. logo y banner), repetí la llamada para cada uno y guardá todas las URLs para el siguiente paso.
 
 ---
 
@@ -182,13 +164,20 @@ Este módulo gestiona las configuraciones de personalización (branding) para ag
 
 ### `PATCH /agencies/:agencyId/customization`
 
-* **Descripción**: Actualiza la configuración de personalización (branding) de una agencia específica.
+* **Descripción**: Actualiza la configuración de personalización (branding) de una agencia específica. **Es crucial entender que si proporcionás una nueva URL para `logoImage` o `banner`, el backend se encargará automáticamente de eliminar la imagen antigua de Cloudinary y luego guardar la nueva.** Este proceso asegura que tu cuenta de Cloudinary se mantenga limpia y sin archivos obsoletos.
 * **Método HTTP**: `PATCH`
 * **Ruta**: `/agencies/:agencyId/customization`
     * `:agencyId` (string): El ID único de la agencia cuya personalización se desea actualizar.
 * **Tipo de Contenido Esperado**: `application/json`
-* **Cuerpo de la Solicitud (Request Body)**: Objeto JSON con los campos a actualizar, según `UpdateCustomizationDto` (que probablemente herede o sea similar a `CreateCustomizationDto`).
+* **Cuerpo de la Solicitud (Request Body)**: Objeto JSON con los campos a actualizar, según `UpdateCustomizationDto`.
     * Al igual que en `POST`, `logoImage` y `banner` deben ser **cadenas de texto (strings) con formato de URL** si se están actualizando las imágenes.
+* **Flujo Detallado de Eliminación (Backend en `CustomizationService` durante `PATCH`):**
+    1.  El servicio recibe los datos de actualización, incluyendo las posibles nuevas URLs para `logoImage` o `banner`.
+    2.  Recupera la entidad de personalización existente de la base de datos para obtener las URLs de las imágenes **actuales (antiguas)**.
+    3.  Para cada campo de imagen que se esté actualizando (es decir, si la nueva URL es diferente de la antigua):
+        * Utiliza `CloudinaryService.getPublicIdFromUrl()` para **extraer el `publicId`** de la URL de la imagen antigua.
+        * Llama a `CloudinaryService.deleteFile(publicId)` para **eliminar físicamente la imagen antigua de Cloudinary**.
+    4.  Finalmente, el servicio guarda la nueva información (incluyendo las nuevas URLs de las imágenes) en la base de datos.
 * **Ejemplo de Request Body**:
     ```json
     {
