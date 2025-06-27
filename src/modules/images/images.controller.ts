@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Delete, ParseUUIDPipe, HttpCode, HttpStatus, BadRequestException, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Param, Delete, ParseUUIDPipe, BadRequestException, UseGuards, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import {ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
@@ -15,16 +15,18 @@ export class ImagesController {
 
   @Post('property/:propertyId/gallery')
   @UseGuards(AuthGuard, PropertyOwnershipGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadPropertyGalleryImage(
+  @UseInterceptors(FileInterceptor('files'))
+  async uploadPropertyGalleryImages(
     @Param('propertyId', ParseUUIDPipe) propertyId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    if (!file) {
+    if (!files || files.length === 0) {
       throw new BadRequestException('Se requiere un archivo de imagen.');
     }
-    const imageUrl = await this.imagesService.uploadAndAddPropertyGalleryImage(propertyId, file);
-    return { message: 'Imagen de galería subida con éxito', url: imageUrl };
+  
+    const imageUrls = await this.imagesService.uploadAndAddPropertyGalleryImages(propertyId, files);
+    
+    return { message: 'Imágenes de galería subidas con éxito', urls: imageUrls };
   }
 
 

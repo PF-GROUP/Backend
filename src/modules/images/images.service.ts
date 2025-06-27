@@ -47,8 +47,7 @@ export class ImagesService {
   }
 
 
-  async uploadAndAddPropertyGalleryImage(propertyId: string, file: Express.Multer.File): Promise<string> {
-
+  async uploadAndAddPropertyGalleryImages(propertyId: string, files: Array<Express.Multer.File>): Promise<string[]> {
     const property = await this.propertyRepository.findOne({ 
         where: { id: propertyId }
     });
@@ -56,23 +55,33 @@ export class ImagesService {
       throw new NotFoundException(`Propiedad con ID "${propertyId}" no encontrada.`);
     }
 
-    try {
-      const newImageUrl = await this.cloudinaryService.uploadFile(file); 
-      const newPublicId = this.cloudinaryService.getPublicIdFromUrl(newImageUrl);
-      
-      const newImage = this.imageRepository.create({
-        file: newImageUrl,
-        publicId: newPublicId,
-        property: property, 
-      });
+    const uploadedImageUrls: string[] = [];
 
-      await this.imageRepository.save(newImage);
+    for (const file of files) {
+      try {
+        const newImageUrl = await this.cloudinaryService.uploadFile(file);
+        const newPublicId = this.cloudinaryService.getPublicIdFromUrl(newImageUrl);
+        
+        const newImage = this.imageRepository.create({
+          file: newImageUrl,
+          publicId: newPublicId,
+          property: property,
+        });
 
-      return newImageUrl; 
-    } catch (error) {
-      console.error(`[ImagesService] Error al subir y añadir imagen de galería para propiedad ${propertyId}:`, error);
-      throw new InternalServerErrorException('No se pudo subir y/o asociar la imagen de galería a la propiedad.');
+        await this.imageRepository.save(newImage);
+        uploadedImageUrls.push(newImageUrl);
+
+      } catch (error) {
+
+        console.error(`[ImagesService] Error al subir una imagen de galería (${file.originalname}) para propiedad ${propertyId}:`, error);
+      }
     }
+
+    if (uploadedImageUrls.length === 0 && files.length > 0) {
+      throw new InternalServerErrorException('No se pudo subir ninguna de las imágenes proporcionadas para la galería.');
+    }
+
+    return uploadedImageUrls;
   }
 
   async uploadAndSetUserProfilePicture(userId: string, file: Express.Multer.File): Promise<string> {
