@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { TypeOfProperty } from '../modules/typeOfProperty/typeofproperty.entity';

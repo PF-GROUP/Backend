@@ -93,11 +93,18 @@ export class AuthController {
     
   }
 
-  // @Get('session_refresh')
-  // @UseGuards(AuthGuard)
-  // async sessionRefresh(@Res({passthrough: true}) res: Response) {
-  //   const {token, user} = await this.authService.refreshSession();
-  // }
+  @Get('session_refresh')
+  @UseGuards(AuthGuard)
+  async sessionRefresh(@Res({passthrough: true}) res: Response, @Req() req: Request & {user: User}) {
+    const {token, user} = await this.authService.refreshSession(req.user.id);
+        res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 60 * 60 * 1000),
+      secure: process.env.NODE_ENV === 'production',
+    });
+    return {content:user, message: "Se ha logeado exitosamente con google"} 
+  }
   @Get('me')
   @UseGuards(AuthGuard)
    me(@Req() req: Request & {user: User}) {

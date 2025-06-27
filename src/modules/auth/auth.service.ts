@@ -17,12 +17,12 @@ dotenvconfig({path: ".env.development"});
 export class AuthService {
   
   
-    private readonly logger: Logger
-    private readonly client : OAuth2Client
-    
+  private readonly logger: Logger
+  private readonly client : OAuth2Client
   
-
-
+  
+  
+  
   constructor(
     private readonly userService: UserService,
     private readonly agencyService: AgencyService,
@@ -84,16 +84,16 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     }
     const user = await this.userService.createFromGoogle({...registerGoogleDto, googleId: payload.sub, rol: Role.User })
     return {user}
+    
+  }
   
-}
-
   async register(
     registerDto: CreateRegisterDto,
   ): Promise<{ user: User }> {
     console.log(registerDto)
-      let existingUser: User | null = null
+    let existingUser: User | null = null
     try {
-       existingUser = await this.userService.findOneByEmail(
+      existingUser = await this.userService.findOneByEmail(
         registerDto.email,
       )
 
@@ -114,16 +114,16 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
         throw new InternalServerErrorException('Error al buscar el usuario')
       }
     }
-
+    
     try {
       const user = await this.userService.create({...registerDto, rol: Role.User });
       this.logger.log(
         `Registro exitoso para email: ${user.email}. Transaccion completada.`,
       );
-
+      
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...userWithoutPassword } = user;
-
+      
       return {
         user: userWithoutPassword as User,
       };
@@ -259,6 +259,12 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
   };
   const token = this.jwtService.sign(payload);
   return { token , user: payload };
+}
+async refreshSession(userId:string) {
+const user = await this.userService.findOneWithAllRelations(userId)
+const {token, user:userToSend} = this.signJWT(user)
+return {token, user:userToSend}
+
 }
 
 
