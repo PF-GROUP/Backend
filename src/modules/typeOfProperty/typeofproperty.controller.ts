@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe, NotFoundException, HttpCode, HttpStatus} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe,  HttpCode, HttpStatus} from '@nestjs/common';
 import { TypeofpropertyService } from './typeofproperty.service';
 import { CreateTypeOfPropertyDto } from './create-typeofproperty.dto';
 
@@ -9,23 +9,27 @@ export class TypeofpropertyController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createTypeofpropertyDto: CreateTypeOfPropertyDto) {
-    return await this.typeofpropertyService.create(createTypeofpropertyDto);
+    const type = await this.typeofpropertyService.create(createTypeofpropertyDto);
+    return {content: type, message: 'Tipo de propiedad creado exitosamente.'};
   }
 
   @Get()
   async findAll() {
-    return await this.typeofpropertyService.findAll();
+    const types = await this.typeofpropertyService.findAll();
+    return {content: types, message: 'Tipos de propiedad encontrados exitosamente.'};
   }
 
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.typeofpropertyService.findOne(id);
+    const type = await this.typeofpropertyService.findOne(id);
+    return {content: type, message: 'Tipo de propiedad encontrado exitosamente.'};
   }
 
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string, 
     @Body() updateTypeofpropertyDto: CreateTypeOfPropertyDto) {
-    return await this.typeofpropertyService.update(id, updateTypeofpropertyDto);
+    const type = await this.typeofpropertyService.update(id, updateTypeofpropertyDto);
+    return {content: type, message: 'Tipo de propiedad actualizado exitosamente.'};
     }
 }

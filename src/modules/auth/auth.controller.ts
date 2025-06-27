@@ -5,6 +5,7 @@ import { Response } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
 import {config as dotenvconfig} from "dotenv"
 import { createUserAndAgencyDto, createUserAndAgencyWithGoogleDto } from './create-register.dto';
+import { User } from '../user/user.entity';
 dotenvconfig({path: ".env.development"});
 
 @Controller('auth')
@@ -16,8 +17,16 @@ export class AuthController {
 
   @Post("createBoth")
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() registerDto: createUserAndAgencyDto) {
-      return await this.authService.registerUserAndAgency(registerDto);
+  async register(@Body() registerDto: createUserAndAgencyDto, @Res({passthrough: true}) res: Response) {
+    const {token, user} = await this.authService.registerUserAndAgency(registerDto);
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 60 * 60 * 1000),
+      secure: process.env.NODE_ENV === 'production',
+    })
+    return {content:user, message: "Se ha registrado exitosamente"}
+
 
   }
 
@@ -31,7 +40,7 @@ export class AuthController {
         expires: new Date(Date.now() + 60 * 60 * 1000),
         secure: process.env.NODE_ENV === 'production',
       })
-      return user
+      return {content:user, message: "Se ha registrado exitosamente con google"}
   }
 
   @Post('logout')
@@ -54,13 +63,13 @@ export class AuthController {
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
     });
-      return user
+      return {content:user, message: "Se ha logeado exitosamente"}
     } catch (error) {
       this.logger.error(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `Login fallo para email: ${createLoginDto.email}. Error: ${error.message}`, // Error de log
       )
-      return new InternalServerErrorException('Error al iniciar sesión');
+      throw new InternalServerErrorException('Error al iniciar sesión');
     } 
   }
 
@@ -74,19 +83,26 @@ export class AuthController {
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
     });
-    return user 
+    return {content:user, message: "Se ha logeado exitosamente con google"} 
   }
 
   @Get('login/tokenSignin/:tokenId')
   async verify(@Param('tokenId') tokenId: string) {
-    return await this.authService.getDataFromToken(tokenId)
+    const data = await this.authService.getDataFromToken(tokenId) 
+    return {content:data, message: "Token verificado exitosamente"}
     
   }
+
+  // @Get('session_refresh')
+  // @UseGuards(AuthGuard)
+  // async sessionRefresh(@Res({passthrough: true}) res: Response) {
+  //   const {token, user} = await this.authService.refreshSession();
+  // }
   @Get('me')
   @UseGuards(AuthGuard)
-   me(@Req() req: Request & {user: any}) {
+   me(@Req() req: Request & {user: User}) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return req.user
+    return {content: req.user, message: 'Fue logeado existosamente'}
   }
 
 

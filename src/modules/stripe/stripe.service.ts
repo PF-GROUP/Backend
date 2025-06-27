@@ -20,16 +20,16 @@ export class StripeService {
   const customerId = await this.searchOrCreateCustomer({email, agencyId});
     
   const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
-  success_url: 'http://kasapp.serveminecraft.net:3001/DashboardAgente',
+  success_url:  `${process.env.CLIENT_URL}:/success`,
+  cancel_url: `${process.env.CLIENT_URL}:/cancel`,
   customer: customerId,
-  payment_method_types: ['card'],
+  payment_method_types: ['card','paypal','pay_by_bank'],
   line_items: [
     {
       price: `${process.env.STRIPE_PRICE_ID}`,
       quantity: 1,
     },
   ],
-  client_reference_id: '1234',
   mode: 'subscription',
 });
   return session
@@ -42,7 +42,6 @@ export class StripeService {
     if (!agency) {
       throw new NotFoundException(`Agencia con ID "${agencyId}" no encontrada.`)
     }
-    console.log("SEXOOOO")
     if (agency?.stripeCustomerId){
       const existingcustomer = await this.searchCustomer(agency.stripeCustomerId);
       return existingcustomer.id

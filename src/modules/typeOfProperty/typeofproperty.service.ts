@@ -1,4 +1,6 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateTypeOfPropertyDto } from './create-typeofproperty.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOfProperty } from './typeofproperty.entity';
@@ -53,7 +55,10 @@ export class TypeofpropertyService {
     if (error.code === '23505' || (error.message && error.message.includes('duplicate key value'))) {
             throw new ConflictException(`El tipo de propiedad "${updateTypeofpropertyDto.type}" ya existe.`);
         }
-        throw error;
+        if (error instanceof NotFoundException) {
+          throw new NotFoundException(`Tipo de propiedad con ID "${id}" no encontrado para actualizar.`);
+        }  
+        throw new InternalServerErrorException(`Error al actualizar el tipo de propiedad: ${error.message}`);
   }
   }
 }

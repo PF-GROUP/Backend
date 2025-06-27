@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as nodeMailer  from 'nodemailer';
 import {config as dotenvConfig} from "dotenv"
 import { readFile } from 'fs/promises'; 
@@ -11,9 +11,6 @@ export class NodeMailerService {
       private transporter: nodeMailer.Transporter;
       
   constructor(private readonly userService: UserService) {
-    console.log("Auth Email:", process.env.SMTP_EMAIL);
-console.log("Auth Pass (oculto):", process.env.SMTP_APP_PASSWORD?.length ? "✔️" : "❌ FALTA");
-
     this.transporter = nodeMailer.createTransport({
       service: "gmail",
       secure: true,
@@ -25,53 +22,77 @@ console.log("Auth Pass (oculto):", process.env.SMTP_APP_PASSWORD?.length ? "✔�
   }
 
   async sendEasyMail(destination: string, subject: string, text: string) {
-    await this.sendMail({
-      from: process.env.SMTP_EMAIL,
-      to: destination,
-      subject: subject,
-      text: text,
-    });
+    try {
+          await this.sendMail({
+            from: process.env.SMTP_EMAIL,
+            to: destination,
+            subject: subject,
+            text: text,
+          });
+    } catch  {
+        throw new BadRequestException("Hubo un error al enviar el mail");
+    }
   }
   async sendEasyMailWithIcon(destination: string, subject: string, text: string, icon: string) {
-    await this.sendMail({
-      from: process.env.SMTP_EMAIL,
-      to: destination,
-      subject: subject,
-      text: text,
-      html: `<img src="${icon}">`
-    });
+try {
+      await this.sendMail({
+        from: process.env.SMTP_EMAIL,
+        to: destination,
+        subject: subject,
+        text: text,
+        html: `<img src="${icon}">`
+      });
+} catch {
+    throw new BadRequestException("Hubo un error al enviar el mail");
+}
   }
   async sendMail (mailOptions: nodeMailer.SendMailOptions) {
-    await this.transporter.sendMail(mailOptions);
+   try {
+     await this.transporter.sendMail(mailOptions);
+   } catch  {
+    throw new BadRequestException("Hubo un error al enviar el mail");
+   }
   }
 
   async sendEasyMailToAll(subject: string, text: string) {
     const emails = await this.userService.getNonAdminUserEmails()
-    await this.sendMail({
-      from: process.env.SMTP_EMAIL,
-      to: emails,
-      subject: subject,
-      text: text,
-    });
+try {
+      await this.sendMail({
+        from: process.env.SMTP_EMAIL,
+        to: emails,
+        subject: subject,
+        text: text,
+      });
+} catch  {
+  throw new BadRequestException("Hubo un error al enviar el mail");
+}
   }
   async sendEasyMailToAllWithIcon(subject: string, text: string, icon: string) {
-    const emails = await this.userService.getNonAdminUserEmails()
-    await this.sendMail({
-      from: process.env.SMTP_EMAIL,
-      to: emails,
-      subject: subject,
-      text: text,
-      html: `<img src="${icon}">`
-    });
+try {
+      const emails = await this.userService.getNonAdminUserEmails()
+      await this.sendMail({
+        from: process.env.SMTP_EMAIL,
+        to: emails,
+        subject: subject,
+        text: text,
+        html: `<img src="${icon}">`
+      });
+} catch  {
+  throw new BadRequestException("Hubo un error al enviar el mail");
+}
   }
   async sendEasyMailWithHTML(to: string, subject: string, text: string, html: string) {
-    await this.sendMail({
-      from: process.env.SMTP_EMAIL,
-      to: to,
-      subject: subject,
-      text: text,
-      html: html
-    });
+try {
+      await this.sendMail({
+        from: process.env.SMTP_EMAIL,
+        to: to,
+        subject: subject,
+        text: text,
+        html: html
+      });
+} catch  {
+  throw new BadRequestException("Hubo un error al enviar el mail");
+}
   }
 
 
@@ -79,16 +100,14 @@ console.log("Auth Pass (oculto):", process.env.SMTP_APP_PASSWORD?.length ? "✔�
 private async loadTemplate(templateName: string, data: Record<string, string>) {
   try {
     const templatePath = join(process.cwd(), 'src', 'modules', 'node-mailer', 'templates', templateName);
-    let html = await readFile(templatePath, 'utf8'); // 👈 ¡Ahora con await!
-
-    // Reemplaza variables dinámicas
+    let html = await readFile(templatePath, 'utf8'); 
     Object.keys(data).forEach(key => {
       html = html.replace(new RegExp(`{{${key}}}`, 'g'), data[key]);
     });
-
     return html;
   } catch (error) {
-    throw new Error(`Error al cargar el template: ${error}`);
+    console.error('Error al cargar el template:', error);
+    throw new BadRequestException('Error al cargar el template');
   }
 }
 
@@ -108,7 +127,7 @@ async sendMailRegistered(mail: string, name: string, surname: string) {
     );
   } catch (error) {
     console.error('Error al enviar el correo:', error);
-    throw error; // O maneja el error según tu lógica
+    throw new BadRequestException('Error al enviar el correo');
   }
 }
 }
