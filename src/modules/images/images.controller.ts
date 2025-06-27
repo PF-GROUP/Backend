@@ -26,7 +26,7 @@ export class ImagesController {
   
     const imageUrls = await this.imagesService.uploadAndAddPropertyGalleryImages(propertyId, files);
     
-    return { message: 'Imágenes de galería subidas con éxito', urls: imageUrls };
+    return { message: 'Imágenes de galería subidas con éxito', content:{urls: imageUrls }};
   }
 
 
@@ -41,7 +41,7 @@ export class ImagesController {
       throw new BadRequestException('Se requiere un archivo de imagen.');
     }
     const imageUrl = await this.imagesService.uploadAndSetUserProfilePicture(userId, file);
-    return { message: 'Foto de perfil de usuario actualizada con éxito', url: imageUrl };
+    return { message: 'Foto de perfil de usuario actualizada con éxito', content:{url: imageUrl} };
   }
 
 
@@ -56,7 +56,7 @@ export class ImagesController {
       throw new BadRequestException('Se requiere un archivo de imagen.');
     }
     const imageUrl = await this.imagesService.uploadAndSetCustomizationLogo(customizationId, file);
-    return { message: 'Logo de customización actualizado con éxito', url: imageUrl };
+    return { message: 'Logo de customización actualizado con éxito', content:{url: imageUrl} };
   }
 
 
@@ -71,7 +71,7 @@ export class ImagesController {
       throw new BadRequestException('Se requiere un archivo de imagen.');
     }
     const imageUrl = await this.imagesService.uploadAndSetCustomizationBanner(customizationId, file);
-    return { message: 'Banner de customización actualizado con éxito', url: imageUrl };
+    return { message: 'Banner de customización actualizado con éxito', content:{url: imageUrl} };
   }
 
 

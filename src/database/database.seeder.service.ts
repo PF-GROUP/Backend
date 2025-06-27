@@ -90,9 +90,6 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         'TRUNCATE TABLE "Property" RESTART IDENTITY CASCADE;',
       );
       await queryRunner.query(
-        'TRUNCATE TABLE "Appointment" RESTART IDENTITY CASCADE;',
-      );
-      await queryRunner.query(
         'TRUNCATE TABLE "User" RESTART IDENTITY CASCADE;',
       );
       await queryRunner.query(

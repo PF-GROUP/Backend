@@ -13,7 +13,6 @@ import { Status } from 'src/Enum/status.enum';
 import { Type } from 'src/Enum/type.enum';
 import { TypeOfProperty } from 'src/modules/typeOfProperty/typeofproperty.entity';
 import { Images } from 'src/modules/images/image.entity';
-import { Appointment } from 'src/modules/appointment/appointment.entity';
 import { SoftDeletableEntity } from 'src/Helpers/softDelete.entity';
 
 @Entity('Property')
@@ -82,13 +81,4 @@ export class Property extends SoftDeletableEntity {
   @JoinColumn({ name: 'agency_id' })
   agency: Agency;
 
-  @OneToMany(
-    () => Appointment,
-    (appointment: Appointment) => appointment.property,
-    {
-      cascade: true,
-      onDelete: 'SET NULL',
-    },
-  )
-  appointment: Appointment[];
 }
