@@ -176,7 +176,7 @@ export class AgencyService {
   async findOneBySlug(slug: string): Promise<Agency> {
     const agency = await this.agencyRepository.findOne({
       where: { slug },
-      relations: ['customization', 'properties', 'user'],
+      relations: ['customization', 'properties', 'user', 'properties.images'],
     });
 
     if (!agency) {
