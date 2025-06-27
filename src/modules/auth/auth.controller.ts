@@ -103,7 +103,7 @@ export class AuthController {
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: process.env.NODE_ENV === 'production',
     });
-    return {content:user, message: "Se ha logeado exitosamente con google"} 
+    return {content:user, message: "Se ha refrescado la sesion exitosamente"} 
   }
   @Get('me')
   @UseGuards(AuthGuard)
