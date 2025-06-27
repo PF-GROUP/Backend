@@ -2,7 +2,7 @@ import { Controller, Post, Param, Delete, ParseUUIDPipe, BadRequestException, Us
 import { ImagesService } from './images.service';
 import {ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { IsOwnerOrAdminGuard } from 'src/guard/isOwnerOrAdmin.guard';
 import { PropertyOwnershipGuard } from 'src/guard/property-ownership.guard';
 import { CustomizationOwnershipGuard } from 'src/guard/customization-ownership.guard';
@@ -15,7 +15,7 @@ export class ImagesController {
 
   @Post('property/:propertyId/gallery')
   @UseGuards(AuthGuard, PropertyOwnershipGuard)
-  @UseInterceptors(FileInterceptor('files'))
+  @UseInterceptors(FilesInterceptor('files'))
   async uploadPropertyGalleryImages(
     @Param('propertyId', ParseUUIDPipe) propertyId: string,
     @UploadedFiles() files: Array<Express.Multer.File>,
