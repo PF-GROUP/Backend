@@ -51,6 +51,16 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
   }
+
+  async findAllNonAdmins(): Promise<User[]> {
+    return this.userRepository.find({where: {isAdmin: false}});
+  }
+
+  async getNonAdminUserEmails(): Promise<string[]> {
+    const users = await this.findAllNonAdmins();
+    return users.map(user => user.email);
+  }
+
 async findOneByEmail(email: string): Promise<User | null> {
   const theUser = await this.userRepository.findOne({ where: { email } });
   if (!theUser) {

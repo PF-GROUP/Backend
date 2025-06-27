@@ -3,13 +3,14 @@ import * as nodeMailer  from 'nodemailer';
 import {config as dotenvConfig} from "dotenv"
 import { readFile } from 'fs/promises'; 
 import { join } from 'path';
+import { UserService } from '../user/user.service';
 dotenvConfig({path: ".env.development"})
 @Injectable()
 export class NodeMailerService {
   
       private transporter: nodeMailer.Transporter;
-      private allMails = ["danielgenarog@gmail.com", "soyhenryorozco@gmail.com"]
-  constructor() {
+      
+  constructor(private readonly userService: UserService) {
     console.log("Auth Email:", process.env.SMTP_EMAIL);
 console.log("Auth Pass (oculto):", process.env.SMTP_APP_PASSWORD?.length ? "✔️" : "❌ FALTA");
 
@@ -45,17 +46,19 @@ console.log("Auth Pass (oculto):", process.env.SMTP_APP_PASSWORD?.length ? "✔�
   }
 
   async sendEasyMailToAll(subject: string, text: string) {
+    const emails = await this.userService.getNonAdminUserEmails()
     await this.sendMail({
       from: process.env.SMTP_EMAIL,
-      to: this.allMails,
+      to: emails,
       subject: subject,
       text: text,
     });
   }
   async sendEasyMailToAllWithIcon(subject: string, text: string, icon: string) {
+    const emails = await this.userService.getNonAdminUserEmails()
     await this.sendMail({
       from: process.env.SMTP_EMAIL,
-      to: this.allMails,
+      to: emails,
       subject: subject,
       text: text,
       html: `<img src="${icon}">`
