@@ -22,7 +22,8 @@ export class CustomizationController {
     @Param('agencyId') agencyId: string,
     @Body() createCustomizationDto: CreateCustomizationDto) 
     {
-    return this.customizationService.create(createCustomizationDto, agencyId);
+    const customization = await this.customizationService.create(createCustomizationDto, agencyId);
+    return {content: customization, message: 'Configuración creada exitosamente'}
   }
 
   @Get()
@@ -30,7 +31,8 @@ export class CustomizationController {
   async findOneByAgencyId(
     @Param('agencyId') agencyId: string)
     {
-    return this.customizationService.findOneByAgencyId(agencyId);
+    const customization = await this.customizationService.findOneByAgencyId(agencyId);
+    return {content: customization, message: 'Configuración recuperada exitosamente'}
   }
 
   @Patch()
@@ -40,6 +42,7 @@ export class CustomizationController {
   async update(
     @Param('agencyId') agencyId: string,
     @Body() updateCustomizationDto: UpdateCustomizationDto,) {
-    return this.customizationService.updateByAgencyId(agencyId, updateCustomizationDto);
+    const customization = await this.customizationService.updateByAgencyId(agencyId, updateCustomizationDto);
+    return {content: customization, message: 'Configuración actualizada exitosamente'}
   }
 }

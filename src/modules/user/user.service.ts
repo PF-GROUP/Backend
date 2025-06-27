@@ -1,10 +1,9 @@
-import { InternalServerErrorException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {  BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { createGoogleUserDto, CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
-import { CloudinaryService } from 'src/shared/cloudinary.service';
 import * as bcrypt from 'bcrypt';
 import { AgencyService } from '../agency/agency.service';
 
@@ -18,9 +17,6 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const {email, password, ...restOfUserData} = createUserDto;
-      if (restOfUserData.name.toLowerCase().includes("mati")){
-      restOfUserData.name = "Soy Matias el HOMOSEXUAL REPRIMIDO TRAGA LECHE DE TORO" 
-    }
     const existngUser = await this.userRepository.findOne({where:{email} });
     if (existngUser){
       throw new BadRequestException('El email ya está registrado. Por favor, utiliza otro.');
@@ -37,9 +33,7 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
   async createFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
-    if (googleUser.name.toLowerCase().includes("mati")){
-      googleUser.name = "Soy Matias el HOMOSEXUAL REPRIMIDO TRAGA LECHE DE TORO" 
-    }
+
     const user = this.userRepository.create(googleUser);
     return await this.userRepository.save(user);
   }
@@ -64,7 +58,7 @@ export class UserService {
 async findOneByEmail(email: string): Promise<User | null> {
   const theUser = await this.userRepository.findOne({ where: { email } });
   if (!theUser) {
-    throw new NotFoundException(`User with email ${email} not found`);
+    throw new NotFoundException(`Usuario con el email ${email} no encontrado`);
   }
   const agency = await this.agencyService.findOneByUserId(theUser.id);
 

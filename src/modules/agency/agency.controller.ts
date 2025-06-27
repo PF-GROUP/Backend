@@ -53,7 +53,7 @@ export class AgencyController {
   @ApiResponse({ status: 404, description: 'Usuario o agency no encontrado.' })
   async getByUser(@Param('id') id: string) {
     const agency = await this.agencyService.findOneByUserId(id);
-    return agency;
+    return {content: agency, message: 'Agencia encontrada exitosamente'};
   }
 
   @Get('by-slug/:slug')
@@ -61,7 +61,8 @@ export class AgencyController {
   @ApiResponse({ status: 200, description: 'Obtuviste la agency por slug.' })
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
   async findBySlug(@Param('slug') slug: string) {
-    return await this.agencyService.findOneBySlug(slug);
+    const agency =  await this.agencyService.findOneBySlug(slug);
+    return {content: agency, message: 'Agencia encontrada exitosamente'}
   }
 
   // Buscar agencias eliminadas logicamente
@@ -77,15 +78,17 @@ export class AgencyController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async findRemoved() {
-    return this.agencyService.findRemoved();
+    const removedAgencies = await  this.agencyService.findRemoved();
+    return {content: removedAgencies, message: 'Agencias removidas, encontradas exitosamente'}
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener agency por ID (Public)' })
   @ApiResponse({ status: 200, description: 'Obtuviste la agency.' })
   @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
-  findOne(@Param('id') id: string) {
-    return this.agencyService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const agency = await this.agencyService.findOne(id);
+    return {content: agency, message: 'Agencia encontrada exitosamente'}
   }
 
   @Patch(':id')
@@ -112,8 +115,9 @@ export class AgencyController {
     description: 'La agencia ha sido eliminada permanentemente.',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  remove(@Param('id') id: string) {
-    return this.agencyService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.agencyService.remove(id);
+    return {message: 'Agencia eliminada exitosamente'}
   }
 
   @Delete('soft/:id')
@@ -128,7 +132,8 @@ export class AgencyController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async softRemove(@Param('id') id: string) {
-    return this.agencyService.softRemove(id);
+     const agency = await this.agencyService.toggleSoftRemove(id);
+     return {content: agency,message: agency ?  'Agencia restaurada exitosamente' : 'Agencia eliminada exitosamente'}
   }
 
   @Patch('update/:id')
@@ -144,9 +149,10 @@ export class AgencyController {
     @Param('id') id: string,
     @Body() updateAgencyDto: UpdateAgencyDto,
   ) {
-    return this.agencyService.updateAgencyNameAndDescription(
+    const agency =  this.agencyService.updateAgencyNameAndDescription(
       id,
       updateAgencyDto,
     );
+    return {content: agency, message: 'Agencia actualizada exitosamente'}
   }
 }

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { User } from '../user/user.entity';
 import { CreateRegisterDto, createUserAndAgencyDto, createUserAndAgencyWithGoogleDto } from './create-register.dto';
@@ -37,10 +37,11 @@ async registerUserAndAgency(data: createUserAndAgencyDto) {
     const {agencyName, agencyDescription, document, email, name, surname, password, phone, slug} = data
 
     const user = await this.register({name, surname, phone, email, password})
-    const agency = await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+    await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
+    const reNewUser = await this.userService.findOneByEmail(email)
+    const {token, user:userToSend} = this.signJWT(reNewUser!)
     await this.mailService.sendMailRegistered(email, name, surname)
-    return {success: true, agencyId: agency.id, userId: user.user.id}
-
+    return {token, user: userToSend}
 }
 async registerUserAndAgencyWithGoogle(registerDto: createUserAndAgencyWithGoogleDto) {
     const {agencyName, agencyDescription, document, email, name, surname, password, phone, slug, token} = registerDto
@@ -61,14 +62,10 @@ async registerUserAndAgencyWithGoogle(registerDto: createUserAndAgencyWithGoogle
       throw new ConflictException('User already exists')
     }
     const user = await this.registerGoogle({name, surname, phone, email, password, token})
-    const agency = await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})
-    console.warn(agency)
+    await this.agencyService.create({name: agencyName, description: agencyDescription, document, agentUser:  user.user.id,slug})    
 
     const reNewUser = await this.userService.findOneByEmail(email)
     const {token: payloadToSend, user:userToSend} = this.signJWT(reNewUser!)
-    console.log(reNewUser)
-    console.log(payloadToSend)
-    console.log(userToSend)
     await this.mailService.sendMailRegistered(email, name, surname)
     return {token: payloadToSend, user: userToSend} 
 }
@@ -92,10 +89,8 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
 
   async register(
     registerDto: CreateRegisterDto,
-  ): Promise<{ user: User /*; agency: Agency */ }> {
+  ): Promise<{ user: User }> {
     console.log(registerDto)
-    this.logger.log(`Comenzando registro para email: ${registerDto.email}`);
-    this.logger.log('Transaccion de base de datos iniciada.');
       let existingUser: User | null = null
     try {
        existingUser = await this.userService.findOneByEmail(
@@ -113,17 +108,15 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
         console.log("El usuario no existe, continuar")
         existingUser = null
       }else{
+        this.logger.warn(
+          `Registro fallo: Error al buscar el usuario.`,
+        ); 
         throw new InternalServerErrorException('Error al buscar el usuario')
       }
     }
 
     try {
-      this.logger.debug('Contrasena hasheada exitosamente.');
       const user = await this.userService.create({...registerDto, rol: Role.User });
-
-      this.logger.log(
-        `User creado con ID: ${user.id} y email: ${user.email}`,
-      );
       this.logger.log(
         `Registro exitoso para email: ${user.email}. Transaccion completada.`,
       );
@@ -137,8 +130,6 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     } catch (error) {
       if (error instanceof ConflictException) throw error;
       this.logger.error(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `Registro fallido para email: ${registerDto.email}. Transaccion revertida. Error: ${error.message}`,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         error.stack,
       );
@@ -192,20 +183,19 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     const user = await this.findUserByEmail(
       createLoginDto.email,
     );
-
-    if (!user || !user.password) {
+    const messageError = "Correo o contraseña incorrectos"
+    if (!user) {
       this.logger.warn(`Login fallo para email: ${createLoginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(messageError);
     }
-
-    this.logger.log(
-      `Usuario encontrado para email: ${createLoginDto.email}. Comparando contrasenas.`,
-    );
+    if (!user.password) {
+      this.logger.warn(
+        `Login fallo: contrasena invalida de email: ${createLoginDto.email}`
+      )
+      throw new BadRequestException('Usuario registrado con google, inicie sesion con google');
+    }
     console.log(user.password)
     console.log(createLoginDto.password)
-    console.log('→ Password plano:', JSON.stringify(createLoginDto.password));
-    console.log('→ Hash en DB   :', JSON.stringify(user.password));
-    console.log('→ Longitudes   :', createLoginDto.password.length, user.password.length);
 
     const isPasswordValid = await  bcrypt.compare(
       createLoginDto.password,
@@ -217,14 +207,13 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
       this.logger.warn(
         `Login fallo: contrasena invalida de email: ${createLoginDto.email}`,
       );
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(messageError);
     }
     const {token, user:userToSend} = this.signJWT(user);
     return {token,user:userToSend};
   }
   async tokenSignin(token: GoogleLoginDto) {
    const res = await this.verify(token.token)
-   console.log(res)
    return res
   }
 
@@ -235,7 +224,7 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
     });
     const payload = ticket.getPayload();
     if (!payload) {
-        throw new UnauthorizedException('Invalid token');
+        throw new UnauthorizedException('Token de google invalido');
     }
     return payload
   }
@@ -246,7 +235,7 @@ async registerGoogle(registerGoogleDto: {name: string, surname: string, phone: s
   });
   const payload = ticket.getPayload();
   if (!payload) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('Token de google invalido');
   }
   const user = await this.findOrCreateByGoogleId(payload)
   const  {token: payloadToSend, user:userToSend} = this.signJWT(user)

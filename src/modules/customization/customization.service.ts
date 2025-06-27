@@ -85,6 +85,9 @@ export class CustomizationService {
       },
       withDeleted: false,
     });
+    if (!customization) {
+      throw new NotFoundException('Personalizacion no encontrada');
+    }
     return customization;
   }
 

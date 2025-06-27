@@ -92,8 +92,9 @@ export class PropertyController {
   })
   async create(
     @Body() createPropertyDto: CreatePropertyDto,
-  ): Promise<Property> {
-    return this.propertyService.create(createPropertyDto);
+  ){
+    const property = await this.propertyService.create(createPropertyDto);
+    return {content:property, message: 'Propiedad creada exitosamente'};
   }
 
   @Get()
@@ -118,8 +119,9 @@ export class PropertyController {
   })
   async findAll(
     @Query('includeDeleted') includeDeleted: boolean = false,
-  ): Promise<Property[]> {
-    return this.propertyService.findAll(includeDeleted);
+  ) {
+    const properties = await this.propertyService.findAll(includeDeleted);
+    return {content:properties, message: 'Propiedades encontradas exitosamente'};
   }
 
   @Get(':id')
@@ -154,8 +156,9 @@ export class PropertyController {
   async findOne(
     @Param('id') id: string,
     @Query('includeDeleted') includeDeleted: boolean = false,
-  ): Promise<Property> {
-    return this.propertyService.findOne(id, includeDeleted);
+  ) {
+    const property = await this.propertyService.findOne(id, includeDeleted);
+    return {content:property, message: 'Propiedad encontrada exitosamente'};
   }
 
   @Patch(':id')
@@ -213,8 +216,9 @@ export class PropertyController {
   async update(
     @Param('id') id: string,
     @Body() updatePropertyDto: UpdatePropertyDto,
-  ): Promise<Property> {
-    return this.propertyService.update(id, updatePropertyDto);
+  ) {
+   const property = await this.propertyService.update(id, updatePropertyDto);
+   return {content:property, message: 'Propiedad actualizada exitosamente'};
   }
 
   @Delete(':id')
@@ -252,8 +256,9 @@ export class PropertyController {
     description: 'Error interno del servidor al eliminar la propiedad',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id') id: string){
     await this.propertyService.remove(id);
+    return {message: 'Propiedad eliminada permanentemente con exito'}
   }
 
   @Delete('soft/:id')
@@ -291,7 +296,8 @@ export class PropertyController {
     description:
       'Error interno del servidor al eliminar/restaurar la propiedad',
   })
-  async softRemove(@Param('id') id: string): Promise<Property> {
-    return this.propertyService.softRemove(id);
+  async softRemove(@Param('id') id: string)  {
+    const property = await this.propertyService.toggleSoftRemove(id);
+    return {content:property, message: 'Propiedad eliminada/restaurada logicamente con exito'}
   }
 }

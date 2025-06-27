@@ -10,17 +10,21 @@ export class StripeController {
   @Post('checkout/:id')
 
   crearCheckout(@Body() body: { email: string }, @Param('id') id:string) {
-    return this.stripeService.crearSesionPago(body.email, id);
+    const session = this.stripeService.crearSesionPago(body.email, id);
+    return {content: session, message: 'Sesion creada exitosamente'}
   }
 
 @Post('webhook')
 @UseInterceptors(StripeWebhookInterceptor)
  handleStripeWebhook(@Req() req: Request) {
-  return this.stripeService.getPaymentStatus(req);
+  const event = this.stripeService.getPaymentStatus(req);
+
+  return {content: event, message: 'Evento recibido exitosamente'}
 
 }
   @Get()
   async getAllSuscriptions() {
-    return await this.stripeService.getAllSuscriptions();
+    const suscriptions = await this.stripeService.getAllSuscriptions();
+    return {content: suscriptions, message: 'Suscripciones obtenidas exitosamente'}
   }
 }

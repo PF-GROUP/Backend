@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import {  Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreatePropertyDto } from './create-property.dto';
 import { Property } from './property.entity';
 import { UpdatePropertyDto } from './update-property.dto';
@@ -17,13 +18,12 @@ export class PropertyService {
 
   async create(createPropertyDto: CreatePropertyDto): Promise<Property> {
     try {
-      // Buscar el tipo de propiedad por ID
       const typeOfProperty = await this.typeOfPropertyRepository.findOne({
         where: { id: createPropertyDto.type_of_property_id },
       });
 
       if (!typeOfProperty) {
-        throw new Error(
+        throw new NotFoundException(
           `Tipo de propiedad con ID '${createPropertyDto.type_of_property_id}' no encontrado`,
         );
       }
@@ -36,7 +36,7 @@ export class PropertyService {
 
       return await this.propertyRepository.save(property);
     } catch (error) {
-      throw new Error(`Error al crear la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(`Error al crear la propiedad: ${error.message}`);
     }
   }
 
@@ -48,7 +48,7 @@ export class PropertyService {
       };
       return await this.propertyRepository.find(options);
     } catch (error) {
-      throw new Error(`Error al buscar propiedades: ${error.message}`);
+      throw new InternalServerErrorException(`Error al buscar propiedades: ${error.message}`);
     }
   }
 
@@ -64,11 +64,11 @@ export class PropertyService {
       });
 
       if (!property) {
-        throw new Error('Propiedad no encontrada');
+        throw new NotFoundException('Propiedad no encontrada');
       }
       return property;
     } catch (error) {
-      throw new Error(`Error al buscar la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(`Error al buscar la propiedad: ${error.message}`);
     }
   }
 
@@ -82,14 +82,13 @@ export class PropertyService {
       });
 
       if (!property) {
-        throw new Error('Propiedad no encontrada');
+        throw new NotFoundException('Propiedad no encontrada');
       }
 
-      // Actualizamos solo los campos proporcionados
       Object.assign(property, updatePropertyDto);
       return await this.propertyRepository.save(property);
     } catch (error) {
-      throw new Error(`Error al actualizar la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(`Error al actualizar la propiedad: ${error.message}`);
     }
   }
 
@@ -97,14 +96,14 @@ export class PropertyService {
     try {
       const result = await this.propertyRepository.delete(id);
       if (result.affected === 0) {
-        throw new Error('Propiedad no encontrada');
+        throw new NotFoundException('Propiedad no encontrada');
       }
     } catch (error) {
-      throw new Error(`Error al eliminar la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(`Error al eliminar la propiedad: ${error.message}`);
     }
   }
 
-  async softRemove(id: string): Promise<Property> {
+  async toggleSoftRemove(id: string): Promise<Property> {
     try {
       const property = await this.propertyRepository.findOne({
         where: { id },
@@ -112,21 +111,19 @@ export class PropertyService {
       });
 
       if (!property) {
-        throw new Error('Propiedad no encontrada');
+        throw new NotFoundException('Propiedad no encontrada');
       }
 
-      // Si ya esta eliminada logicamente, se restaura
       if (property.deletedAt) {
         await this.propertyRepository.restore({ id });
         return this.findOne(id);
       }
 
-      // Si no esta eliminada, se elimina logicamente
       await this.propertyRepository.softRemove(property);
       return this.findOne(id, true);
     } catch (error) {
-      throw new Error(
-        `Error al eliminar logicamente la propiedad: ${error.message}`,
+      throw new InternalServerErrorException(
+        `Error al eliminar o restaurar logicamente la propiedad: ${error.message}`,
       );
     }
   }
@@ -143,6 +140,9 @@ export class PropertyService {
       withDeleted: false,
     });
 
+    if (!property) {
+      throw new NotFoundException('Propiedad no encontrada');
+    }
     return property;
   }
 }
