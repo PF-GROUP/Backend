@@ -1,4 +1,8 @@
-import {  BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -16,10 +20,12 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const {email, password, ...restOfUserData} = createUserDto;
-    const existngUser = await this.userRepository.findOne({where:{email} });
-    if (existngUser){
-      throw new BadRequestException('El email ya está registrado. Por favor, utiliza otro.');
+    const { email, password, ...restOfUserData } = createUserDto;
+    const existngUser = await this.userRepository.findOne({ where: { email } });
+    if (existngUser) {
+      throw new BadRequestException(
+        'El email ya está registrado. Por favor, utiliza otro.',
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,12 +38,11 @@ export class UserService {
 
     return await this.userRepository.save(newUser);
   }
-  async createFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
-
+  async createFromGoogle(googleUser: createGoogleUserDto): Promise<User> {
     const user = this.userRepository.create(googleUser);
     return await this.userRepository.save(user);
   }
-  async updateFromGoogle(googleUser:createGoogleUserDto): Promise<User> {
+  async updateFromGoogle(googleUser: createGoogleUserDto): Promise<User> {
     const user = this.userRepository.create(googleUser);
     return await this.userRepository.save(user);
   }
@@ -47,46 +52,43 @@ export class UserService {
   }
 
   async findAllNonAdmins(): Promise<User[]> {
-    return this.userRepository.find({where: {isAdmin: false}});
+    return this.userRepository.find({ where: { isAdmin: false } });
   }
 
   async getNonAdminUserEmails(): Promise<string[]> {
     const users = await this.findAllNonAdmins();
-    return users.map(user => user.email);
+    return users.map((user) => user.email);
   }
 
-async findOneByEmail(email: string): Promise<User | null> {
-  const theUser = await this.userRepository.findOne({ where: { email } });
-  if (!theUser) {
-    throw new NotFoundException(`Usuario con el email ${email} no encontrado`);
+  // Modificado para que traiga la agencia y la suscripcion
+  async findOneByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+      relations: ['agency', 'agency.suscription'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        `Usuario con el email ${email} no encontrado`,
+      );
+    }
+    return user;
   }
-  const agency = await this.agencyService.findOneByUserId(theUser.id);
+  async findOneByGoogleId(googleId: string): Promise<User | null> {
+    const theUser = await this.userRepository.findOne({ where: { googleId } });
+    if (!theUser) {
+      throw new NotFoundException(`User with googleId ${googleId} not found`);
+    }
+    const agency = await this.agencyService.findOneByUserId(theUser.id);
 
-  if (!agency || !agency.user) {
-   return theUser
+    if (!agency || !agency.user) {
+      return theUser;
+    }
+
+    agency.user.agency = agency;
+
+    return agency.user;
   }
-
-    agency.user.agency = agency
- 
-
-  return agency.user;
-}
-async findOneByGoogleId(googleId: string): Promise<User | null> {
-const theUser = await this.userRepository.findOne({ where: { googleId } });
-  if (!theUser) {
-    throw new NotFoundException(`User with googleId ${googleId} not found`);
-  }
-  const agency = await this.agencyService.findOneByUserId(theUser.id);
-
-  if (!agency || !agency.user) {
-   return theUser
-  }
-  
-    agency.user.agency = agency
- 
-
-  return agency.user;
-}
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
@@ -95,7 +97,6 @@ const theUser = await this.userRepository.findOne({ where: { googleId } });
     return user;
   }
 
-  
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const userToUpdate = await this.findOne(id);
 
@@ -110,19 +111,17 @@ const theUser = await this.userRepository.findOne({ where: { googleId } });
   }
   async findOneWithAllRelations(id: string) {
     const theUser = await this.userRepository.findOne({ where: { id } });
-  if (!theUser) {
-    throw new NotFoundException(`User with id ${id} not found`);
-  }
-  const agency = await this.agencyService.findOneByUserId(theUser.id);
+    if (!theUser) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    const agency = await this.agencyService.findOneByUserId(theUser.id);
 
-  if (!agency || !agency.user) {
-   return theUser
-  }
-  
-    agency.user.agency = agency
- 
+    if (!agency || !agency.user) {
+      return theUser;
+    }
 
-  return agency.user;
-  }
+    agency.user.agency = agency;
 
+    return agency.user;
+  }
 }
