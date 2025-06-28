@@ -15,7 +15,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    console.log(request.cookies)
+
     if (!request.cookies || !request.cookies.token || !request)  {
       throw new UnauthorizedException('Invalid token format');
     }
@@ -32,7 +32,7 @@ export class AuthGuard implements CanActivate {
       const user:User = await this.userService.findOne(userInPayload.id)
       const updatedPayload: JwtPayload = {
         ...userInPayload,
-        roles: user.isAdmin ? [Role.Admin] : [Role.User],
+        roles: user.isAdmin ? [Role.Admin] : [Role.User] ,
       };
       console.log(updatedPayload)
       request.user = updatedPayload;

@@ -44,7 +44,6 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard)
   logout(@Req() req, @Res({passthrough: true}) res: Response) {
     res.clearCookie('token');
     return { message: 'Logout successful' };
@@ -110,6 +109,12 @@ export class AuthController {
    me(@Req() req: Request & {user: User}) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return {content: req.user, message: 'Fue logeado existosamente'}
+  }
+
+  @Get('ValidToken')
+  @UseGuards(AuthGuard) 
+   ValidToken() {
+    return {content: true, message: 'Fue logeado existosamente'}
   }
 
 
