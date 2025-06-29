@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, HttpCode, HttpStatus, UseGuards, ParseUUIDPipe,} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, HttpCode, HttpStatus, UseGuards, ParseUUIDPipe, Put,} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './create-user.dto';
+import { CreateUserDto, ChangePasswordDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import {  ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
@@ -44,6 +44,11 @@ export class UserController {
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
     const user = this.userService.update(id, updateUserDto);
     return {content: user, message: 'Usuario actualizado exitosamente.'};
+  }
+
+    @Put(':id/change-password')
+  async changePassword(@Param('id') id: string, @Body() changePasswordDto: ChangePasswordDto) {
+    return this.userService.changePassword(id, changePasswordDto.currentPassword, changePasswordDto.newPassword, changePasswordDto.confirmPassword);
   }
 
 }

@@ -125,4 +125,29 @@ const theUser = await this.userRepository.findOne({ where: { googleId } });
   return agency.user;
   }
 
+  async changePassword(id: string, currentPassword: string, newPassword: string, confirmPassword: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    if (user.password && !await bcrypt.compare(currentPassword, user.password))
+    if (!await bcrypt.compare(currentPassword, user.password)) {
+      throw new BadRequestException('La contraseña actual es incorrecta');
+    }
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Las nuevas contraseñas no coinciden');
+    }
+    user.password = await this.hashPassword(newPassword);
+    await this.userRepository.save(user);
+    return user;
+}
+
+  async comparePasswords(password: string, hashedPassword: string) {
+    return bcrypt.compare(password, hashedPassword);
+
+}
+   async hashPassword(password: string){
+    const salt = await bcrypt.genSalt(10);
+    return bcrypt.hash(password, salt);
+  }
 }

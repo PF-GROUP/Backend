@@ -1,5 +1,5 @@
 import { UserRole } from "src/Interface/enum";
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
 import { OmitType } from "@nestjs/mapped-types";
 
 export class CreateUserDto {
@@ -43,4 +43,28 @@ export class CreateUserDto {
 
 export class createGoogleUserDto extends OmitType(CreateUserDto, ['password','phone']) {
   googleId: string;
+}
+
+export class ChangePasswordDto {
+
+    @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&])[A-Za-z\d!@#$%^&]{8,}$/, {
+    message: 'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial (!@#$%^&)',
+  })
+  @MinLength(8)
+  @MaxLength(15)
+  currentPassword: string;
+
+    @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&])[A-Za-z\d!@#$%^&]{8,}$/, {
+    message: 'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial (!@#$%^&)',
+  })
+  @MinLength(8)
+  @MaxLength(15)
+  newPassword: string;
+
+    @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&])[A-Za-z\d!@#$%^&]{8,}$/, {
+    message: 'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial (!@#$%^&)',
+  })
+  @MinLength(8)
+  @MaxLength(15)
+  confirmPassword: string;
 }
