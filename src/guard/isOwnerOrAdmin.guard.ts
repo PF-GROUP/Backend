@@ -10,7 +10,7 @@ export class IsOwnerOrAdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user as JwtPayload;
-    const requestedId = request.params.id;
+    const requestedId = request.params.userId;
 
     if (!user) {
       throw new ForbiddenException('Acceso denegado: Usuario no autenticado.'); // Esto no debería suceder si AuthGuard precede.
