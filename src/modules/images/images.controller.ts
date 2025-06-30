@@ -1,6 +1,6 @@
 import { Controller, Post, Param, Delete, ParseUUIDPipe, BadRequestException, UseGuards, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import {ApiTags } from '@nestjs/swagger';
+import {ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { IsOwnerOrAdminGuard } from 'src/guard/isOwnerOrAdmin.guard';
@@ -16,6 +16,14 @@ export class ImagesController {
   @Post('property/:propertyId/gallery')
   @UseGuards(AuthGuard, PropertyOwnershipGuard)
   @UseInterceptors(FilesInterceptor('files'))
+  @ApiOperation({ summary: 'Subir múltiples imágenes a la galería de una propiedad' })
+  @ApiConsumes('multipart/form-data') // Esto es importante para indicar el tipo de datos
+  @ApiResponse({ status: 201 }) // Creado exitosamente
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta (ej. no se enviaron archivos, formato inválido)
+  @ApiResponse({ status: 401 }) // No autorizado (token ausente/inválido)
+  @ApiResponse({ status: 403 }) // Prohibido (no es propietario de la propiedad o admin)
+  @ApiResponse({ status: 404 }) // Propiedad no encontrada
+  @ApiResponse({ status: 500 }) // Error interno del servidor (ej. error al subir a Cloudinary)
   async uploadPropertyGalleryImages(
     @Param('propertyId', ParseUUIDPipe) propertyId: string,
     @UploadedFiles() files: Array<Express.Multer.File>,
@@ -33,6 +41,14 @@ export class ImagesController {
   @Post('profile/:userId')
   @UseGuards(AuthGuard, IsOwnerOrAdminGuard)
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Subir y actualizar la foto de perfil de un usuario' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201 }) // Creado/Actualizado exitosamente
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta (ej. no se envió archivo)
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido (no es el propietario del perfil o admin)
+  @ApiResponse({ status: 404 }) // Usuario no encontrado
+  @ApiResponse({ status: 500 }) // Error interno del servidor
   async uploadUserProfilePicture(
     @Param('userId', ParseUUIDPipe) userId: string,
     @UploadedFile() file: Express.Multer.File,
@@ -48,6 +64,14 @@ export class ImagesController {
   @Post('customization/:customizationId/logo')
   @UseGuards(AuthGuard, CustomizationOwnershipGuard)
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Subir y actualizar el logo de personalización de una agencia' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201 }) // Creado/Actualizado exitosamente
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta (ej. no se envió archivo)
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido (no es propietario de la customización o admin)
+  @ApiResponse({ status: 404 }) // Customization no encontrada
+  @ApiResponse({ status: 500 }) // Error interno del servidor
   async uploadCustomizationLogo(
     @Param('customizationId', ParseUUIDPipe) customizationId: string,
     @UploadedFile() file: Express.Multer.File,
@@ -63,6 +87,14 @@ export class ImagesController {
   @Post('customization/:customizationId/banner')
   @UseGuards(AuthGuard, CustomizationOwnershipGuard) 
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Subir y actualizar el banner de personalización de una agencia' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201 }) // Creado/Actualizado exitosamente
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido
+  @ApiResponse({ status: 404 }) // Customization no encontrada
+  @ApiResponse({ status: 500 }) // Error interno del servidor
   async uploadCustomizationBanner(
     @Param('customizationId', ParseUUIDPipe) customizationId: string,
     @UploadedFile() file: Express.Multer.File,
@@ -77,6 +109,13 @@ export class ImagesController {
 
   @Delete('property/:propertyId/gallery/:imageId')
   @UseGuards(AuthGuard, PropertyOwnershipGuard)
+  @ApiOperation({ summary: 'Eliminar una imagen de la galería de una propiedad' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta (ej. imagen no pertenece a la propiedad)
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido
+  @ApiResponse({ status: 404 }) // Propiedad no encontrada
+  @ApiResponse({ status: 500 }) // Error interno del servidor
   async removePropertyGalleryImage(
     @Param('propertyId', ParseUUIDPipe) propertyId: string,
     @Param('imageId', ParseUUIDPipe) imageId: string,

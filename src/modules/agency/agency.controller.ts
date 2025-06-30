@@ -26,11 +26,10 @@ export class AgencyController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.User)
   @ApiOperation({ summary: 'Crear nueva Agency (Solo User)' })
-  @ApiResponse({
-    status: 201,
-    description: 'La Agency ha sido creada exitosamente.',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 201 }) // Creado
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta (ej. slug ya existe, datos inválidos)
+  @ApiResponse({ status: 401 }) // No autorizado (token ausente/inválido)
+  @ApiResponse({ status: 403 }) // Prohibido (rol incorrecto)
   create(@Body() createAgencyDto: CreateAgencyDto) {
     return this.agencyService.create(createAgencyDto);
   }
@@ -38,7 +37,8 @@ export class AgencyController {
   @Get()
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener todas las agencies' })
-  @ApiResponse({ status: 200, description: 'Son todas las agencies.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 401 }) // No autorizado
   findAll() {
     return this.agencyService.findAll();
   }
@@ -46,11 +46,9 @@ export class AgencyController {
   @Get('getByUser/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener agency por ID del usuario' })
-  @ApiResponse({
-    status: 200,
-    description: 'Es la agency para el usuario especificado.',
-  })
-  @ApiResponse({ status: 404, description: 'Usuario o agency no encontrado.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 404 }) // Usuario o agency no encontrada
   async getByUser(@Param('id') id: string) {
     const agency = await this.agencyService.findOneByUserId(id);
     return {content: agency, message: 'Agencia encontrada exitosamente'};
@@ -72,11 +70,9 @@ export class AgencyController {
   @ApiOperation({
     summary: 'Obtener todas las agencias eliminadas logicamente (Solo Admin)',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de agencias eliminadas logicamente.',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido
   async findRemoved() {
     const removedAgencies = await  this.agencyService.findRemoved();
     return {content: removedAgencies, message: 'Agencias removidas, encontradas exitosamente'}
@@ -84,8 +80,8 @@ export class AgencyController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener agency por ID (Public)' })
-  @ApiResponse({ status: 200, description: 'Obtuviste la agency.' })
-  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 404 }) // Agency no encontrada
   async findOne(@Param('id') id: string) {
     const agency = await this.agencyService.findOne(id);
     return {content: agency, message: 'Agencia encontrada exitosamente'}
@@ -94,12 +90,11 @@ export class AgencyController {
   @Patch(':id')
   @UseGuards(AuthGuard, AgencyGuard)
   @ApiOperation({ summary: 'Actualizar agency' })
-  @ApiResponse({
-    status: 200,
-    description: 'La agency ha sido actualizada exitosamente.',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta (ej. usuario no incluido, slug duplicado)
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido (permisos de agencia)
+  @ApiResponse({ status: 404 }) // Agency no encontrada
   update(@Param('id') id: string, @Body() updateAgencyDto: CreateAgencyDto) {
     return this.agencyService.update(id, updateAgencyDto);
   }
@@ -110,11 +105,10 @@ export class AgencyController {
   @ApiOperation({
     summary: 'Eliminar permanentemente una agencia (Solo Admin)',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'La agencia ha sido eliminada permanentemente.',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido
+  @ApiResponse({ status: 404 }) // Agencia no encontrada
   async remove(@Param('id') id: string) {
     await this.agencyService.remove(id);
     return {message: 'Agencia eliminada exitosamente'}
@@ -126,11 +120,10 @@ export class AgencyController {
   @ApiOperation({
     summary: 'Eliminar/restaurar logicamente una agencia (Solo Admin)',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'La agencia ha sido eliminada/restaurada logicamente.',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido
+  @ApiResponse({ status: 404 }) // Agencia no encontrada
   async softRemove(@Param('id') id: string) {
      const agency = await this.agencyService.toggleSoftRemove(id);
      return {content: agency,message: agency ?  'Agencia restaurada exitosamente' : 'Agencia eliminada exitosamente'}
@@ -139,12 +132,11 @@ export class AgencyController {
   @Patch('update/:id')
   @UseGuards(AuthGuard, AgencyGuard)
   @ApiOperation({ summary: 'Actualizar nombre y descripción de agency' })
-  @ApiResponse({
-    status: 200,
-    description: 'La agency ha sido actualizada exitosamente.',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @ApiResponse({ status: 404, description: 'Agency no encontrada.' })
+  @ApiResponse({ status: 200 }) // Éxito
+  @ApiResponse({ status: 400 }) // Solicitud incorrecta (datos inválidos)
+  @ApiResponse({ status: 401 }) // No autorizado
+  @ApiResponse({ status: 403 }) // Prohibido (permisos de agencia)
+  @ApiResponse({ status: 404 }) // Agency no encontrada
   updateAgency(
     @Param('id') id: string,
     @Body() updateAgencyDto: UpdateAgencyDto,
