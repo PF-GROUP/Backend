@@ -56,7 +56,6 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @ArrayMinSize(1)
   id_images?: string[];
 
   @IsNotEmpty()
