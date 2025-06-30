@@ -7,7 +7,7 @@ export class ScheduleService {
     constructor(private readonly mailerService: NodeMailerService ){}
 
 
-    @Cron('0 0 * * * *')
+    @Cron('0 0 0 * * *')
     async sendEveryHour(){
         await this.mailerService.sendEasyMailToAll("Esto es una prueba", "Esto es una prueba");
     }
