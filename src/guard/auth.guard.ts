@@ -28,14 +28,13 @@ export class AuthGuard implements CanActivate {
       console.log(token)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const userInPayload = this.jwtService.verify<JwtPayload>(token as string)
-      console.log(userInPayload)
+
       const user:User = await this.userService.findOne(userInPayload.id)
       const updatedPayload: JwtPayload = {
         ...userInPayload,
         roles: user.isAdmin ? [Role.Admin] : [Role.User] ,
         profilePictureUrl: !!user.profilePictureUrl ? user.profilePictureUrl : undefined
       };
-      console.log(updatedPayload)
       request.user = updatedPayload;
 
     } catch(error) {

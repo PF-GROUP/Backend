@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Agency } from './agency.entity';
 import { UserModule } from '../user/user.module';
@@ -10,7 +9,6 @@ import { AgencyGuard } from '../../guard/agency.guard';
   imports: [
     TypeOrmModule.forFeature([Agency]),
     forwardRef(() => UserModule),
-    JwtModule.register({}),
   ],
   controllers: [AgencyController],
   providers: [AgencyService, AgencyGuard],
