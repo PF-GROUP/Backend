@@ -13,7 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { Status } from '../Enum/status.enum';
 import { Type } from '../Enum/type.enum';
 import { PropertyTypeName } from '../modules/typeOfProperty/property-type.enum';
-import { Customization } from 'src/Customization/customization.entity';
+import { Customization } from 'src/modules/customization/customization.entity';
 
 @Injectable()
 export class DatabaseSeederService implements OnApplicationBootstrap {
