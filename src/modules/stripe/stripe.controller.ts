@@ -9,8 +9,8 @@ export class StripeController {
 
   @Post('checkout/:id')
 
-  crearCheckout(@Body() body: { email: string }, @Param('id') id:string) {
-    const session = this.stripeService.crearSesionPago(body.email, id);
+  async crearCheckout(@Body() body: { email: string }, @Param('id') id:string) {
+    const session = await this.stripeService.crearSesionPago(body.email, id);
     return {content: session, message: 'Sesion creada exitosamente'}
   }
 

@@ -77,8 +77,6 @@ export class AgencyService {
   }
   async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
     const agency = await this.findOne(id);
-    if (!updateAgencyDto.agentUser)
-      throw new NotFoundException('Usuario no incluido en el dto');
     if (updateAgencyDto.name) agency.name = updateAgencyDto.name;
     if (updateAgencyDto.description)
       agency.description = updateAgencyDto.description;

@@ -33,6 +33,7 @@ export class AuthGuard implements CanActivate {
       const updatedPayload: JwtPayload = {
         ...userInPayload,
         roles: user.isAdmin ? [Role.Admin] : [Role.User] ,
+        profilePictureUrl: !!user.profilePictureUrl ? user.profilePictureUrl : undefined
       };
       console.log(updatedPayload)
       request.user = updatedPayload;

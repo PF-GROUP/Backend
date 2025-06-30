@@ -19,20 +19,27 @@ export class StripeService {
   async crearSesionPago(email: string, agencyId: string) {
   const customerId = await this.searchOrCreateCustomer({email, agencyId});
     
-  const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
-  success_url:  `${process.env.CLIENT_URL}:/success`,
-  cancel_url: `${process.env.CLIENT_URL}:/cancel`,
-  customer: customerId,
-  payment_method_types: ['card','paypal','pay_by_bank'],
-  line_items: [
-    {
-      price: `${process.env.STRIPE_PRICE_ID}`,
-      quantity: 1,
-    },
-  ],
-  mode: 'subscription',
-});
-  return session
+ try {
+   const session: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create({
+   success_url:  `${process.env.CLIENT_URL}/success`,
+   cancel_url: `${process.env.CLIENT_URL}/cancel`,
+   customer: customerId,
+   payment_method_types: ['card'],
+   line_items: [
+     {
+       price: `${process.env.STRIPE_PRICE_ID}`,
+       quantity: 1,
+     },
+   ],
+   mode: 'subscription',
+ });
+
+ return session
+ } catch (error) {
+  console.log(error)
+  throw new BadRequestException("Hubo un error al crear la sesion de pago");
+
+ }
   }
 
 
