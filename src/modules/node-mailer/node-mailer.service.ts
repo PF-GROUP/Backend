@@ -93,7 +93,23 @@ try {
 } catch  {
   throw new BadRequestException("Hubo un error al enviar el mail");
 }
+
   }
+  async sendEasyMailWithHTMLToAll(subject: string, text: string, html: string) {
+    try {
+          const emails = await this.userService.getNonAdminUserEmails()
+          await this.sendMail({
+            from: process.env.SMTP_EMAIL,
+            to: emails,
+            subject: subject,
+            text: text,
+            html: html
+          });
+    } catch  {
+      throw new BadRequestException("Hubo un error al enviar el mail");
+    }
+  
+      }
 
 
 
