@@ -20,19 +20,26 @@ export class AgencyService {
   ) {}
 
   async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
-    const existsAgency = await this.agencyRepository.exists({where: {slug: createAgencyDto.slug}});
+    const existsAgency = await this.agencyRepository.exists({
+      where: { slug: createAgencyDto.slug },
+    });
+
     if (existsAgency) {
-      throw new NotFoundException(`Agencia con slug '${createAgencyDto.slug}' ya existe`);
+      throw new NotFoundException(
+        `Agencia con slug '${createAgencyDto.slug}' ya existe`,
+      );
     }
+
     const user = await this.userService.findOne(createAgencyDto.agentUser);
+
     const agency = new Agency();
     agency.name = createAgencyDto.name;
     agency.description = createAgencyDto.description;
     agency.document = createAgencyDto.document;
-    agency.id_customization = null;
     agency.slug = createAgencyDto.slug;
     agency.user = user;
-    return await this.agencyRepository.save(agency);
+
+    return this.agencyRepository.save(agency);
   }
 
   async findAll(): Promise<Agency[]> {
@@ -61,7 +68,9 @@ export class AgencyService {
     });
 
     if (!agency) {
-      throw new NotFoundException(`Agencia con el customerId ${customerId} no encontrada`);
+      throw new NotFoundException(
+        `Agencia con el customerId ${customerId} no encontrada`,
+      );
     }
     return agency;
   }
@@ -71,7 +80,9 @@ export class AgencyService {
       relations: ['customization', 'properties', 'user'],
     });
     if (!agency) {
-      throw new NotFoundException(`Agencia con el userId ${userId} no encontrada`);
+      throw new NotFoundException(
+        `Agencia con el userId ${userId} no encontrada`,
+      );
     }
     return agency;
   }
@@ -87,11 +98,15 @@ export class AgencyService {
       agency.user = user;
     }
     if (updateAgencyDto.slug && updateAgencyDto.slug !== agency.slug) {
-      const existsAgency = await this.agencyRepository.exists({where: {slug: updateAgencyDto.slug}});
+      const existsAgency = await this.agencyRepository.exists({
+        where: { slug: updateAgencyDto.slug },
+      });
       if (existsAgency) {
-        throw new NotFoundException(`Agencia con slug '${updateAgencyDto.slug}' ya existe`);
+        throw new NotFoundException(
+          `Agencia con slug '${updateAgencyDto.slug}' ya existe`,
+        );
       }
-      agency.slug = updateAgencyDto.slug
+      agency.slug = updateAgencyDto.slug;
     }
 
     if (updateAgencyDto.name) agency.name = updateAgencyDto.name;
@@ -119,7 +134,6 @@ export class AgencyService {
       throw new NotFoundException('Agencia no encontrada');
     }
 
-
     if (agency.deletedAt) {
       await this.agencyRepository.restore({ id });
       return this.agencyRepository.findOne({
@@ -127,7 +141,6 @@ export class AgencyService {
         withDeleted: true,
       });
     }
-
 
     await this.agencyRepository.softRemove(agency);
     return this.agencyRepository.findOne({

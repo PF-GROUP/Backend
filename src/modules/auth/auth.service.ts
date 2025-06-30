@@ -99,7 +99,6 @@ export class AuthService {
       agency.name = agencyName;
       agency.description = agencyDescription;
       agency.document = document;
-      agency.id_customization = null;
       agency.slug = slug;
       agency.user = user;
 
