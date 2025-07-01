@@ -1,3 +1,4 @@
+import { StripeService } from './../modules/stripe/stripe.service';
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -17,7 +18,7 @@ import { Customization } from 'src/modules/customization/customization.entity';
 
 @Injectable()
 export class DatabaseSeederService implements OnApplicationBootstrap {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource, private stripeService: StripeService) {}
 
   async onApplicationBootstrap() {
     console.log(process.env.SEEDER_ENABLED);
@@ -215,6 +216,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       console.log(`Seeded ${customizationes.length} Customization records.`);
 
       const agencyRepo = queryRunner.manager.getRepository(Agency);
+      
       const agenciesToCreate = [
         {
           name: 'Luxury Estates',
@@ -324,10 +326,15 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
 
       // Asignar los usuarios a las agencias
       agencies[0].user = users[2];
+      agencies[0].stripeCustomerId = await this.createCustomerId(users[2].email);
       agencies[1].user = users[3];
+      agencies[1].stripeCustomerId = await this.createCustomerId(users[3].email);
       agencies[2].user = users[4];
+      agencies[2].stripeCustomerId = await this.createCustomerId(users[4].email);
       agencies[3].user = users[0]; // Admin Properties -> Admin
+      agencies[3].stripeCustomerId = await this.createCustomerId(users[0].email);
       agencies[4].user = users[1];
+      agencies[4].stripeCustomerId = await this.createCustomerId(users[1].email);
       await agencyRepo.save(agencies);
 
       // Obtener los tipos de propiedad
@@ -477,5 +484,18 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
     } finally {
       await queryRunner.release();
     }
+  }
+  async createCustomerId(email:string){
+    if (!email) {
+      throw new Error('Email is required');
+    }
+    try {
+        const customer = (await this.stripeService.createCustomer(email))
+        return customer.id
+      } catch (error){ 
+      console.log(error)
+      
+        return null
+      }
   }
 }

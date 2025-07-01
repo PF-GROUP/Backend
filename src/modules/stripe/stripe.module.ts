@@ -3,14 +3,15 @@ import { StripeService } from './stripe.service';
 import { StripeController } from './stripe.controller';
 import { AgencyModule } from '../agency/agency.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Suscription } from './stripe.collections.entity';
+import { Invoice, Suscription } from './stripe.collections.entity';
 
 @Module({
     imports:[
-        TypeOrmModule.forFeature([Suscription]),
+        TypeOrmModule.forFeature([Suscription,Invoice]),
         AgencyModule
     ],
     providers:[StripeService],
-    controllers:[StripeController]
+    controllers:[StripeController],
+    exports:[StripeService]
 })
 export class StripeModule {}

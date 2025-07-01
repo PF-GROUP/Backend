@@ -5,17 +5,17 @@ import { config as dotenvconfig } from "dotenv"
 dotenvconfig({path: ".env.development"});
 import Stripe from 'stripe';
 import { AgencyService } from '../agency/agency.service';
-import { Suscription } from './stripe.collections.entity';
+import { Invoice, Suscription } from './stripe.collections.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Agency } from '../agency/agency.entity';
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
 
-  constructor(private readonly agencyService: AgencyService,     @InjectRepository(Suscription) private readonly suscriptionRepository: Repository<Suscription>) {
+  constructor(private readonly agencyService: AgencyService,     @InjectRepository(Suscription) private readonly suscriptionRepository: Repository<Suscription>, @InjectRepository(Invoice) private readonly invoiceRepository: Repository<Invoice>) {
     this.stripe = new Stripe(`${process.env.STRIPE_SECRET}`, { apiVersion: '2025-05-28.basil' });
   }
-
   async crearSesionPago(email: string, agencyId: string) {
   const customerId = await this.searchOrCreateCustomer({email, agencyId});
     
@@ -121,6 +121,12 @@ async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buff
       case 'payment_intent.succeeded':
         await this.handleChargeSucceeded(event.data.object);
         break;
+      case 'invoice.paid':
+      case 'invoice.finalized':
+      case 'invoice.payment_failed':
+      case 'invoice.payment_succeeded':
+      await this.handleInvoiceEvent(event.data.object as Stripe.Invoice & {subscription : Stripe.Subscription});
+      break;
       // case 'payment_intent.payment_failed':
       //   await this.handleChargeFailed(event.data.object);  
       //   break;
@@ -141,6 +147,47 @@ async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buff
     await this.handleSuscriptionEvent(suscription, "customer.subscription.created");
   }
 
+async handleInvoiceEvent(object: Stripe.Invoice & { subscription: Stripe.Subscription }) {
+  const queryRunner = this.invoiceRepository.manager.connection.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+  try {
+    // 1. Recuperar suscripción local
+    const customerId = object.customer as string;
+    const susList = await this.getSuscriptionByCustomer(customerId);
+    const sus = susList.find(s => s.suscriptionId === object.subscription.id);
+    if (!sus) {
+      await queryRunner.rollbackTransaction();
+      return;
+    }
+
+    // 2. Crear o actualizar invoice
+    const invRepo = queryRunner.manager.getRepository(Invoice);
+    const invoiceData: Partial<Invoice> = {
+      invoiceId: object.id,
+      status: object.status ? object.status : undefined,
+      suscription: sus,
+      amount: object.total,
+      currency: object.currency,
+      createdAt: new Date(object.created * 1000),
+    };
+    await invRepo.save(invoiceData);
+
+
+    // 3. (Opcional) Actualizar estado de la suscripción o agencia según status
+    // e.g. si object.status==='payment_failed' podrías marcar algo en Suscription
+    if (object.status) {
+      await queryRunner.manager.getRepository(Suscription).update(sus.id, { status: object.status });
+    }
+
+    await queryRunner.commitTransaction();
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    throw err;
+  } finally {
+    await queryRunner.release();
+  }
+}
 private async handleCheckoutSessionCompleted(session : Stripe.Checkout.Session) {
  const suscription = await this.stripe.subscriptions.retrieve(session.subscription as string);
  await this.handleSuscriptionEvent(suscription, "customer.subscription.created");
@@ -158,25 +205,34 @@ private async handleSuscriptionEvent(suscription: Stripe.Subscription, eventType
  
 }
 
-private async createOrUpdateSubscription(suscription: Stripe.Subscription & {current_period_end?: number | null}) {
 
-  const agency = await this.agencyService.findOneByCustomerId(suscription.customer as string);
-  const sucriptionData:Partial<Suscription> = {
-    suscriptionId: suscription.id,
-    status: suscription.status,
-    agency: agency,
-    planId: suscription.items.data[0].price.id,
-    currentPeriodEnd: suscription.current_period_end ? new Date(suscription.current_period_end * 1000) : undefined,
-    createdAt: new Date(suscription.created * 1000),
-    updatedAt: new Date()
+private async createOrUpdateSubscription(suscription: Stripe.Subscription & {current_period_end?: number | null}) {
+  const queryRunner = this.suscriptionRepository.manager.connection.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+  try {
+    // 1. Crear o actualizar la suscripción
+    const agency = await this.agencyService.findOneByCustomerId(suscription.customer as string);
+    const subsData: Partial<Suscription> = {
+      suscriptionId: suscription.id,
+      status: suscription.status,
+      agency: agency,
+      planId: suscription.items.data[0].price.id,
+      currentPeriodEnd: suscription.current_period_end ? new Date(suscription.current_period_end * 1000) : undefined,
+      updatedAt: new Date(),
+    };
+    await queryRunner.manager.getRepository(Suscription).save(subsData);
+
+    // 2. Marcar onboarding
+    await queryRunner.manager.getRepository(Agency).update(agency.id, { onBoarding: false });
+
+    await queryRunner.commitTransaction();
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    throw err;
+  } finally {
+    await queryRunner.release();
   }
-  const existsSuscription = await this.suscriptionRepository.findOne({where: {suscriptionId: suscription.id}});
-  if (existsSuscription) {
-    await this.suscriptionRepository.update(existsSuscription.id, sucriptionData);
-  } else{
-    await this.suscriptionRepository.insert(sucriptionData);
-  }
-  await this.agencyService.update(agency.id, {onBoarding: false})
 }
 private async deleteSubscription(suscription: Stripe.Subscription) {
   await this.suscriptionRepository.softDelete({suscriptionId: suscription.id})
@@ -189,7 +245,8 @@ async getAllSuscriptions(){
 async getSuscriptionByCustomer(customerId: string){ 
   const agency = await this.agencyService.findOneByCustomerId(customerId); 
   return await this.suscriptionRepository.find({where: {agency: agency}});
-} 
+}
+
 private async handleChargeSucceeded(charge: Stripe.PaymentIntent & {subscription?: string}) {
   if (!charge.subscription) {
     return;
