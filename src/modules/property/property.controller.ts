@@ -90,11 +90,9 @@ export class PropertyController {
     status: 500,
     description: 'Error interno del servidor al crear la propiedad',
   })
-  async create(
-    @Body() createPropertyDto: CreatePropertyDto,
-  ){
+  async create(@Body() createPropertyDto: CreatePropertyDto) {
     const property = await this.propertyService.create(createPropertyDto);
-    return {content:property, message: 'Propiedad creada exitosamente'};
+    return { content: property, message: 'Propiedad creada exitosamente' };
   }
 
   @Get()
@@ -117,11 +115,53 @@ export class PropertyController {
     status: 500,
     description: 'Error interno del servidor al obtener las propiedades',
   })
-  async findAll(
-    @Query('includeDeleted') includeDeleted: boolean = false,
-  ) {
+  async findAll(@Query('includeDeleted') includeDeleted: boolean = false) {
     const properties = await this.propertyService.findAll(includeDeleted);
-    return {content:properties, message: 'Propiedades encontradas exitosamente'};
+    return {
+      content: properties,
+      message: 'Propiedades encontradas exitosamente',
+    };
+  }
+
+  @Get('agency/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.User)
+  @ApiOperation({
+    summary: 'Obtener propiedades por ID de agencia',
+    description:
+      'Obtiene todas las propiedades asociadas a una agencia especifica.',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID de la agencia',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Lista de propiedades de la agencia obtenida exitosamente',
+    type: [Property],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontraron propiedades para la agencia especificada',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado. Se requiere autenticacion',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos para realizar esta accion',
+  })
+  async findByAgencyId(@Param('id') agencyId: string) {
+    const properties = await this.propertyService.findByAgencyId(agencyId);
+    return {
+      content: properties,
+      message:
+        properties.length > 0
+          ? 'Propiedades encontradas exitosamente'
+          : 'No se encontraron propiedades para esta agencia',
+    };
   }
 
   @Get(':id')
@@ -158,7 +198,7 @@ export class PropertyController {
     @Query('includeDeleted') includeDeleted: boolean = false,
   ) {
     const property = await this.propertyService.findOne(id, includeDeleted);
-    return {content:property, message: 'Propiedad encontrada exitosamente'};
+    return { content: property, message: 'Propiedad encontrada exitosamente' };
   }
 
   @Patch(':id')
@@ -217,8 +257,8 @@ export class PropertyController {
     @Param('id') id: string,
     @Body() updatePropertyDto: UpdatePropertyDto,
   ) {
-   const property = await this.propertyService.update(id, updatePropertyDto);
-   return {content:property, message: 'Propiedad actualizada exitosamente'};
+    const property = await this.propertyService.update(id, updatePropertyDto);
+    return { content: property, message: 'Propiedad actualizada exitosamente' };
   }
 
   @Delete(':id')
@@ -256,9 +296,9 @@ export class PropertyController {
     description: 'Error interno del servidor al eliminar la propiedad',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string){
+  async remove(@Param('id') id: string) {
     await this.propertyService.remove(id);
-    return {message: 'Propiedad eliminada permanentemente con exito'}
+    return { message: 'Propiedad eliminada permanentemente con exito' };
   }
 
   @Delete('soft/:id')
@@ -296,8 +336,11 @@ export class PropertyController {
     description:
       'Error interno del servidor al eliminar/restaurar la propiedad',
   })
-  async softRemove(@Param('id') id: string)  {
+  async softRemove(@Param('id') id: string) {
     const property = await this.propertyService.toggleSoftRemove(id);
-    return {content:property, message: 'Propiedad eliminada/restaurada logicamente con exito'}
+    return {
+      content: property,
+      message: 'Propiedad eliminada/restaurada logicamente con exito',
+    };
   }
 }
