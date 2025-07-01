@@ -303,20 +303,20 @@ export class PropertyController {
 
   @Delete('soft/:id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.User)
+  @Roles(Role.User) // Solo usuarios con rol User pueden acceder
   @ApiOperation({
-    summary: 'Eliminar/restaurar propiedad logicamente (Agente o Admin)',
+    summary: 'Eliminar propiedad permanentemente (Solo Usuario)',
     description:
-      'Realiza un borrado logico (soft delete). Si la propiedad ya esta eliminada, la restaura.',
+      'Elimina permanentemente una propiedad de la base de datos. Esta accion no se puede deshacer.',
   })
   @ApiParam({
     name: 'id',
     required: true,
-    description: 'ID unico de la propiedad a eliminar/restaurar',
+    description: 'ID unico de la propiedad a eliminar permanentemente',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiOkResponse({
-    description: 'Propiedad eliminada/restaurada logicamente con exito',
+    description: 'Propiedad eliminada permanentemente con éxito',
     type: Property,
   })
   @ApiResponse({
@@ -333,14 +333,12 @@ export class PropertyController {
   })
   @ApiResponse({
     status: 500,
-    description:
-      'Error interno del servidor al eliminar/restaurar la propiedad',
+    description: 'Error interno del servidor al eliminar la propiedad',
   })
-  async softRemove(@Param('id') id: string) {
-    const property = await this.propertyService.toggleSoftRemove(id);
+  async permanentRemove(@Param('id') id: string) {
+    await this.propertyService.permanentRemove(id);
     return {
-      content: property,
-      message: 'Propiedad eliminada/restaurada logicamente con exito',
+      message: 'Propiedad eliminada permanentemente con exito',
     };
   }
 }
