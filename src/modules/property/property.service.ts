@@ -130,7 +130,7 @@ export class PropertyService {
     }
   }
 
-  async toggleSoftRemove(id: string): Promise<Property> {
+  async permanentRemove(id: string): Promise<void> {
     try {
       const property = await this.propertyRepository.findOne({
         where: { id },
@@ -141,16 +141,13 @@ export class PropertyService {
         throw new NotFoundException('Propiedad no encontrada');
       }
 
-      if (property.deletedAt) {
-        await this.propertyRepository.restore({ id });
-        return this.findOne(id);
-      }
-
-      await this.propertyRepository.softRemove(property);
-      return this.findOne(id, true);
+      await this.propertyRepository.remove(property);
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException(
-        `Error al eliminar o restaurar logicamente la propiedad: ${error.message}`,
+        `Error al eliminar permanentemente la propiedad: ${error.message}`,
       );
     }
   }
