@@ -31,6 +31,15 @@ export class StripeService {
        quantity: 1,
      },
    ],
+   invoice_creation:{
+    enabled: true,
+    invoice_data: {
+      description: "Suscripcion de la agencia",
+      metadata:{
+        agencyId
+      }
+    }
+   },
    mode: 'subscription',
  });
 
@@ -148,6 +157,7 @@ async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buff
   }
 
 async handleInvoiceEvent(object: Stripe.Invoice & { subscription: Stripe.Subscription }) {
+  if (object.billing_reason === "subscription_create" || object.billing_reason === "subscription_update" || object.billing_reason === "subscription") {
   const queryRunner = this.invoiceRepository.manager.connection.createQueryRunner();
   await queryRunner.connect();
   await queryRunner.startTransaction();
@@ -188,9 +198,65 @@ async handleInvoiceEvent(object: Stripe.Invoice & { subscription: Stripe.Subscri
     await queryRunner.release();
   }
 }
+}
 private async handleCheckoutSessionCompleted(session : Stripe.Checkout.Session) {
- const suscription = await this.stripe.subscriptions.retrieve(session.subscription as string);
- await this.handleSuscriptionEvent(suscription, "customer.subscription.created");
+
+if (session.mode === "subscription") {
+   const suscription = await this.stripe.subscriptions.retrieve(session.subscription as string);
+   await this.handleSuscriptionEvent(suscription, "customer.subscription.created");
+   if (session.invoice){
+    const invoice = await this.stripe.invoices.retrieve(session.invoice as string);
+    await this.createOrUpdate(invoice);
+
+   }
+}
+
+
+}
+private async createOrUpdate(invoice: Stripe.Invoice) {
+if (invoice.billing_reason === "subscription_create" || invoice.billing_reason === "subscription_update" || invoice.billing_reason === "subscription") {
+  const queryRunner = this.invoiceRepository.manager.connection.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+  try {
+    // 1. Recuperar suscripción local
+    const customerId = invoice.customer as string;
+    const susList = await this.getSuscriptionByCustomer(customerId);
+    const sus = susList[0] // solo debería haber una suscripción por customer
+    if (!sus) {
+      await queryRunner.rollbackTransaction();
+      return;
+    }
+
+    // 2. Crear o actualizar invoice
+    const invoiceData: Partial<Invoice> = {
+      invoiceId: invoice.id,
+      status: invoice.status ? invoice.status : undefined,
+      suscription: sus,
+      amount: invoice.total,
+      currency: invoice.currency,
+      createdAt: new Date(invoice.created * 1000),
+    };
+    const inv = await queryRunner.manager.getRepository(Invoice).findOne({ where: { invoiceId: invoice.id } });
+    if (inv) {
+      await queryRunner.manager.getRepository(Invoice).update(inv.id, invoiceData);
+    }else{
+      await queryRunner.manager.getRepository(Invoice).save(invoiceData);
+    }
+
+    if (invoice.status) {
+      await queryRunner.manager.getRepository(Suscription).update(sus.id, { status: invoice.status });
+    }
+
+    await queryRunner.commitTransaction();
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    throw err;
+  } finally {
+    await queryRunner.release();
+  }
+  
+}
 }
 private async handleSuscriptionEvent(suscription: Stripe.Subscription, eventType: "customer.subscription.created" | "customer.subscription.updated" | "customer.subscription.deleted") {
   switch(eventType){
@@ -225,6 +291,11 @@ private async createOrUpdateSubscription(suscription: Stripe.Subscription & {cur
 
     // 2. Marcar onboarding
     await queryRunner.manager.getRepository(Agency).update(agency.id, { onBoarding: false });
+    //obbtener invoice
+    if (suscription.latest_invoice) {
+      const invoice = await this.stripe.invoices.retrieve(suscription.latest_invoice as string);
+      await this.createOrUpdate(invoice);
+    }
 
     await queryRunner.commitTransaction();
   } catch (err) {
