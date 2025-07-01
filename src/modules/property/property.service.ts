@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import {  Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePropertyDto } from './create-property.dto';
 import { Property } from './property.entity';
 import { UpdatePropertyDto } from './update-property.dto';
@@ -36,7 +40,9 @@ export class PropertyService {
 
       return await this.propertyRepository.save(property);
     } catch (error) {
-      throw new InternalServerErrorException(`Error al crear la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Error al crear la propiedad: ${error.message}`,
+      );
     }
   }
 
@@ -48,7 +54,22 @@ export class PropertyService {
       };
       return await this.propertyRepository.find(options);
     } catch (error) {
-      throw new InternalServerErrorException(`Error al buscar propiedades: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Error al buscar propiedades: ${error.message}`,
+      );
+    }
+  }
+
+  async findByAgencyId(agencyId: string): Promise<Property[]> {
+    try {
+      return await this.propertyRepository.find({
+        where: { agency: { id: agencyId } },
+        relations: ['type_of_property', 'agency', 'images'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error al obtener las propiedades de la agencia: ${error.message}`,
+      );
     }
   }
 
@@ -68,7 +89,9 @@ export class PropertyService {
       }
       return property;
     } catch (error) {
-      throw new InternalServerErrorException(`Error al buscar la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Error al buscar la propiedad: ${error.message}`,
+      );
     }
   }
 
@@ -88,7 +111,9 @@ export class PropertyService {
       Object.assign(property, updatePropertyDto);
       return await this.propertyRepository.save(property);
     } catch (error) {
-      throw new InternalServerErrorException(`Error al actualizar la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Error al actualizar la propiedad: ${error.message}`,
+      );
     }
   }
 
@@ -99,7 +124,9 @@ export class PropertyService {
         throw new NotFoundException('Propiedad no encontrada');
       }
     } catch (error) {
-      throw new InternalServerErrorException(`Error al eliminar la propiedad: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Error al eliminar la propiedad: ${error.message}`,
+      );
     }
   }
 
