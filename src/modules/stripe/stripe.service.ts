@@ -327,6 +327,9 @@ async getSuscriptionByCustomer(customerId: string){
   const agency = await this.agencyService.findOneByCustomerId(customerId); 
   return await this.suscriptionRepository.find({where: {agency: agency}});
 }
+async getSuscriptionByAgency(agencyId: string){
+  return await this.suscriptionRepository.find({where: {agency: {id: agencyId}}, relations: ['Invoice']});
+}
 
 private async handleChargeSucceeded(charge: Stripe.PaymentIntent & {subscription?: string}) {
   if (!charge.subscription) {
