@@ -19,8 +19,10 @@ export class Suscription {
   @Column({ nullable: true })
   currentPeriodEnd?: Date;
 
-  @Column()
-  createdAt: Date;
+  @Column({ nullable: true ,
+    default: new Date()
+  })
+  createdAt: Date = new Date();
 
   @Column()
   updatedAt: Date;
