@@ -277,6 +277,16 @@ private async createOrUpdateSubscription(suscription: Stripe.Subscription & {cur
   await queryRunner.connect();
   await queryRunner.startTransaction();
   try {
+    const existingSuscription = await this.suscriptionRepository.findOne({where: {suscriptionId: suscription.id}});
+    if (existingSuscription) {
+      await queryRunner.manager.getRepository(Suscription).update(existingSuscription.id, {
+        status: suscription.status,
+        currentPeriodEnd: suscription.current_period_end ? new Date(suscription.current_period_end * 1000) : undefined,
+        updatedAt: new Date(),
+      });
+      await queryRunner.commitTransaction();
+      return;
+    }
     // 1. Crear o actualizar la suscripción
     const agency = await this.agencyService.findOneByCustomerId(suscription.customer as string);
     const subsData: Partial<Suscription> = {
