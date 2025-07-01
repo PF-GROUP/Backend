@@ -8,15 +8,18 @@ export class ScheduleService {
     constructor(private readonly mailerService: NodeMailerService,
                 private readonly userService: UserService
      ){}
-
-     async sendWelcomeEmail(email: string) {
-        await this.mailerService.sendEasyMail(email, "Bienvenido a nuestra plataforma", "Gracias por registrarte!");
-     }
-    @Cron('*/5 * * * *')
-    async sendEveryFiveMinutes(){
-    const emails = await this.userService.getNonAdminUserEmails();
-    for (const email of emails) {
-        await this.sendWelcomeEmail(email);
-        await this.mailerService.sendEasyMail(email, "NewsLetter", "Esto es una prueba");
-    }
-}}
+async subscribeToNewsletter(email: string) {
+  await this.userService.addUserToNewsletter(email);
+}
+@Cron('*/5 * * * *') 
+async sendNewsletterToSubscribedUsers() {
+  const users = await this.userService.getNewsletterUsers();
+  for (const user of users) {
+    await this.mailerService.sendEasyMail(
+      user.email,
+      'Newsletter de Kasapp',
+      'Este es un mensaje automático enviado cada 5 minutos.'
+    );
+  }
+}
+}
