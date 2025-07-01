@@ -56,8 +56,10 @@ export class UserService {
   }
 
   async getNonAdminUserEmails(): Promise<string[]> {
-    const users = await this.findAllNonAdmins();
-    return users.map((user) => user.email);
+    const users = await this.userRepository.find({
+    where: { isAdmin: false, newsletter: true },
+  });
+  return users.map((user) => user.email);
   }
 
   // Modificado para que traiga la agencia y la suscripcion
