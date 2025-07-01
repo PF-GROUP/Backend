@@ -31,15 +31,7 @@ export class StripeService {
        quantity: 1,
      },
    ],
-   invoice_creation:{
-    enabled: true,
-    invoice_data: {
-      description: "Suscripcion de la agencia",
-      metadata:{
-        agencyId
-      }
-    }
-   },
+
    mode: 'subscription',
  });
 
@@ -192,8 +184,8 @@ async handleInvoiceEvent(object: Stripe.Invoice & { subscription: Stripe.Subscri
 
     await queryRunner.commitTransaction();
   } catch (err) {
+    console.log(err);
     await queryRunner.rollbackTransaction();
-    throw err;
   } finally {
     await queryRunner.release();
   }
@@ -207,7 +199,6 @@ if (session.mode === "subscription") {
    if (session.invoice){
     const invoice = await this.stripe.invoices.retrieve(session.invoice as string);
     await this.createOrUpdate(invoice);
-
    }
 }
 
@@ -234,6 +225,7 @@ if (invoice.billing_reason === "subscription_create" || invoice.billing_reason =
       status: invoice.status ? invoice.status : undefined,
       suscription: sus,
       amount: invoice.total,
+      suscriptionId: sus.suscriptionId,
       currency: invoice.currency,
       createdAt: new Date(invoice.created * 1000),
     };
@@ -250,8 +242,8 @@ if (invoice.billing_reason === "subscription_create" || invoice.billing_reason =
 
     await queryRunner.commitTransaction();
   } catch (err) {
+    console.log(err);
     await queryRunner.rollbackTransaction();
-    throw err;
   } finally {
     await queryRunner.release();
   }
@@ -289,6 +281,14 @@ private async createOrUpdateSubscription(suscription: Stripe.Subscription & {cur
     }
     // 1. Crear o actualizar la suscripción
     const agency = await this.agencyService.findOneByCustomerId(suscription.customer as string);
+    const existsingSuscription = await this.suscriptionRepository.findOne({where: {agency: {id: agency.id}}});
+    if(existsingSuscription){
+      await queryRunner.manager.getRepository(Suscription).update(existsingSuscription.id, {
+        status: suscription.status,
+        currentPeriodEnd: suscription.current_period_end ? new Date(suscription.current_period_end * 1000) : undefined,
+        updatedAt: new Date(),
+      });
+    }
     const subsData: Partial<Suscription> = {
       suscriptionId: suscription.id,
       status: suscription.status,
@@ -310,7 +310,7 @@ private async createOrUpdateSubscription(suscription: Stripe.Subscription & {cur
     await queryRunner.commitTransaction();
   } catch (err) {
     await queryRunner.rollbackTransaction();
-    throw err;
+    console.log(err);
   } finally {
     await queryRunner.release();
   }
@@ -320,7 +320,7 @@ private async deleteSubscription(suscription: Stripe.Subscription) {
 }
 
 async getAllSuscriptions(){
-  return this.suscriptionRepository.find();
+  return this.suscriptionRepository.find({relations:['Invoice','Agency']});
 }
 
 async getSuscriptionByCustomer(customerId: string){ 
