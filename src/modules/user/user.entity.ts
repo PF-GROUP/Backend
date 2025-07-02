@@ -64,6 +64,12 @@ export class User extends SoftDeletableEntity {
     })
     profilePictureUrl: string | null;
     
+    @Column({
+        type: "boolean",
+        default: false,
+    })
+    newsletter: boolean;
+    
     @OneToOne(()=> Agency , (agency: Agency) => agency.user,
 {
     onDelete: "SET NULL",

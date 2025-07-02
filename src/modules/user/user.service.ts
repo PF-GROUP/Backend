@@ -56,8 +56,10 @@ export class UserService {
   }
 
   async getNonAdminUserEmails(): Promise<string[]> {
-    const users = await this.findAllNonAdmins();
-    return users.map((user) => user.email);
+    const users = await this.userRepository.find({
+    where: { isAdmin: false, newsletter: true },
+  });
+  return users.map((user) => user.email);
   }
 
   // Modificado para que traiga la agencia y la suscripcion
@@ -150,4 +152,19 @@ export class UserService {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
+
+async addUserToNewsletter(email: string) {
+  const user = await this.userRepository.findOne({ where: { email } });
+  if (user) {
+    user.newsletter = true;
+    await this.userRepository.save(user);
+  } else {
+    const newUser = this.userRepository.create({ email, newsletter: true });
+    await this.userRepository.save(newUser);
+  }
+}
+async getNewsletterUsers() {
+  return this.userRepository.find({ where: { newsletter: true } });
+}
+
 }

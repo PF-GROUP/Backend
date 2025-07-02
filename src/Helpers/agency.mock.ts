@@ -10,6 +10,7 @@ export const MOCK_USER: User = {
   password: 'hashedpassword123',
   googleId: null,
   isAdmin: false,
+  newsletter: false,
   appointment: [],
   agency: null, 
  deletedAt: null,
