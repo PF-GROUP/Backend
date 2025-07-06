@@ -13,14 +13,12 @@ const imagePath = "./Assets/hotel.jpg";
 // Subir imagen
 async function uploadImage() {
   const results = await cloudinary.uploader.upload(imagePath);
-  console.log(results);
 
   // Optimizacion de URL
   const url = cloudinary.url(results.public_id, {
     quality: "auto",
     fetch_format: "auto",
   });
-  console.log(url);
 }
 
 uploadImage(imagePath)

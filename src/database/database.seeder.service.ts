@@ -21,7 +21,6 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   constructor(private dataSource: DataSource, private stripeService: StripeService) {}
 
   async onApplicationBootstrap() {
-    console.log(process.env.SEEDER_ENABLED);
     if (process.env.SEEDER_ENABLED === 'true') {
       await this.seed();
     }

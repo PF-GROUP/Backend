@@ -7,7 +7,7 @@ export class Customization extends SoftDeletableEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({nullable: true, default: null})
+  @Column({nullable: true, default: "Logo"})
   logoImage: string;
   
   @Column({nullable: true, default:"Informacion de la agencia"})
@@ -16,7 +16,7 @@ export class Customization extends SoftDeletableEntity {
   @Column({nullable: true, default:"#000000"})
   mainColors: string;
   
-  @Column({nullable: true, default: null})
+  @Column({nullable: true, default: "Logo"})
   banner: string;
 
   @Column({nullable: true,default: "#8787FF"})

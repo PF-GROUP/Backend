@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CustomizationService } from './customization.service';
 import { CustomizationController } from './customization.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,8 +9,7 @@ import { UserModule } from '../user/user.module';
 import { AgencyModule } from '../agency/agency.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customization, Agency ]),UserModule,AgencyModule
-],
+  imports: [TypeOrmModule.forFeature([Customization, Agency ]),UserModule, forwardRef(() => AgencyModule)],
   controllers: [CustomizationController],
   providers: [CustomizationService],
   exports: [CustomizationService, TypeOrmModule],

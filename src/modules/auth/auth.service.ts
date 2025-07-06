@@ -26,6 +26,7 @@ import { Role } from 'src/Enum/roles.enum';
 import { NodeMailerService } from '../node-mailer/node-mailer.service';
 import { config as dotenvconfig } from 'dotenv';
 import { userPayload } from './update-register.dto';
+import { Customization } from '../customization/customization.entity';
 dotenvconfig({ path: '.env.development' });
 @Injectable()
 export class AuthService {
@@ -104,6 +105,10 @@ export class AuthService {
 
       await queryRunner.manager.save(agency);
 
+      const customization = await queryRunner.manager.getRepository(Customization).create()
+      const savedCustomization = await queryRunner.manager.save(customization)
+      agency.customization = savedCustomization
+      await queryRunner.manager.update(Agency, agency.id, agency)
       // Si todo sale bien, hacemos commit
       await queryRunner.commitTransaction();
 
@@ -144,7 +149,6 @@ export class AuthService {
       existsUser = await this.userService.findOneByEmail(email);
     } catch (error) {
       if (error instanceof NotFoundException) {
-        console.log(`Usuario con mail: ${registerDto.email} no existe.`);
         existsUser = null;
       } else {
         throw new InternalServerErrorException('Error al buscar el usuario');
@@ -204,7 +208,6 @@ export class AuthService {
   }
 
   async register(registerDto: CreateRegisterDto): Promise<{ user: User }> {
-    console.log(registerDto);
     let existingUser: User | null = null;
     try {
       existingUser = await this.userService.findOneByEmail(registerDto.email);
@@ -217,7 +220,6 @@ export class AuthService {
       }
     } catch (error) {
       if (error instanceof NotFoundException) {
-        console.log('El usuario no existe, continuar');
         existingUser = null;
       } else {
         this.logger.warn(`Registro fallido: Error al buscar el usuario.`);
@@ -312,14 +314,11 @@ export class AuthService {
         'Usuario registrado con google, inicie sesion con google',
       );
     }
-    console.log(user.password);
-    console.log(createLoginDto.password);
 
     const isPasswordValid = await bcrypt.compare(
       createLoginDto.password,
       user.password,
     );
-    console.log(isPasswordValid);
 
     if (!isPasswordValid) {
       this.logger.warn(
@@ -362,7 +361,6 @@ export class AuthService {
   }
 
   private signJWT(user: User) {
-    console.log(user);
     const payload: userPayload = {
       id: user.id,
       name: user.name,

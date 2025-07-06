@@ -9,6 +9,8 @@ import { Repository, Not, IsNull } from 'typeorm';
 import { CreateAgencyDto, UpdateAgencyDto } from './agency.dto';
 import { Agency } from './agency.entity';
 import { UserService } from '../user/user.service';
+import { Customization } from '../customization/customization.entity';
+import { CustomizationService } from '../customization/customization.service';
 
 @Injectable()
 export class AgencyService {
@@ -17,6 +19,8 @@ export class AgencyService {
     private agencyRepository: Repository<Agency>,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    @Inject(forwardRef(() => CustomizationService))
+    private readonly customizationService: CustomizationService
   ) {}
 
   async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
@@ -31,7 +35,6 @@ export class AgencyService {
     }
 
     const user = await this.userService.findOne(createAgencyDto.agentUser);
-
     const agency = new Agency();
     agency.name = createAgencyDto.name;
     agency.description = createAgencyDto.description;
@@ -39,7 +42,12 @@ export class AgencyService {
     agency.slug = createAgencyDto.slug;
     agency.user = user;
 
-    return this.agencyRepository.save(agency);
+    const savedAgency = await this.agencyRepository.save(agency);
+    const newCustomization = await this.customizationService.create({}, savedAgency.id);
+    savedAgency.customization = newCustomization;
+
+    await this.agencyRepository.update(savedAgency.id, savedAgency);
+    return savedAgency;
   }
 
   async findAll(): Promise<Agency[]> {

@@ -3,8 +3,6 @@ import {config as dotenvconfig} from "dotenv"
 
 dotenvconfig({path: ".env.development"});
 
-console.log(process.env.DB_NAME);
-console.log(process.env.DB_HOST);
 const config = {
   type: 'postgres',
   database: `${process.env.DB_NAME}`,
@@ -16,8 +14,8 @@ const config = {
   migrations: ["dist/migrations/*{.ts,.js}"],
   autoLoadEntities: true,
   synchronize: true, 
-  logging: true, 
-  dropSchema: true,
+  // logging: true, 
+  dropSchema: false,
   
 };
 

@@ -2,7 +2,7 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, One
 import { Agency } from "../agency/agency.entity";
 import { v4 as uuid } from "uuid";
 
-@Entity('suscription')
+@Entity('Suscription')
 export class Suscription {
   @PrimaryGeneratedColumn()
   id: number;
@@ -42,7 +42,7 @@ export class Suscription {
   invoice: Invoice[];  // <-- array, no singular
 }
 
-@Entity('invoice')
+@Entity('Invoice')
 export class Invoice {
   @PrimaryGeneratedColumn('uuid')
   id: string = uuid();

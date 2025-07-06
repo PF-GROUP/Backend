@@ -21,7 +21,6 @@ import { UserService } from "../modules/user/user.service";
         }
  
         const fullUser = await this.userService.findOneWithAllRelations(user.id);
-        console.log(fullUser)
         if(!fullUser.agency) {
             throw new ForbiddenException('Acceso denegado: Usuario no pertenece a una agencia');
         }

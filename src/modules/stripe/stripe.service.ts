@@ -37,7 +37,6 @@ export class StripeService {
 
  return session
  } catch (error) {
-  console.log(error)
   throw new BadRequestException("Hubo un error al crear la sesion de pago");
 
  }
@@ -94,7 +93,6 @@ async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buff
     const rawBody = request.stripeRawBody || request.body;
 
     if (!Buffer.isBuffer(rawBody)) {
-      console.log('Raw body:', rawBody);
       throw new BadRequestException('Invalid request body');
     }
 
@@ -108,7 +106,6 @@ async getPaymentStatus(request: RawBodyRequest<Request> & { stripeRawBody?: Buff
       throw new BadRequestException('Webhook Error: ' + error.message);
     }
 
-    console.log('Event type:', event.type);
 
     switch (event.type) {
       case 'checkout.session.completed':
@@ -320,7 +317,7 @@ private async deleteSubscription(suscription: Stripe.Subscription) {
 }
 
 async getAllSuscriptions(){
-  return this.suscriptionRepository.find({relations:['Invoice','Agency']});
+  return this.suscriptionRepository.find({relations:['invoice','agency']});
 }
 
 async getSuscriptionByCustomer(customerId: string){ 

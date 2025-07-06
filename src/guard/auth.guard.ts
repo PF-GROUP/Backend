@@ -25,7 +25,6 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid token format');
     }
     try {
-      console.log(token)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const userInPayload = this.jwtService.verify<JwtPayload>(token as string)
 
@@ -38,7 +37,6 @@ export class AuthGuard implements CanActivate {
       request.user = updatedPayload;
 
     } catch(error) {
-      console.log(error)
       throw new UnauthorizedException('No estas logeado');
     }
 
