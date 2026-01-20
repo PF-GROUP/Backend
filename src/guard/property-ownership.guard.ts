@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { ImagesService } from '../modules/images/images.service'; 
 import { Role } from '../Enum/roles.enum';
 import { PropertyService } from 'src/modules/property/property.service';
+import parseId from 'src/Helpers/parseId';
 
 @Injectable()
 export class PropertyOwnershipGuard implements CanActivate {
@@ -25,7 +26,7 @@ export class PropertyOwnershipGuard implements CanActivate {
 
     if (imageId) {
 
-      const image = await this.imagesService.findOneWithPropertyAndOwner(imageId);
+      const image = await this.imagesService.findOneWithPropertyAndOwner(parseId(imageId));
 
       if (!image) {
         throw new NotFoundException(`Imagen con ID "${imageId}" no encontrada.`);
@@ -36,7 +37,7 @@ export class PropertyOwnershipGuard implements CanActivate {
       targetPropertyId = image.property.id;
     } else if (propertyId) {
 
-      targetPropertyId = propertyId;
+      targetPropertyId = parseId(propertyId);
     } else {
 
       throw new BadRequestException('No se proporcionó ID de imagen ni ID de propiedad para la verificación.');

@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFound
 import { Request } from 'express';
 import { Role } from '../Enum/roles.enum'; 
 import { CustomizationService } from 'src/modules/customization/customization.service'; 
+import parseId from '../Helpers/parseId';
 
 @Injectable()
 export class CustomizationOwnershipGuard implements CanActivate {
@@ -26,7 +27,7 @@ export class CustomizationOwnershipGuard implements CanActivate {
       throw new BadRequestException('ID de customización no proporcionado en la ruta.');
     }
 
-    const customization = await this.customizationService.findOneWithAgencyAndOwner(customizationId);
+    const customization = await this.customizationService.findOneWithAgencyAndOwner(parseId(customizationId));
 
     if (!customization) {
       throw new NotFoundException(`Customización con ID "${customizationId}" no encontrada.`);

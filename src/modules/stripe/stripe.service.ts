@@ -14,7 +14,7 @@ export class StripeService {
   private stripe: Stripe;
 
   constructor(private readonly agencyService: AgencyService,     @InjectRepository(Suscription) private readonly suscriptionRepository: Repository<Suscription>, @InjectRepository(Invoice) private readonly invoiceRepository: Repository<Invoice>) {
-    this.stripe = new Stripe(`${process.env.STRIPE_SECRET}`, { apiVersion: '2025-05-28.basil' });
+    this.stripe = new Stripe(`${process.env.STRIPE_SECRET}`, { apiVersion: '2025-08-27.basil' });
   }
   async crearSesionPago(email: string, agencyId: string) {
   const customerId = await this.searchOrCreateCustomer({email, agencyId});
