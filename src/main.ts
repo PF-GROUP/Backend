@@ -7,17 +7,24 @@ import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: [
+  origin: (origin, callback) => {
+    const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
-      'https://kasapp-preview-jb4oz0f64-kasapp-preview.vercel.app',
       'https://kasapp-preview.vercel.app',
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: true,
-  });
+      'https://kasapp-preview-jb4oz0f64-kasapp-preview.vercel.app',
+    ];
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+});
   app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
 
   const swaggerConfig = new DocumentBuilder()
