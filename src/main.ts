@@ -11,6 +11,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:3001',
       'https://kasapp-preview-jb4oz0f64-kasapp-preview.vercel.app/',
+      'https://kasapp-preview.vercel.app/',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
