@@ -6,6 +6,22 @@ import { loggerGlobal } from './middlewares/logger-global/logger-global.middlewa
 import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization'
+    );
+    res.header(
+      'Access-Control-Allow-Methods',
+      'GET,POST,PUT,PATCH,DELETE,OPTIONS'
+    );
+    return res.sendStatus(204);
+  }
+  next();
+});
   app.enableCors({
   origin: (origin, callback) => {
     const allowedOrigins = [
@@ -16,7 +32,7 @@ async function bootstrap() {
     ];
 
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+      callback(null, origin);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
