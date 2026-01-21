@@ -7,10 +7,11 @@ import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: ["*"],
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+  console.log('PORT:', process.env.PORT);
   app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
 
   const swaggerConfig = new DocumentBuilder()
@@ -31,5 +32,6 @@ async function bootstrap() {
   app.use(loggerGlobal);
 
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  console.log(`🚀 API listening on ${process.env.PORT}`);
 }
 bootstrap();
